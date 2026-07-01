@@ -1,0 +1,163 @@
+// charter: turn an analysis plus a tempo into a playable chart. Pure logic, no
+// DOM, seeded so the same inputs always produce the same chart.
+//
+// Two stages, after the Dance Dance Convolution decomposition but using
+// classical signal processing rather than a trained net:
+//   1. Placement. Quantize onsets to the difficulty's rhythmic grid, dedupe grid
+//      slots keeping the strongest, and thin to a notes-per-second cap.
+//   2. Selection. Walk the placed rows assigning arrows with strict foot
+//      alternation. A foot only reaches panels on its own body side, so no
+//      crossover appears unless the tier's crossover probability adds one.
+//      Footswitches (same panel, alternating feet) unlock the same way. Low
+//      tiers forbid both, which keeps beginner charts forward-facing.
+//
+// Lane bias 'drum' routes low band energy toward Down and high toward Up so
+// arrows track the drum kit. Lane bias 'none' (Quick) ignores the bands and
+// leans on alternation and the home-side backbone only.
+
+// Difficulty table. foot is the StepMania-style meter shown in menus. subs are
+// the allowed beat subdivisions. crossover and footswitch are probabilities,
+// zero at the low tiers so those patterns never appear there.
+export const DIFFS = {
+  beginner:  { name: 'Beginner',  foot: 3,  subs: [1],              minStrength: 0.50, maxNps: 2.5,  jumpProb: 0.00, jumpMin: 9,    crossover: 0.00, footswitch: 0.00, holdProb: 0.25 },
+  basic:     { name: 'Basic',     foot: 6,  subs: [1, 2],           minStrength: 0.32, maxNps: 3.6,  jumpProb: 0.04, jumpMin: 0.80, crossover: 0.00, footswitch: 0.00, holdProb: 0.18 },
+  difficult: { name: 'Difficult', foot: 9,  subs: [1, 2, 4],        minStrength: 0.18, maxNps: 5.6,  jumpProb: 0.12, jumpMin: 0.74, crossover: 0.03, footswitch: 0.03, holdProb: 0.12 },
+  expert:    { name: 'Expert',    foot: 12, subs: [1, 2, 3, 4],     minStrength: 0.10, maxNps: 8.5,  jumpProb: 0.20, jumpMin: 0.66, crossover: 0.08, footswitch: 0.08, holdProb: 0.10 },
+  challenge: { name: 'Challenge', foot: 15, subs: [1, 2, 3, 4, 6, 8], minStrength: 0.05, maxNps: 12.0, jumpProb: 0.28, jumpMin: 0.58, crossover: 0.12, footswitch: 0.14, holdProb: 0.08 }
+};
+
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+
+// Deterministic RNG (mulberry32) seeded by a string, so a title plus difficulty
+// always charts the same way.
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hashSeed(str) { let h = 2166136261 >>> 0; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+// Nearest simple subdivision of a beat, used to color the note by quantization.
+function quantOf(beat) { const subs = [1, 2, 3, 4, 6, 8]; for (let i = 0; i < subs.length; i++) { const d = subs[i]; if (Math.abs(beat * d - Math.round(beat * d)) < 0.02) return d; } return 8; }
+function denomToNote(d) { return ({ 1: 4, 2: 8, 3: 12, 4: 16, 6: 24, 8: 32 })[d] || 32; }
+
+// Drop rows that would exceed the notes-per-second cap, keeping the stronger of
+// two that fall too close together.
+function thinByNPS(list, period, maxNps) {
+  if (list.length < 2) return list;
+  const minDt = 1 / maxNps, out = [list[0]];
+  for (let i = 1; i < list.length; i++) {
+    const prev = out[out.length - 1], dt = (list[i].beat - prev.beat) * period;
+    if (dt >= minDt) out.push(list[i]);
+    else if (list[i].strength > prev.strength) out[out.length - 1] = list[i];
+  }
+  return out;
+}
+
+// Choose a panel for one foot without crossing the body, biased to the home side
+// and (in drum mode) nudged by the onset's band energy.
+function pickPanel(foot, last, prev, r, rng, D, allowRepeat, useBands) {
+  let cands = foot === 0 ? [0, 1, 2] : [3, 2, 1];        // left foot reaches L/D/U, right reaches R/U/D
+  if (rng() < D.crossover) cands.push(foot === 0 ? 3 : 0); // controlled crossover at high tiers only
+  if (!allowRepeat) cands = cands.filter((p) => p !== last);
+  if (!cands.length) cands = [foot === 0 ? 0 : 3];
+  const tot = r.lo + r.mi + r.hi + 1e-9, lo = r.lo / tot, mi = r.mi / tot, hi = r.hi / tot;
+  const home = foot === 0 ? 0 : 3, cross = foot === 0 ? 3 : 0;
+  let best = cands[0], bw = -1;
+  for (let i = 0; i < cands.length; i++) {
+    const p = cands[i];
+    const base = (p === home) ? 1.0 : ((p === cross) ? 0.45 : 0.6);
+    const nudge = useBands ? ((p === 1) ? 0.30 * lo : ((p === 2) ? 0.30 * hi : 0.12 * mi)) : 0;
+    let w = (base + nudge) * (0.7 + 0.6 * rng());
+    if (p === prev) w *= 0.7;
+    if (w > bw) { bw = w; best = p; }
+  }
+  return best;
+}
+
+// generate(analysis, tempo, options) -> chart
+//   options: { difficulty, laneBias: 'drum'|'none', seed, engine, engineUsed }
+export function generate(analysis, tempo, options = {}) {
+  const difficulty = options.difficulty || 'basic';
+  const D = DIFFS[difficulty] || DIFFS.basic;
+  const useBands = (options.laneBias || 'drum') !== 'none';
+  const bpm = tempo.bpm, offset = tempo.offset != null ? tempo.offset : (tempo.offsetSec || 0), period = 60 / bpm;
+  const rng = mulberry32(hashSeed((options.seed || 'ddr') + '|' + difficulty + '|' + Math.round(bpm)));
+  const onsets = analysis.onsets || [];
+
+  // stage 1: placement. quantize each onset to the tier grid, merge grid slots.
+  const rows = {}, tol = 0.16;
+  for (let i = 0; i < onsets.length; i++) {
+    const o = onsets[i];
+    if (o.strength < D.minStrength) continue;
+    const beatPos = (o.time - offset) / period;
+    if (beatPos < -0.5) continue;
+    let chosen = null, cErr = 1e9;
+    for (let a = 0; a < D.subs.length; a++) { const d = D.subs[a], cand = Math.round(beatPos * d) / d, err = Math.abs(cand - beatPos); if (err <= tol / d && err < cErr) { chosen = { beat: cand }; cErr = err; } }
+    if (!chosen) continue;
+    const key = Math.round(chosen.beat * 48);
+    if (rows[key]) { const e = rows[key]; e.strength = Math.max(e.strength, o.strength); e.lo += o.lo; e.mi += o.mid; e.hi += o.hi; }
+    else rows[key] = { beat: chosen.beat, strength: o.strength, lo: o.lo, mi: o.mid, hi: o.hi };
+  }
+  let list = Object.keys(rows).map((k) => rows[k]).sort((a, b) => a.beat - b.beat);
+  list = thinByNPS(list, period, D.maxNps);
+
+  // stage 2: selection. alternate feet, keep charts physically playable.
+  const notes = [];
+  let lastFoot = -1, lastPanel = -1, prevPanel = -1, lastBeat = -99;
+  for (let i = 0; i < list.length; i++) {
+    const r = list[i], qd = quantOf(r.beat), note = denomToNote(qd), time = offset + r.beat * period, dtBeat = r.beat - lastBeat;
+    if (r.strength > D.jumpMin && dtBeat >= 0.5 && rng() < D.jumpProb) {
+      const pair = rng() < 0.5 ? [0, 3] : [1, 2];
+      notes.push({ t: time, beat: r.beat, lane: pair[0], dur: 0, quant: note, type: 'tap' });
+      notes.push({ t: time, beat: r.beat, lane: pair[1], dur: 0, quant: note, type: 'tap' });
+      lastFoot = -1; lastPanel = -1; prevPanel = -1;
+    } else {
+      const allowRepeat = rng() < D.footswitch;
+      const foot = lastFoot === 0 ? 1 : (lastFoot === 1 ? 0 : (rng() < 0.5 ? 0 : 1));
+      const panel = pickPanel(foot, lastPanel, prevPanel, r, rng, D, allowRepeat, useBands);
+      notes.push({ t: time, beat: r.beat, lane: panel, dur: 0, quant: note, type: 'tap' });
+      prevPanel = lastPanel; lastPanel = panel; lastFoot = foot;
+    }
+    lastBeat = r.beat;
+  }
+
+  // holds: promote a single tap to a freeze when a long gap follows it.
+  for (let i = 0; i < notes.length - 1; i++) {
+    const n = notes[i];
+    if (n.type !== 'tap' || n.dur > 0) continue;
+    // do not hold a note that shares its row with another (a jump)
+    if (notes[i + 1] && Math.abs(notes[i + 1].beat - n.beat) < 1e-3 && notes[i + 1].lane !== n.lane) continue;
+    const next = notes[i + 1];
+    const gap = next.beat - n.beat;
+    if (gap >= 1.5 && rng() < D.holdProb) {
+      let len = Math.min(gap * 0.55, 2.0); len = Math.max(0.5, Math.round(len * 2) / 2);
+      n.type = 'hold'; n.dur = len * period; n.endBeat = n.beat + len;
+    }
+  }
+
+  notes.sort((a, b) => a.t - b.t || a.lane - b.lane);
+
+  const count = notes.length, dur = analysis.duration || 1, nps = count / dur;
+  const jumps = countJumps(notes), holds = notes.filter((n) => n.dur > 0).length, busy = notes.filter((n) => n.quant >= 16).length / (count || 1);
+  const radar = {
+    stream: clamp01(nps / 8), voltage: clamp01(D.foot / 15), air: clamp01(jumps / (count || 1) * 5),
+    freeze: clamp01(holds / (count || 1) * 5), chaos: clamp01(busy * 1.5)
+  };
+
+  return {
+    bpm, offset, difficulty, foot: D.foot, meter: D.foot, duration: dur,
+    engine: options.engine || 'drum', engineUsed: options.engineUsed || (useBands ? 'drum-aware' : 'quick (onset+tempo)'),
+    notes, count, radar
+  };
+}
+
+// Count rows that carry two or more arrows (jumps).
+export function countJumps(notes) {
+  let c = 0, i = 0;
+  const sorted = notes.slice().sort((a, b) => a.t - b.t);
+  while (i < sorted.length) { let j = i + 1; while (j < sorted.length && Math.abs(sorted[j].t - sorted[i].t) < 1e-3) j++; if (j - i >= 2) c++; i = j; }
+  return c;
+}
+
+// Nominal radar for a difficulty before a chart exists, so menus can preview it.
+export function nominalRadar(difficulty) {
+  const D = DIFFS[difficulty] || DIFFS.basic, f = D.foot / 15;
+  return { stream: Math.min(1, f * 0.9 + 0.1), voltage: Math.min(1, f), air: Math.min(1, D.jumpProb * 3), freeze: Math.min(1, D.holdProb * 4), chaos: Math.min(1, f * 0.8) };
+}

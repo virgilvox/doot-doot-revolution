@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFE9C7">
+<title>Doot Doot Revolution</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style id="ddr-css"></style>
+</head>
+<body>
+<div class="dots" aria-hidden="true"></div>
+<div class="app">
+
+  <nav class="nav">
+    <div class="brand" data-goto="title"><svg class="mk" viewBox="0 0 512 512" id="brandMark" aria-hidden="true"></svg>DOOT DOOT REVOLUTION<span class="dot">.</span></div>
+    <div class="tabs">
+      <button class="tab" data-goto="select">Play</button>
+      <button class="tab" data-goto="add">Add Song</button>
+      <button class="tab" data-goto="library">Library</button>
+      <button class="tab" data-goto="settings">Settings</button>
+      <button class="tab" data-goto="gamepad">Pads</button>
+    </div>
+  </nav>
+
+  <section class="screen" id="s-title">
+    <div class="frame"><div class="scn t-scn">
+      <div class="rays" aria-hidden="true"></div>
+      <div class="t-inner">
+        <h1 class="logo"><span class="l1">DOOT</span><span class="l2">DOOT</span><span class="l3">REVOLUTION</span></h1>
+        <div class="t-arrows" id="titleArrows" aria-hidden="true"></div>
+        <button class="press" data-goto="select">PRESS START</button>
+      </div>
+      <div class="t-foot"><span>v2.0 &middot; open source</span><span id="titleFoot">/songs &middot; loaded</span></div>
+    </div></div>
+  </section>
+
+  <section class="screen" id="s-select">
+    <div class="frame"><div class="scn sel-scn">
+      <div class="sel-top">
+        <h1><span class="tbadge"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#22203F" d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.6" fill="#22203F"/><circle cx="16.5" cy="16" r="2.6" fill="#22203F"/></svg></span> SELECT MUSIC</h1>
+        <div class="right">
+          <button class="btn yellow sm" data-goto="add">+ Add Song</button>
+          <span class="sortpill">SORT &middot; <b>GROUP</b></span>
+          <span class="scount" id="selCount">0</span>
+        </div>
+      </div>
+      <div class="sel-body">
+        <div class="hero">
+          <div class="banner" id="selBanner" style="background:linear-gradient(125deg,var(--pink),var(--purple))">
+            <div class="big-l" id="selBigL">M</div>
+            <div class="eq"><i></i><i></i><i></i><i></i></div>
+            <div><div class="bt" id="selTitle">&mdash;</div><div class="ba" id="selArtist">&mdash;</div></div>
+          </div>
+          <div class="facts">
+            <div class="fact"><span>BPM</span><b id="selBpm">&mdash;</b></div>
+            <div class="fact"><span>Length</span><b id="selLen">&mdash;</b></div>
+            <div class="fact"><span>Charted</span><b id="selEngine">&mdash;</b></div>
+            <div class="fact"><span>Source</span><b id="selSrc">&mdash;</b></div>
+          </div>
+          <div class="radar-card">
+            <svg viewBox="0 0 168 168" id="selRadar" aria-hidden="true"></svg>
+            <div class="legend" id="selLegend"></div>
+          </div>
+          <div class="diffs" id="diffs"></div>
+          <div class="cta">
+            <button class="btn white sm" id="modsBtn">Speed &middot; Mods</button>
+            <button class="btn green" id="danceBtn">DANCE</button>
+          </div>
+        </div>
+        <div class="wheel-board" id="wheel"><div class="wheel-reticle" aria-hidden="true"></div><div class="wheel-cursor" aria-hidden="true"></div></div>
+      </div>
+      <div class="sel-foot">
+        <span class="k"><span class="btnk" style="background:#9a97c0">B</span>Exit</span>
+        <span class="k"><span class="btnk" style="background:var(--green)">A</span>Select</span>
+        <span class="k"><span class="btnk" style="background:var(--yellow)">&#9650;&#9660;</span>Move</span>
+        <span class="k"><span class="btnk" style="background:var(--blue);color:#fff">Y</span>Add Song</span>
+        <span class="user">Player 1</span>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="screen" id="s-diff">
+    <div class="scr-head"><button class="btn white sm" data-goto="select">&larr; Back</button><h1 id="diffSong">Difficulty</h1></div>
+    <div class="panel">
+      <div class="eyebrow" style="margin-bottom:12px">Pick a chart. Foot rating and note count come from the generated steps.</div>
+      <div class="diff-grid" id="diffGrid"></div>
+      <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;align-items:center">
+        <button class="btn green lg" id="startPlay" disabled>START</button>
+        <span class="eyebrow" id="diffHint">select a difficulty above</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-add">
+    <div class="frame"><div class="scn add-scn">
+      <div class="add-top">
+        <h1><span class="tbadge">+</span> ADD A SONG</h1>
+        <div class="right"><span class="sortpill">NEW &middot; <b>.doot</b></span></div>
+      </div>
+      <div class="add-body">
+        <div class="panel">
+          <span class="eyebrow">Source</span>
+          <div class="src-tabs">
+            <button class="src-tab on" data-src="file">Upload</button>
+            <button class="src-tab" data-src="yt" disabled>YouTube</button>
+            <button class="src-tab" data-src="rec" disabled>Record</button>
+          </div>
+          <div class="src-pane on" data-src="file">
+            <div class="drop" id="drop"><b>Drop an audio file</b>mp3 &middot; wav &middot; ogg &middot; m4a, or click to browse. Decoded locally, nothing uploaded.<input type="file" id="file" accept="audio/*" hidden></div>
+          </div>
+          <div class="src-pane" data-src="yt">
+            <p class="hint">A YouTube style source needs a server or the desktop app to fetch the audio, so it is unavailable in the browser build. Use Upload.</p>
+          </div>
+          <div class="src-pane" data-src="rec">
+            <div class="drop"><b>Record from the mic</b>not wired in the browser build. Use Upload.</div>
+          </div>
+          <span class="eyebrow" style="margin-top:2px">Track</span>
+          <div class="grid2">
+            <div class="field"><label for="mTitle">Title</label><input class="input" id="mTitle" value="Untitled"></div>
+            <div class="field"><label for="mArtist">Artist</label><input class="input" id="mArtist" value="Unknown"></div>
+            <div class="field"><label for="mBpm">BPM (detected)</label><input class="input" id="mBpm" value="&mdash;"></div>
+            <div class="field"><label for="mLen">Length</label><input class="input" id="mLen" value="&mdash;" readonly></div>
+          </div>
+        </div>
+        <div class="panel">
+          <span class="eyebrow">Chart engine</span>
+          <div class="engines" id="engines"></div>
+          <span class="eyebrow" style="margin-top:2px">Generate difficulties</span>
+          <div class="gen-diffs" id="genDiffs"></div>
+        </div>
+        <div class="add-cta">
+          <button class="btn white" data-goto="select">Cancel</button>
+          <button class="btn green" id="genBtn" disabled>GENERATE CHART</button>
+        </div>
+      </div>
+
+      <div class="add-run" id="addRun">
+        <div class="run-card">
+          <h3><span class="tbadge">&#9834;</span> Charting the track</h3>
+          <div class="run-bar"><i id="runBar"></i></div>
+          <div class="stages" id="stages"></div>
+          <div class="run-done" id="runDone">
+            <div class="done-tag" id="doneTag">&#10003; Chart ready</div>
+            <div class="res-cta">
+              <button class="btn white sm" id="runCancel">Back</button>
+              <button class="btn green sm" id="reviewBtn">Review &amp; edit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="addReview" style="position:absolute;inset:0;z-index:12;display:none;flex-direction:column;background:var(--paper);padding:clamp(12px,2vw,18px);gap:10px">
+        <div class="add-top" style="border-radius:var(--r2);border:3px solid var(--ink)">
+          <h1><span class="tbadge">&#9998;</span> REVIEW &amp; EDIT</h1>
+          <div class="right" style="gap:8px">
+            <span class="sortpill" id="reviewPath">drum-aware</span>
+            <button class="btn white sm" id="reviewBack">Back</button>
+            <button class="btn white sm" id="reviewPlay">Preview play</button>
+            <button class="btn green sm" id="saveBtn">Save to Library</button>
+          </div>
+        </div>
+        <div id="edHost" style="flex:1;min-height:0;overflow:hidden"></div>
+      </div>
+
+      <div class="sel-foot">
+        <span class="k"><span class="btnk" style="background:#9a97c0">B</span>Cancel</span>
+        <span class="k"><span class="btnk" style="background:var(--green)">A</span>Generate</span>
+        <span class="user">/songs &rarr; new .doot package</span>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="screen" id="s-game">
+    <div class="stage">
+      <canvas id="field"></canvas>
+      <div class="gp-top">
+        <div class="song"><div class="t" id="gpTitle">&mdash;</div><div class="s" id="gpSub">&mdash;</div></div>
+        <div class="acts"><button class="btn white sm" id="gpRestart">Restart</button><button class="btn white sm" id="gpQuit">Quit</button></div>
+      </div>
+      <div class="gp-prog"><i id="gpProg"></i></div>
+      <div class="count" id="gpCount" style="display:none">3</div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-results">
+    <h1 style="color:#fff;text-shadow:0 3px 0 var(--ink-2);font-size:clamp(20px,4vw,30px)" id="resTitle">Results</h1>
+    <div class="grade" id="resGrade">S</div>
+    <div class="pill" id="resCombo">FULL COMBO</div>
+    <div class="judges" id="resJudges"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+      <button class="btn" id="resRetry">RETRY</button>
+      <button class="btn white sm" data-goto="select">Song select</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-settings">
+    <div class="scr-head"><button class="btn white sm" data-goto="select">&larr; Back</button><h1>Settings</h1></div>
+    <div class="panel"><div class="rows" id="setRows"></div></div>
+  </section>
+
+  <section class="screen" id="s-library">
+    <div class="scr-head"><button class="btn white sm" data-goto="select">&larr; Back</button><h1>Library</h1><span class="spacer"></span></div>
+    <div class="panel" style="margin-bottom:14px">
+      <div class="row">
+        <div class="rl"><div class="t">Storage location</div><div class="d" id="storeDesc">Songs live in this browser (IndexedDB). Optionally sync to a folder on disk.</div></div>
+        <div class="rc"><button class="btn white sm" id="chooseFolder">Choose folder&hellip;</button><button class="btn white sm" id="exportFolder" disabled>Export</button><button class="btn white sm" id="importFolder" disabled>Import</button></div>
+      </div>
+      <div class="row">
+        <div class="rl"><div class="t">Backup</div><div class="d">Download or restore the whole library as a single .ddr file.</div></div>
+        <div class="rc"><button class="btn white sm" id="exportFile">Download .ddr</button><button class="btn white sm" id="importFileBtn">Restore&hellip;</button><input type="file" id="importFile" accept=".ddr,application/json" hidden></div>
+      </div>
+    </div>
+    <div class="panel"><div class="eyebrow" style="margin-bottom:12px">Songs <span id="libCount"></span></div><div class="lib-list" id="libList"></div></div>
+  </section>
+
+  <section class="screen" id="s-gamepad">
+    <div class="scr-head"><button class="btn white sm" data-goto="select">&larr; Back</button><h1>Controls</h1></div>
+    <div class="panel">
+      <div class="row"><div class="rl"><div class="t">Connected gamepad</div><div class="d gp-status" id="gpDetect">None detected &mdash; press a button on a controller to wake it.</div></div><div class="rc"><span class="sw-toggle" id="gpEnable"></span><span class="eyebrow">enable pad</span></div></div>
+      <div class="eyebrow" style="margin:16px 0 10px">Bind each lane. Click a slot, then press a key or a gamepad button.</div>
+      <div class="bind-grid" id="bindGrid"></div>
+      <div class="eyebrow" style="margin-top:14px">Keyboard defaults: arrow keys. Start = Enter, Back = Escape.</div>
+    </div>
+  </section>
+
+</div>
+<div id="toast">ok</div>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

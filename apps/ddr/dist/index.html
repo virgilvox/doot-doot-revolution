@@ -1,0 +1,2841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFE9C7">
+<title>Doot Doot Revolution</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style id="ddr-css"></style>
+</head>
+<body>
+<div class="dots" aria-hidden="true"></div>
+<div class="app">
+
+  <nav class="nav">
+    <div class="brand" data-goto="title"><svg class="mk" viewBox="0 0 512 512" id="brandMark" aria-hidden="true"></svg>DOOT DOOT REVOLUTION<span class="dot">.</span></div>
+    <div class="tabs">
+      <button class="tab" data-goto="select">Play</button>
+      <button class="tab" data-goto="add">Add Song</button>
+      <button class="tab" data-goto="library">Library</button>
+      <button class="tab" data-goto="settings">Settings</button>
+      <button class="tab" data-goto="gamepad">Pads</button>
+    </div>
+  </nav>
+
+  <section class="screen" id="s-title">
+    <div class="frame"><div class="scn t-scn">
+      <div class="rays" aria-hidden="true"></div>
+      <div class="t-inner">
+        <h1 class="logo"><span class="l1">DOOT</span><span class="l2">DOOT</span><span class="l3">REVOLUTION</span></h1>
+        <div class="t-arrows" id="titleArrows" aria-hidden="true"></div>
+        <button class="press" data-goto="select">PRESS START</button>
+      </div>
+      <div class="t-foot"><span>v2.0 &middot; open source</span><span id="titleFoot">/songs &middot; loaded</span></div>
+    </div></div>
+  </section>
+
+  <section class="screen" id="s-select">
+    <div class="frame"><div class="scn sel-scn">
+      <div class="sel-top">
+        <h1><span class="tbadge"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#22203F" d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.6" fill="#22203F"/><circle cx="16.5" cy="16" r="2.6" fill="#22203F"/></svg></span> SELECT MUSIC</h1>
+        <div class="right">
+          <button class="btn yellow sm" data-goto="add">+ Add Song</button>
+          <span class="sortpill">SORT &middot; <b>GROUP</b></span>
+          <span class="scount" id="selCount">0</span>
+        </div>
+      </div>
+      <div class="sel-body">
+        <div class="hero">
+          <div class="banner" id="selBanner" style="background:linear-gradient(125deg,var(--pink),var(--purple))">
+            <div class="big-l" id="selBigL">M</div>
+            <div class="eq"><i></i><i></i><i></i><i></i></div>
+            <div><div class="bt" id="selTitle">&mdash;</div><div class="ba" id="selArtist">&mdash;</div></div>
+          </div>
+          <div class="facts">
+            <div class="fact"><span>BPM</span><b id="selBpm">&mdash;</b></div>
+            <div class="fact"><span>Length</span><b id="selLen">&mdash;</b></div>
+            <div class="fact"><span>Charted</span><b id="selEngine">&mdash;</b></div>
+            <div class="fact"><span>Source</span><b id="selSrc">&mdash;</b></div>
+          </div>
+          <div class="radar-card">
+            <svg viewBox="0 0 168 168" id="selRadar" aria-hidden="true"></svg>
+            <div class="legend" id="selLegend"></div>
+          </div>
+          <div class="diffs" id="diffs"></div>
+          <div class="cta">
+            <button class="btn white sm" id="modsBtn">Speed &middot; Mods</button>
+            <button class="btn green" id="danceBtn">DANCE</button>
+          </div>
+        </div>
+        <div class="wheel-board" id="wheel"><div class="wheel-reticle" aria-hidden="true"></div><div class="wheel-cursor" aria-hidden="true"></div></div>
+      </div>
+      <div class="sel-foot">
+        <span class="k"><span class="btnk" style="background:#9a97c0">B</span>Exit</span>
+        <span class="k"><span class="btnk" style="background:var(--green)">A</span>Select</span>
+        <span class="k"><span class="btnk" style="background:var(--yellow)">&#9650;&#9660;</span>Move</span>
+        <span class="k"><span class="btnk" style="background:var(--blue);color:#fff">Y</span>Add Song</span>
+        <span class="user">Player 1</span>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="screen" id="s-diff">
+    <div class="scr-head"><button class="btn white sm" data-goto="select">&larr; Back</button><h1 id="diffSong">Difficulty</h1></div>
+    <div class="panel">
+      <div class="eyebrow" style="margin-bottom:12px">Pick a chart. Foot rating and note count come from the generated steps.</div>
+      <div class="diff-grid" id="diffGrid"></div>
+      <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;align-items:center">
+        <button class="btn green lg" id="startPlay" disabled>START</button>
+        <span class="eyebrow" id="diffHint">select a difficulty above</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-add">
+    <div class="frame"><div class="scn add-scn">
+      <div class="add-top">
+        <h1><span class="tbadge">+</span> ADD A SONG</h1>
+        <div class="right"><span class="sortpill">NEW &middot; <b>.doot</b></span></div>
+      </div>
+      <div class="add-body">
+        <div class="panel">
+          <span class="eyebrow">Source</span>
+          <div class="src-tabs">
+            <button class="src-tab on" data-src="file">Upload</button>
+            <button class="src-tab" data-src="yt" disabled>YouTube</button>
+            <button class="src-tab" data-src="rec" disabled>Record</button>
+          </div>
+          <div class="src-pane on" data-src="file">
+            <div class="drop" id="drop"><b>Drop an audio file</b>mp3 &middot; wav &middot; ogg &middot; m4a, or click to browse. Decoded locally, nothing uploaded.<input type="file" id="file" accept="audio/*" hidden></div>
+          </div>
+          <div class="src-pane" data-src="yt">
+            <p class="hint">A YouTube style source needs a server or the desktop app to fetch the audio, so it is unavailable in the browser build. Use Upload.</p>
+          </div>
+          <div class="src-pane" data-src="rec">
+            <div class="drop"><b>Record from the mic</b>not wired in the browser build. Use Upload.</div>
+          </div>
+          <span class="eyebrow" style="margin-top:2px">Track</span>
+          <div class="grid2">
+            <div class="field"><label for="mTitle">Title</label><input class="input" id="mTitle" value="Untitled"></div>
+            <div class="field"><label for="mArtist">Artist</label><input class="input" id="mArtist" value="Unknown"></div>
+            <div class="field"><label for="mBpm">BPM (detected)</label><input class="input" id="mBpm" value="&mdash;"></div>
+            <div class="field"><label for="mLen">Length</label><input class="input" id="mLen" value="&mdash;" readonly></div>
+          </div>
+        </div>
+        <div class="panel">
+          <span class="eyebrow">Chart engine</span>
+          <div class="engines" id="engines"></div>
+          <span class="eyebrow" style="margin-top:2px">Generate difficulties</span>
+          <div class="gen-diffs" id="genDiffs"></div>
+        </div>
+        <div class="add-cta">
+          <button class="btn white" data-goto="select">Cancel</button>
+          <button class="btn green" id="genBtn" disabled>GENERATE CHART</button>
+        </div>
+      </div>
+
+      <div class="add-run" id="addRun">
+        <div class="run-card">
+          <h3><span class="tbadge">&#9834;</span> Charting the track</h3>
+          <div class="run-bar"><i id="runBar"></i></div>
+          <div class="stages" id="stages"></div>
+          <div class="run-done" id="runDone">
+            <div class="done-tag" id="doneTag">&#10003; Chart ready</div>
+            <div class="res-cta">
+              <button class="btn white sm" id="runCancel">Back</button>
+              <button class="btn green sm" id="reviewBtn">Review &amp; edit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="addReview" style="position:absolute;inset:0;z-index:12;display:none;flex-direction:column;background:var(--paper);padding:clamp(12px,2vw,18px);gap:10px">
+        <div class="add-top" style="border-radius:var(--r2);border:3px solid var(--ink)">
+          <h1><span class="tbadge">&#9998;</span> REVIEW &amp; EDIT</h1>
+          <div class="right" style="gap:8px">
+            <span class="sortpill" id="reviewPath">drum-aware</span>
+            <button class="btn white sm" id="reviewBack">Back</button>
+            <button class="btn white sm" id="reviewPlay">Preview play</button>
+            <button class="btn green sm" id="saveBtn">Save to Library</button>
+          </div>
+        </div>
+        <div id="edHost" style="flex:1;min-height:0;overflow:hidden"></div>
+      </div>
+
+      <div class="sel-foot">
+        <span class="k"><span class="btnk" style="background:#9a97c0">B</span>Cancel</span>
+        <span class="k"><span class="btnk" style="background:var(--green)">A</span>Generate</span>
+        <span class="user">/songs &rarr; new .doot package</span>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="screen" id="s-game">
+    <div class="stage">
+      <canvas id="field"></canvas>
+      <div class="gp-top">
+        <div class="song"><div class="t" id="gpTitle">&mdash;</div><div class="s" id="gpSub">&mdash;</div></div>
+        <div class="acts"><button class="btn white sm" id="gpRestart">Restart</button><button class="btn white sm" id="gpQuit">Quit</button></div>
+      </div>
+      <div class="gp-prog"><i id="gpProg"></i></div>
+      <div class="count" id="gpCount" style="display:none">3</div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-results">
+    <h1 style="color:#fff;text-shadow:0 3px 0 var(--ink-2);font-size:clamp(20px,4vw,30px)" id="resTitle">Results</h1>
+    <div class="grade" id="resGrade">S</div>
+    <div class="pill" id="resCombo">FULL COMBO</div>
+    <div class="judges" id="resJudges"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+      <button class="btn" id="resRetry">RETRY</button>
+      <button class="btn white sm" data-goto="select">Song select</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-settings">
+    <div class="scr-head"><button class="btn white sm" data-goto="select">&larr; Back</button><h1>Settings</h1></div>
+    <div class="panel"><div class="rows" id="setRows"></div></div>
+  </section>
+
+  <section class="screen" id="s-library">
+    <div class="scr-head"><button class="btn white sm" data-goto="select">&larr; Back</button><h1>Library</h1><span class="spacer"></span></div>
+    <div class="panel" style="margin-bottom:14px">
+      <div class="row">
+        <div class="rl"><div class="t">Storage location</div><div class="d" id="storeDesc">Songs live in this browser (IndexedDB). Optionally sync to a folder on disk.</div></div>
+        <div class="rc"><button class="btn white sm" id="chooseFolder">Choose folder&hellip;</button><button class="btn white sm" id="exportFolder" disabled>Export</button><button class="btn white sm" id="importFolder" disabled>Import</button></div>
+      </div>
+      <div class="row">
+        <div class="rl"><div class="t">Backup</div><div class="d">Download or restore the whole library as a single .ddr file.</div></div>
+        <div class="rc"><button class="btn white sm" id="exportFile">Download .ddr</button><button class="btn white sm" id="importFileBtn">Restore&hellip;</button><input type="file" id="importFile" accept=".ddr,application/json" hidden></div>
+      </div>
+    </div>
+    <div class="panel"><div class="eyebrow" style="margin-bottom:12px">Songs <span id="libCount"></span></div><div class="lib-list" id="libList"></div></div>
+  </section>
+
+  <section class="screen" id="s-gamepad">
+    <div class="scr-head"><button class="btn white sm" data-goto="select">&larr; Back</button><h1>Controls</h1></div>
+    <div class="panel">
+      <div class="row"><div class="rl"><div class="t">Connected gamepad</div><div class="d gp-status" id="gpDetect">None detected &mdash; press a button on a controller to wake it.</div></div><div class="rc"><span class="sw-toggle" id="gpEnable"></span><span class="eyebrow">enable pad</span></div></div>
+      <div class="eyebrow" style="margin:16px 0 10px">Bind each lane. Click a slot, then press a key or a gamepad button.</div>
+      <div class="bind-grid" id="bindGrid"></div>
+      <div class="eyebrow" style="margin-top:14px">Keyboard defaults: arrow keys. Start = Enter, Back = Escape.</div>
+    </div>
+  </section>
+
+</div>
+<div id="toast">ok</div>
+<script>
+(function(){
+"use strict";
+var __m={};
+function __d(id,fn){__m[id]={fn:fn,ex:null};}
+function __r(id){var m=__m[id];if(!m)throw new Error("missing module "+id);if(!m.ex){m.ex={};m.fn(m.ex,__r);}return m.ex;}
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/core/src/index.js", function(exports, require){
+// core: the pub/sub bus and persisted settings. No DOM, no audio.
+// These are the seams the rest of the workspace talks through, so they carry
+// no game logic of their own.
+
+// A tiny synchronous event bus. Handlers that throw are isolated so one bad
+// subscriber cannot break an emit.
+function createBus() {
+  const map = new Map();
+  return {
+    on(ev, fn) {
+      let set = map.get(ev);
+      if (!set) { set = new Set(); map.set(ev, set); }
+      set.add(fn);
+      return () => set.delete(fn);
+    },
+    once(ev, fn) {
+      const off = this.on(ev, (data) => { off(); fn(data); });
+      return off;
+    },
+    emit(ev, data) {
+      const set = map.get(ev);
+      if (!set) return;
+      set.forEach((fn) => { try { fn(data); } catch (e) { console.error(e); } });
+    }
+  };
+}
+
+function pickStorage(storage) {
+  if (storage) return storage;
+  try { if (typeof localStorage !== 'undefined') return localStorage; } catch (e) {}
+  return null;
+}
+
+// Persisted settings over a key/value store (localStorage by default). Emits
+// 'change' on the returned bus-like object when a value is set or reset, so the
+// audio engine and screens can react without polling.
+function createSettings({ key = 'ddr.settings.v1', defaults = {}, storage } = {}) {
+  const store = pickStorage(storage);
+  const listeners = new Set();
+  let state = Object.assign({}, defaults);
+  try {
+    const raw = store && store.getItem(key);
+    if (raw) state = Object.assign(state, JSON.parse(raw));
+  } catch (e) {}
+
+  function save() {
+    try { if (store) store.setItem(key, JSON.stringify(state)); } catch (e) {}
+  }
+  function fire(change) { listeners.forEach((fn) => { try { fn(change); } catch (e) { console.error(e); } }); }
+
+  return {
+    all() { return Object.assign({}, state); },
+    get(k) { return state[k]; },
+    set(k, v) { state[k] = v; save(); fire({ key: k, value: v, all: state }); },
+    reset() { state = Object.assign({}, defaults); save(); fire({ all: state }); },
+    onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); }
+  };
+}
+
+exports.createBus = createBus;
+exports.createSettings = createSettings;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/engine/src/index.js", function(exports, require){
+// engine: Web Audio playback and the master clock. The audio hardware clock
+// (ctx.currentTime) is the single source of truth for song time; the renderer
+// and the judge both read it through here, so audio and visuals never drift.
+
+class AudioEngine {
+  constructor() {
+    this.ctx = null; this.buffer = null; this.src = null;
+    this.master = null; this.music = null; this.sfx = null;
+    this.startAt = 0; this.pauseAt = 0; this.playing = false; this._onend = null;
+    this.volumes = { master: 0.9, music: 0.85, sfx: 0.7 };
+  }
+  _ensure() {
+    if (this.ctx) return;
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.master = this.ctx.createGain(); this.music = this.ctx.createGain(); this.sfx = this.ctx.createGain();
+    this.music.connect(this.master); this.sfx.connect(this.master); this.master.connect(this.ctx.destination);
+    this.applyVolumes();
+  }
+  ensure() { this._ensure(); return this.ctx; }
+  // outputLatency (or baseLatency) in milliseconds, for a first-guess offset.
+  latencyMs() { if (!this.ctx) return 0; return Math.round((this.ctx.outputLatency || this.ctx.baseLatency || 0) * 1000); }
+
+  setVolumes(v) { Object.assign(this.volumes, v); this.applyVolumes(); }
+  applyVolumes() { if (!this.ctx) return; this.master.gain.value = this.volumes.master; this.music.gain.value = this.volumes.music; this.sfx.gain.value = this.volumes.sfx; }
+
+  resume() { this._ensure(); if (this.ctx.state === 'suspended') return this.ctx.resume(); return Promise.resolve(); }
+  async decode(arrayBuffer) { this._ensure(); return await this.ctx.decodeAudioData(arrayBuffer.slice(0)); }
+  load(buffer) { this.buffer = buffer; }
+
+  play(fromSec = 0) {
+    this._ensure(); this.stop();
+    const s = this.ctx.createBufferSource(); s.buffer = this.buffer; s.connect(this.music);
+    s.onended = () => { if (this.playing && this._onend) this._onend(); };
+    this.startAt = this.ctx.currentTime - fromSec; s.start(0, Math.max(0, fromSec));
+    this.src = s; this.playing = true;
+  }
+  stop() { if (this.src) { try { this.src.onended = null; this.src.stop(); } catch (e) {} this.src = null; } this.playing = false; }
+
+  // Current song time in seconds, read from the audio clock.
+  time() { if (!this.ctx || !this.playing) return this.pauseAt; return this.ctx.currentTime - this.startAt; }
+  duration() { return this.buffer ? this.buffer.duration : 0; }
+  // Beat position given the chart's bpm and first-beat offset.
+  beat(bpm, offsetSec) { return (this.time() - offsetSec) / (60 / bpm); }
+  onended(fn) { this._onend = fn; }
+
+  // A short hit blip on the sfx bus, optional feedback for a tap.
+  tick() {
+    if (!this.ctx) return;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = 'square'; o.frequency.value = 880;
+    g.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.25, this.ctx.currentTime + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.08);
+    o.connect(g); g.connect(this.sfx); o.start(); o.stop(this.ctx.currentTime + 0.09);
+  }
+}
+
+function createEngine() { return new AudioEngine(); }
+
+exports.AudioEngine = AudioEngine;
+exports.createEngine = createEngine;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/input/src/index.js", function(exports, require){
+// input: unified keyboard and Web Gamepad input, rebindable per lane. Emits
+// 'down' { lane }, 'up' { lane }, 'start', 'back', and 'bound' { lane }. Lanes
+// are 0 Left, 1 Down, 2 Up, 3 Right. Consumers read the song clock synchronously
+// in the handler for accurate hit timing.
+//
+// A slot can hold one key and one gamepad button. Bindings persist to a store
+// (localStorage by default). Call attach(window) once to bind DOM listeners and
+// poll() every frame to sample gamepads.
+
+const LANE_NAMES = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
+
+const DEFAULTS = () => ({
+  lanes: [
+    [{ type: 'key', code: 'ArrowLeft' }],
+    [{ type: 'key', code: 'ArrowDown' }],
+    [{ type: 'key', code: 'ArrowUp' }],
+    [{ type: 'key', code: 'ArrowRight' }]
+  ],
+  start: [{ type: 'key', code: 'Enter' }],
+  back: [{ type: 'key', code: 'Escape' }]
+});
+
+function pickStorage(storage) {
+  if (storage) return storage;
+  try { if (typeof localStorage !== 'undefined') return localStorage; } catch (e) {}
+  return null;
+}
+function keyLabel(code) { return code.replace('Arrow', '').replace('Key', '').replace('Digit', ''); }
+
+function createInput(options = {}) {
+  const store = pickStorage(options.storage), KEY = options.key || 'ddr.binds.v1';
+  let binds;
+  try { binds = (store && JSON.parse(store.getItem(KEY))) || DEFAULTS(); } catch (e) { binds = DEFAULTS(); }
+  let padEnabled = true, listening = null;
+  const laneDown = [false, false, false, false], prevPad = {}, listeners = new Map();
+
+  function emit(ev, data) { const s = listeners.get(ev); if (s) s.forEach((fn) => { try { fn(data); } catch (e) { console.error(e); } }); }
+  function on(ev, fn) { let s = listeners.get(ev); if (!s) { s = new Set(); listeners.set(ev, s); } s.add(fn); return () => s.delete(fn); }
+  function save() { try { if (store) store.setItem(KEY, JSON.stringify(binds)); } catch (e) {} }
+
+  function laneForKey(code) { for (let l = 0; l < 4; l++) if (binds.lanes[l].some((b) => b.type === 'key' && b.code === code)) return l; return -1; }
+  function laneForPad(index) { for (let l = 0; l < 4; l++) if (binds.lanes[l].some((b) => b.type === 'pad' && b.index === index)) return l; return -1; }
+  function upsert(lane, b) { const arr = binds.lanes[lane], i = arr.findIndex((x) => x.type === b.type); if (i >= 0) arr[i] = b; else arr.push(b); save(); }
+  function down(lane) { if (laneDown[lane]) return; laneDown[lane] = true; emit('down', { lane }); }
+  function up(lane) { if (!laneDown[lane]) return; laneDown[lane] = false; emit('up', { lane }); }
+
+  function onKeyDown(e) {
+    if (e.repeat) return;
+    if (listening != null) { upsert(listening, { type: 'key', code: e.code }); const done = listening; listening = null; emit('bound', { lane: done }); e.preventDefault(); return; }
+    if (/^(input|textarea|select)$/i.test((e.target && e.target.tagName) || '')) return;
+    if (binds.start.some((b) => b.type === 'key' && b.code === e.code)) emit('start');
+    if (binds.back.some((b) => b.type === 'key' && b.code === e.code)) emit('back');
+    const l = laneForKey(e.code); if (l >= 0) { down(l); e.preventDefault(); }
+  }
+  function onKeyUp(e) { const l = laneForKey(e.code); if (l >= 0) up(l); }
+
+  function poll() {
+    if (!padEnabled || typeof navigator === 'undefined' || !navigator.getGamepads) return;
+    const pads = navigator.getGamepads();
+    for (const gp of pads) {
+      if (!gp) continue;
+      for (let b = 0; b < gp.buttons.length; b++) {
+        const key = gp.index + ':' + b, pressed = gp.buttons[b].pressed, was = prevPad[key] || false;
+        if (pressed && !was) {
+          if (listening != null) { upsert(listening, { type: 'pad', index: b }); const done = listening; listening = null; emit('bound', { lane: done }); }
+          else { const l = laneForPad(b); if (l >= 0) down(l); }
+        } else if (!pressed && was) { const l = laneForPad(b); if (l >= 0) up(l); }
+        prevPad[key] = pressed;
+      }
+    }
+  }
+  function connectedPad() { if (typeof navigator === 'undefined' || !navigator.getGamepads) return null; for (const gp of navigator.getGamepads()) { if (gp) return gp; } return null; }
+
+  let _kd = null, _ku = null, _target = null;
+  function attach(target) {
+    _target = target || (typeof window !== 'undefined' ? window : null); if (!_target) return;
+    _kd = onKeyDown; _ku = onKeyUp; _target.addEventListener('keydown', _kd); _target.addEventListener('keyup', _ku);
+  }
+  function detach() { if (_target) { _target.removeEventListener('keydown', _kd); _target.removeEventListener('keyup', _ku); _target = null; } }
+
+  return {
+    LANE_NAMES, on, poll, attach, detach, connectedPad,
+    laneDown: () => laneDown.slice(),
+    isDown: (lane) => laneDown[lane],
+    bindings: () => binds,
+    listen: (lane) => { listening = lane; },
+    cancelListen: () => { listening = null; },
+    setPadEnabled: (v) => { padEnabled = !!v; },
+    padEnabled: () => padEnabled,
+    describe: (lane) => binds.lanes[lane].map((b) => b.type === 'key' ? keyLabel(b.code) : ('Pad ' + b.index)).join('  +  ') || '—',
+    reset: () => { binds = DEFAULTS(); save(); }
+  };
+}
+
+exports.LANE_NAMES = LANE_NAMES;
+exports.createInput = createInput;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/library/src/index.js", function(exports, require){
+// library: the song store. Songs persist in IndexedDB so the app works offline
+// with no server. A record keeps the original audio Blob (AudioBuffers are not
+// serializable, so the app re-decodes on play) plus the generated charts.
+//
+// Two optional export paths sit alongside the store: a single portable .ddr
+// backup file that works everywhere, and File System Access folder sync where
+// the browser supports it.
+//
+// record = { id, title, artist, bpm, offset, source, createdAt, duration,
+//            audio: Blob, charts: { [difficulty]: chart } }
+
+function createLibrary(options = {}) {
+  const idb = options.indexedDB || (typeof indexedDB !== 'undefined' ? indexedDB : null);
+  const DB = options.dbName || 'ddr', STORE = 'songs', VER = 1;
+  let _db = null, _dir = null;
+  const canFolder = typeof window !== 'undefined' && 'showDirectoryPicker' in window;
+  const listeners = new Set();
+  const onChange = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
+  const fire = () => listeners.forEach((fn) => { try { fn(); } catch (e) { console.error(e); } });
+
+  function open() {
+    return new Promise((res, rej) => {
+      if (_db) return res(_db);
+      if (!idb) return rej(new Error('IndexedDB unavailable'));
+      const r = idb.open(DB, VER);
+      r.onupgradeneeded = () => { const db = r.result; if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: 'id' }); };
+      r.onsuccess = () => { _db = r.result; res(_db); };
+      r.onerror = () => rej(r.error);
+    });
+  }
+  function tx(mode) { return open().then((db) => db.transaction(STORE, mode).objectStore(STORE)); }
+  const req = (r) => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+
+  async function list() { return (await req((await tx('readonly')).getAll())) || []; }
+  async function get(id) { return await req((await tx('readonly')).get(id)); }
+  async function put(rec) { await req((await tx('readwrite')).put(rec)); fire(); return rec; }
+  async function remove(id) { await req((await tx('readwrite')).delete(id)); fire(); }
+  async function clear() { await req((await tx('readwrite')).clear()); fire(); }
+
+  const blobToDataURL = (b) => new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(b); });
+  const dataURLToBlob = async (u) => await (await fetch(u)).blob();
+
+  async function exportFile() {
+    const songs = await list(), out = { format: 'ddr-library', version: 1, songs: [] };
+    for (const s of songs) { const audio = s.audio ? await blobToDataURL(s.audio) : null; out.songs.push(Object.assign({}, s, { audio })); }
+    return new Blob([JSON.stringify(out)], { type: 'application/json' });
+  }
+  async function importFile(file) {
+    const data = JSON.parse(await file.text()); if (!data.songs) throw new Error('not a .ddr library');
+    let n = 0;
+    for (const s of data.songs) { const rec = Object.assign({}, s); rec.audio = s.audio ? await dataURLToBlob(s.audio) : null; await put(rec); n++; }
+    return n;
+  }
+
+  async function chooseFolder() { if (!canFolder) throw new Error('unsupported'); _dir = await window.showDirectoryPicker({ mode: 'readwrite' }); return _dir.name; }
+  function haveFolder() { return !!_dir; }
+  async function exportToFolder() {
+    if (!_dir) throw new Error('no folder');
+    const songs = await list(); let n = 0;
+    for (const s of songs) {
+      const meta = Object.assign({}, s); delete meta.audio;
+      let h = await _dir.getFileHandle(s.id + '.json', { create: true }), w = await h.createWritable(); await w.write(JSON.stringify(meta)); await w.close();
+      if (s.audio) { h = await _dir.getFileHandle(s.id + '.audio', { create: true }); w = await h.createWritable(); await w.write(s.audio); await w.close(); }
+      n++;
+    }
+    return n;
+  }
+  async function importFromFolder() {
+    if (!_dir) throw new Error('no folder'); let n = 0;
+    for await (const [name, handle] of _dir.entries()) {
+      if (!name.endsWith('.json') || handle.kind !== 'file') continue;
+      const meta = JSON.parse(await (await handle.getFile()).text());
+      try { const af = await _dir.getFileHandle(meta.id + '.audio'); meta.audio = await af.getFile(); } catch (e) { meta.audio = null; }
+      await put(meta); n++;
+    }
+    return n;
+  }
+
+  return { list, get, put, remove, clear, onChange, exportFile, importFile, chooseFolder, exportToFolder, importFromFolder, haveFolder, canFolder };
+}
+
+exports.createLibrary = createLibrary;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/noteskin/src/index.js", function(exports, require){
+// noteskin: the StepMania arrow silhouette and its coloring, drawn to a 2D canvas
+// or returned as an SVG string. One geometry, reused everywhere (menus, the
+// notefield, the editor) so arrows look identical across the app.
+//
+// Colors follow the StepMania convention of tinting a note by its rhythmic
+// quantization: 4th red, 8th blue, 12th purple, 16th green, 24th magenta, 32nd
+// orange. Directions are tinted per lane for menu specimens.
+
+const ARO = '#101018';
+const SIL = "M 256 22 L 484 248 L 484 305 L 438 345 L 373 345 L 337 306 L 337 412 L 256 481 L 175 412 L 175 306 L 139 345 L 74 345 L 28 305 L 28 248 Z";
+const DET = [
+  "M 256 99 L 415 248 L 417 275 L 392 277 L 300 205 L 256 169 L 212 205 L 120 277 L 95 275 L 97 248 Z",
+  "M 256 185 L 286 213 L 284 289 L 262 272 L 256 272 L 250 272 L 228 289 L 226 213 Z",
+  "M 256 289 L 285 309 L 284 382 L 256 404 L 228 382 L 227 309 Z"
+];
+
+const QUANT = {
+  4: { t: '#C42133', b: '#FF7A6B' },
+  8: { t: '#1E3FA8', b: '#57BDF5' },
+  12: { t: '#6A24C8', b: '#C58BFF' },
+  16: { t: '#1F9A34', b: '#86EE72' },
+  24: { t: '#B31D8F', b: '#EF6AD6' },
+  32: { t: '#B85E00', b: '#FFB84D' }
+};
+const DIR = {
+  left: { t: '#B31D8F', b: '#EF6AD6' },
+  down: { t: '#1E3FA8', b: '#57BDF5' },
+  up: { t: '#1F9A34', b: '#86EE72' },
+  right: { t: '#BF1F2B', b: '#FF6A5C' }
+};
+// Lane order is Left, Down, Up, Right. Rotation of the up-facing silhouette.
+const LANE_ROT = [-90, 180, 0, 90];
+const LANE_NAMES = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
+const LANE_DIRS = ['left', 'down', 'up', 'right'];
+
+// Path2D is browser-only. Build the paths lazily so this module imports cleanly
+// in Node (for the bundler and pure tests).
+let P_SIL = null, P_DET = null;
+function paths() {
+  if (P_SIL) return true;
+  if (typeof Path2D === 'undefined') return false;
+  P_SIL = new Path2D(SIL);
+  P_DET = DET.map((d) => new Path2D(d));
+  return true;
+}
+
+function rgb(h) { h = h.replace('#', ''); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+// Shade a hex toward white (p>0) or black (p<0), returning an rgba string.
+function shade(h, p, a) {
+  const c = rgb(h), f = p / 100, adj = (v) => Math.round(p < 0 ? v * (1 + f) : v + (255 - v) * f);
+  return 'rgba(' + adj(c[0]) + ',' + adj(c[1]) + ',' + adj(c[2]) + ',' + (a == null ? 1 : a) + ')';
+}
+
+function colorFor(key) { return QUANT[key] || DIR[key] || QUANT[4]; }
+
+function gradFor(ctx, key) {
+  if (!ctx._gc) ctx._gc = {};
+  if (ctx._gc[key]) return ctx._gc[key];
+  const c = colorFor(key);
+  const g = ctx.createLinearGradient(0, 22, 0, 481);
+  g.addColorStop(0, c.t); g.addColorStop(1, c.b);
+  ctx._gc[key] = g; return g;
+}
+
+// Draw an arrow centered at (x, y) at a given pixel size, tinted by key, rotated
+// by rot degrees. opt: { alpha, glow, receptor }.
+function drawArrow(ctx, x, y, size, key, rot, opt = {}) {
+  if (!paths()) return;
+  const c = colorFor(key);
+  ctx.save();
+  ctx.globalAlpha = opt.alpha == null ? 1 : opt.alpha;
+  ctx.translate(x, y); ctx.rotate(rot * Math.PI / 180);
+  const s = size / 512; ctx.scale(s, s); ctx.translate(-256, -256);
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  if (opt.receptor) {
+    if (opt.glow) { ctx.shadowColor = 'rgba(255,255,255,.5)'; ctx.shadowBlur = opt.glow; }
+    ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fill(P_SIL);
+    ctx.lineWidth = 26; ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.stroke(P_SIL); ctx.shadowBlur = 0;
+  } else {
+    if (opt.glow) { ctx.shadowColor = c.b; ctx.shadowBlur = opt.glow; }
+    ctx.fillStyle = gradFor(ctx, key); ctx.fill(P_SIL); ctx.shadowBlur = 0;
+    ctx.lineWidth = 26; ctx.strokeStyle = ARO; ctx.stroke(P_SIL);
+    ctx.fillStyle = '#fff'; P_DET.forEach((p) => ctx.fill(p));
+  }
+  ctx.restore();
+}
+
+// Draw a hold/freeze body from topY to botY in lane column x, tinted by key.
+function drawTrail(ctx, x, topY, botY, key, w) {
+  const c = colorFor(key), H = botY - topY; if (H <= 0.5) return;
+  const half = w / 2, r = Math.min(9, half);
+  const outline = () => {
+    ctx.beginPath();
+    ctx.moveTo(x - half, topY); ctx.lineTo(x - half, botY - r);
+    ctx.quadraticCurveTo(x - half, botY, x - half + r, botY);
+    ctx.lineTo(x + half - r, botY); ctx.quadraticCurveTo(x + half, botY, x + half, botY - r);
+    ctx.lineTo(x + half, topY); ctx.closePath();
+  };
+  ctx.save(); outline(); ctx.clip();
+  const g = ctx.createLinearGradient(0, topY, 0, botY);
+  g.addColorStop(0, shade(c.b, 0, .95)); g.addColorStop(1, shade(c.t, -30, .85));
+  ctx.fillStyle = g; ctx.fillRect(x - half, topY, w, H);
+  ctx.strokeStyle = shade(c.t, -45, .82); ctx.lineWidth = Math.max(3, w * 0.13); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  const stepY = w * 0.6, cw = w * 0.32, ch = w * 0.2;
+  for (let cy = botY - w * 0.35; cy > topY - ch; cy -= stepY) { ctx.beginPath(); ctx.moveTo(x - cw, cy); ctx.lineTo(x, cy - ch); ctx.lineTo(x + cw, cy); ctx.stroke(); }
+  ctx.restore();
+  ctx.save(); ctx.strokeStyle = shade(c.b, 25, .9); ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; outline(); ctx.stroke(); ctx.restore();
+}
+
+let _svgN = 0;
+// Build an inline SVG string for a direction, optionally tinted by a quant key.
+// Used for menu, title, and binding specimens.
+function arrowSVG(dir, key) {
+  const uid = ++_svgN;
+  const c = (key != null && QUANT[key]) ? QUANT[key] : (DIR[dir] || DIR.up);
+  const r = LANE_ROT[LANE_DIRS.indexOf(dir)] || 0;
+  return '<svg viewBox="0 0 512 512" width="100%" height="100%" style="display:block"><g transform="rotate(' + r + ' 256 256)">' +
+    '<defs><linearGradient id="ag' + uid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + c.t + '"/><stop offset="1" stop-color="' + c.b + '"/></linearGradient></defs>' +
+    '<path d="' + SIL + '" fill="url(#ag' + uid + ')" stroke="' + ARO + '" stroke-width="26" stroke-linejoin="round" stroke-linecap="round"/>' +
+    DET.map((d) => '<path d="' + d + '" fill="#fff"/>').join('') + '</g></svg>';
+}
+
+exports.QUANT = QUANT;
+exports.DIR = DIR;
+exports.LANE_ROT = LANE_ROT;
+exports.LANE_NAMES = LANE_NAMES;
+exports.LANE_DIRS = LANE_DIRS;
+exports.shade = shade;
+exports.colorFor = colorFor;
+exports.drawArrow = drawArrow;
+exports.drawTrail = drawTrail;
+exports.arrowSVG = arrowSVG;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/notefield/src/index.js", function(exports, require){
+// notefield: the scrolling notefield on a canvas. Upscroll, receptors near the
+// top, notes rising from below to meet them, driven entirely by song time. Used
+// by gameplay and, in a narrow variant, by the editor.
+//
+// Scroll speed is XMOD, verified against StepMania: a note beats_away from now
+// sits beats_away * speed note-heights past the receptor, so pixels per second =
+// (bpm / 60) * speed * noteSize. A speed of 2.4 travels 2.4 note-heights per beat.
+
+const { drawArrow, drawTrail, LANE_ROT } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/noteskin/src/index.js");
+const JUDGE_COLOR = { marvelous: '#89f0d8', perfect: '#89f0d8', great: '#86EE72', good: '#8fc0ff', boo: '#FF9B2E', miss: '#FF7A8A', drop: '#FF7A8A' };
+const JUDGE_LABEL = { marvelous: 'MARVELOUS', perfect: 'PERFECT', great: 'GREAT', good: 'GOOD', boo: 'BOO', miss: 'MISS', drop: 'DROP' };
+
+function createNotefield(canvas, config = {}) {
+  const ctx = canvas.getContext('2d');
+  let w = 0, h = 0, dpr = 1, ro = null, winResize = null;
+  const blasts = [];
+  const now = config.now || (() => (typeof performance !== 'undefined' ? performance.now() : Date.now()));
+  const cols = 4;
+
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1);
+    w = r.width; h = r.height;
+    canvas.width = Math.max(1, Math.round(r.width * dpr));
+    canvas.height = Math.max(1, Math.round(r.height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx._gc = null;
+  }
+  function observe() {
+    if (typeof ResizeObserver !== 'undefined') { ro = new ResizeObserver(resize); ro.observe(canvas); }
+    else if (typeof window !== 'undefined') { winResize = resize; window.addEventListener('resize', winResize); }
+    resize();
+  }
+  function disconnect() { if (ro) ro.disconnect(); if (winResize && typeof window !== 'undefined') { window.removeEventListener('resize', winResize); winResize = null; } }
+
+  // Geometry adapts to the canvas. recFrac places receptors as a fraction of
+  // height from the top (near the top for gameplay).
+  function geom() {
+    const gap = Math.min((w * (config.spread || 0.86)) / cols, config.maxGap || 116);
+    const laneW = Math.min(gap * 0.9, config.maxLaneW || 92);
+    const startX = w / 2 - gap * (cols - 1) / 2;
+    const recY = Math.max(config.minRecY || 70, h * (config.recFrac || 0.18));
+    return { w, h, gap, laneW, startX, recY };
+  }
+  function pps(chart, speed) { const g = geom(); const noteSize = g.laneW; return (chart.bpm / 60) * speed * noteSize; }
+  function laneX(i) { const g = geom(); return g.startX + g.gap * i; }
+  function yAtTime(t, now, chart, speed) { const g = geom(); return g.recY + (t - now) * pps(chart, speed); }
+  function timeAtY(y, now, chart, speed) { const g = geom(); return now + (y - g.recY) / pps(chart, speed); }
+
+  // Push an expanding hit ring on a lane at song time t0.
+  function blast(lane, color, t0) { blasts.push({ lane, color, t0 }); }
+
+  // Render the field at song time. opts: { speed, judge, held, beats }.
+  function render(time, chart, opts = {}) {
+    const speed = opts.speed || 2.4, judge = opts.judge || null, held = opts.held || null;
+    const g = geom(); if (!w || !h) return;
+    const { startX, gap, laneW, recY } = g;
+    ctx.clearRect(0, 0, w, h);
+    const rate = pps(chart, speed);
+
+    // lane guides and press glow
+    for (let i = 0; i < cols; i++) {
+      const x = startX + gap * i;
+      ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fillRect(x - laneW * 0.62, 0, laneW * 1.24, h);
+      const on = held ? held[i] : (judge && judge.holdActive[i]);
+      if (on) { const grad = ctx.createLinearGradient(0, h, 0, recY); grad.addColorStop(0, 'rgba(137,240,216,0)'); grad.addColorStop(1, 'rgba(137,240,216,.16)'); ctx.fillStyle = grad; ctx.fillRect(x - laneW * 0.62, recY, laneW * 1.24, h - recY); }
+    }
+
+    // beat lines
+    if (opts.beats !== false && chart.bpm) {
+      const per = 60 / chart.bpm, first = Math.floor((time - chart.offset) / per) - 1;
+      for (let k = first; k < first + 48; k++) {
+        const bt = chart.offset + k * per, by = recY + (bt - time) * rate;
+        if (by < -20 || by > h + 20) continue;
+        const meas = (k % 4 === 0);
+        ctx.strokeStyle = meas ? 'rgba(255,255,255,.10)' : 'rgba(255,255,255,.04)'; ctx.lineWidth = meas ? 2 : 1;
+        ctx.beginPath(); ctx.moveTo(startX - laneW * 0.62, by); ctx.lineTo(startX + gap * (cols - 1) + laneW * 0.62, by); ctx.stroke();
+      }
+    }
+
+    // center feedback behind notes, classic DDR
+    if (judge && opts.showFeedback !== false) feedback(g, judge);
+
+    // notes. When a judge is present it was built from this same chart, so its
+    // tracking array lines up by index (no per-note search).
+    for (let idx = 0; idx < chart.notes.length; idx++) {
+      const n = chart.notes[idx];
+      const jn = judge ? judge.notes[idx] : null;
+      if (n.dur > 0) {
+        const holding = jn && jn.holding;
+        if (jn && jn.done && !holding) continue;
+        const rawY = recY + (n.t - time) * rate, tailY = recY + (n.t + n.dur - time) * rate;
+        if (tailY < recY - 2 || rawY > h + 50) continue;
+        const topY = holding ? recY : rawY, x = startX + gap * n.lane;
+        drawTrail(ctx, x, topY, tailY, n.quant, laneW * 0.5);
+        drawArrow(ctx, x, tailY, laneW * 0.9, n.quant, LANE_ROT[n.lane], { alpha: .9 });
+        const near = Math.abs(topY - recY) < 24; drawArrow(ctx, x, topY, laneW * 0.98, n.quant, LANE_ROT[n.lane], { glow: near ? 18 : 0 });
+      } else {
+        if (jn && jn.judged) continue;
+        const y = recY + (n.t - time) * rate; if (y < recY - 40 || y > h + 50) continue;
+        const near = Math.abs(y - recY) < 24; drawArrow(ctx, startX + gap * n.lane, y, laneW * 0.98, n.quant, LANE_ROT[n.lane], { glow: near ? 16 : 0 });
+      }
+    }
+
+    // hit blasts
+    for (let i = blasts.length - 1; i >= 0; i--) {
+      const bl = blasts[i], age = time - bl.t0;
+      if (age > 0.30 || age < 0) { blasts.splice(i, 1); continue; }
+      const pr = age / 0.30, rad = laneW * 0.5 + pr * laneW * 0.9, al = (1 - pr) * 0.8;
+      ctx.save(); ctx.globalAlpha = al; ctx.strokeStyle = bl.color; ctx.lineWidth = 3 * (1 - pr) + 0.5;
+      ctx.beginPath(); ctx.arc(startX + gap * bl.lane, recY, rad, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+    }
+
+    // receptors on top
+    for (let i = 0; i < cols; i++) {
+      const on = held ? held[i] : (judge && judge.holdActive[i]);
+      drawArrow(ctx, startX + gap * i, recY, laneW * 0.98, 4, LANE_ROT[i], { receptor: true, glow: on ? 22 : 6 });
+    }
+  }
+
+  function feedback(g, judge) {
+    const cx = g.w / 2, cy = g.recY + (g.h - g.recY) * 0.42;
+    const j = judge.lastJudge, age = j ? now() - j.at : 9999;
+    if (j && age < 650) {
+      ctx.save(); ctx.globalAlpha = Math.max(0, 1 - age / 650); ctx.textAlign = 'center';
+      ctx.fillStyle = JUDGE_COLOR[j.type] || '#fff'; ctx.font = '800 ' + Math.round(Math.min(g.w * 0.07, 44)) + 'px "Baloo 2",sans-serif';
+      ctx.shadowColor = 'rgba(21,19,44,.6)'; ctx.shadowOffsetY = 3; ctx.fillText(JUDGE_LABEL[j.type] || '', cx, cy);
+      if (j.type !== 'miss' && j.type !== 'drop' && j.dt != null) {
+        const ms = Math.round(j.dt * 1000), lab = Math.abs(ms) <= 5 ? '' : (ms > 0 ? 'LATE +' + ms + 'ms' : 'EARLY ' + ms + 'ms');
+        ctx.shadowOffsetY = 0; ctx.font = '700 12px "Outfit",sans-serif'; ctx.fillStyle = ms > 0 ? '#ff8f6a' : '#6aa8ff'; if (lab) ctx.fillText(lab, cx, cy + 20);
+      }
+      ctx.restore();
+    }
+    if (judge.combo > 2) {
+      ctx.save(); ctx.textAlign = 'center'; ctx.globalAlpha = .92;
+      ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.font = '800 13px "Outfit",sans-serif'; ctx.fillText('COMBO', cx, cy + 30);
+      ctx.fillStyle = '#fff'; ctx.font = '800 ' + Math.round(Math.min(g.w * 0.11, 64)) + 'px "Baloo 2",sans-serif'; ctx.shadowColor = '#15132c'; ctx.shadowOffsetY = 4; ctx.fillText(judge.combo, cx, cy + 84); ctx.restore();
+    }
+  }
+
+  return { resize, observe, disconnect, render, blast, geom, laneX, pps, yAtTime, timeAtY };
+}
+
+exports.createNotefield = createNotefield;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/charter/src/index.js", function(exports, require){
+// charter: turn an analysis plus a tempo into a playable chart. Pure logic, no
+// DOM, seeded so the same inputs always produce the same chart.
+//
+// Two stages, after the Dance Dance Convolution decomposition but using
+// classical signal processing rather than a trained net:
+//   1. Placement. Quantize onsets to the difficulty's rhythmic grid, dedupe grid
+//      slots keeping the strongest, and thin to a notes-per-second cap.
+//   2. Selection. Walk the placed rows assigning arrows with strict foot
+//      alternation. A foot only reaches panels on its own body side, so no
+//      crossover appears unless the tier's crossover probability adds one.
+//      Footswitches (same panel, alternating feet) unlock the same way. Low
+//      tiers forbid both, which keeps beginner charts forward-facing.
+//
+// Lane bias 'drum' routes low band energy toward Down and high toward Up so
+// arrows track the drum kit. Lane bias 'none' (Quick) ignores the bands and
+// leans on alternation and the home-side backbone only.
+
+// Difficulty table. foot is the StepMania-style meter shown in menus. subs are
+// the allowed beat subdivisions. crossover and footswitch are probabilities,
+// zero at the low tiers so those patterns never appear there.
+const DIFFS = {
+  beginner:  { name: 'Beginner',  foot: 3,  subs: [1],              minStrength: 0.50, maxNps: 2.5,  jumpProb: 0.00, jumpMin: 9,    crossover: 0.00, footswitch: 0.00, holdProb: 0.25 },
+  basic:     { name: 'Basic',     foot: 6,  subs: [1, 2],           minStrength: 0.32, maxNps: 3.6,  jumpProb: 0.04, jumpMin: 0.80, crossover: 0.00, footswitch: 0.00, holdProb: 0.18 },
+  difficult: { name: 'Difficult', foot: 9,  subs: [1, 2, 4],        minStrength: 0.18, maxNps: 5.6,  jumpProb: 0.12, jumpMin: 0.74, crossover: 0.03, footswitch: 0.03, holdProb: 0.12 },
+  expert:    { name: 'Expert',    foot: 12, subs: [1, 2, 3, 4],     minStrength: 0.10, maxNps: 8.5,  jumpProb: 0.20, jumpMin: 0.66, crossover: 0.08, footswitch: 0.08, holdProb: 0.10 },
+  challenge: { name: 'Challenge', foot: 15, subs: [1, 2, 3, 4, 6, 8], minStrength: 0.05, maxNps: 12.0, jumpProb: 0.28, jumpMin: 0.58, crossover: 0.12, footswitch: 0.14, holdProb: 0.08 }
+};
+
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+
+// Deterministic RNG (mulberry32) seeded by a string, so a title plus difficulty
+// always charts the same way.
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hashSeed(str) { let h = 2166136261 >>> 0; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+// Nearest simple subdivision of a beat, used to color the note by quantization.
+function quantOf(beat) { const subs = [1, 2, 3, 4, 6, 8]; for (let i = 0; i < subs.length; i++) { const d = subs[i]; if (Math.abs(beat * d - Math.round(beat * d)) < 0.02) return d; } return 8; }
+function denomToNote(d) { return ({ 1: 4, 2: 8, 3: 12, 4: 16, 6: 24, 8: 32 })[d] || 32; }
+
+// Drop rows that would exceed the notes-per-second cap, keeping the stronger of
+// two that fall too close together.
+function thinByNPS(list, period, maxNps) {
+  if (list.length < 2) return list;
+  const minDt = 1 / maxNps, out = [list[0]];
+  for (let i = 1; i < list.length; i++) {
+    const prev = out[out.length - 1], dt = (list[i].beat - prev.beat) * period;
+    if (dt >= minDt) out.push(list[i]);
+    else if (list[i].strength > prev.strength) out[out.length - 1] = list[i];
+  }
+  return out;
+}
+
+// Choose a panel for one foot without crossing the body, biased to the home side
+// and (in drum mode) nudged by the onset's band energy.
+function pickPanel(foot, last, prev, r, rng, D, allowRepeat, useBands) {
+  let cands = foot === 0 ? [0, 1, 2] : [3, 2, 1];        // left foot reaches L/D/U, right reaches R/U/D
+  if (rng() < D.crossover) cands.push(foot === 0 ? 3 : 0); // controlled crossover at high tiers only
+  if (!allowRepeat) cands = cands.filter((p) => p !== last);
+  if (!cands.length) cands = [foot === 0 ? 0 : 3];
+  const tot = r.lo + r.mi + r.hi + 1e-9, lo = r.lo / tot, mi = r.mi / tot, hi = r.hi / tot;
+  const home = foot === 0 ? 0 : 3, cross = foot === 0 ? 3 : 0;
+  let best = cands[0], bw = -1;
+  for (let i = 0; i < cands.length; i++) {
+    const p = cands[i];
+    const base = (p === home) ? 1.0 : ((p === cross) ? 0.45 : 0.6);
+    const nudge = useBands ? ((p === 1) ? 0.30 * lo : ((p === 2) ? 0.30 * hi : 0.12 * mi)) : 0;
+    let w = (base + nudge) * (0.7 + 0.6 * rng());
+    if (p === prev) w *= 0.7;
+    if (w > bw) { bw = w; best = p; }
+  }
+  return best;
+}
+
+// generate(analysis, tempo, options) -> chart
+//   options: { difficulty, laneBias: 'drum'|'none', seed, engine, engineUsed }
+function generate(analysis, tempo, options = {}) {
+  const difficulty = options.difficulty || 'basic';
+  const D = DIFFS[difficulty] || DIFFS.basic;
+  const useBands = (options.laneBias || 'drum') !== 'none';
+  const bpm = tempo.bpm, offset = tempo.offset != null ? tempo.offset : (tempo.offsetSec || 0), period = 60 / bpm;
+  const rng = mulberry32(hashSeed((options.seed || 'ddr') + '|' + difficulty + '|' + Math.round(bpm)));
+  const onsets = analysis.onsets || [];
+
+  // stage 1: placement. quantize each onset to the tier grid, merge grid slots.
+  const rows = {}, tol = 0.16;
+  for (let i = 0; i < onsets.length; i++) {
+    const o = onsets[i];
+    if (o.strength < D.minStrength) continue;
+    const beatPos = (o.time - offset) / period;
+    if (beatPos < -0.5) continue;
+    let chosen = null, cErr = 1e9;
+    for (let a = 0; a < D.subs.length; a++) { const d = D.subs[a], cand = Math.round(beatPos * d) / d, err = Math.abs(cand - beatPos); if (err <= tol / d && err < cErr) { chosen = { beat: cand }; cErr = err; } }
+    if (!chosen) continue;
+    const key = Math.round(chosen.beat * 48);
+    if (rows[key]) { const e = rows[key]; e.strength = Math.max(e.strength, o.strength); e.lo += o.lo; e.mi += o.mid; e.hi += o.hi; }
+    else rows[key] = { beat: chosen.beat, strength: o.strength, lo: o.lo, mi: o.mid, hi: o.hi };
+  }
+  let list = Object.keys(rows).map((k) => rows[k]).sort((a, b) => a.beat - b.beat);
+  list = thinByNPS(list, period, D.maxNps);
+
+  // stage 2: selection. alternate feet, keep charts physically playable.
+  const notes = [];
+  let lastFoot = -1, lastPanel = -1, prevPanel = -1, lastBeat = -99;
+  for (let i = 0; i < list.length; i++) {
+    const r = list[i], qd = quantOf(r.beat), note = denomToNote(qd), time = offset + r.beat * period, dtBeat = r.beat - lastBeat;
+    if (r.strength > D.jumpMin && dtBeat >= 0.5 && rng() < D.jumpProb) {
+      const pair = rng() < 0.5 ? [0, 3] : [1, 2];
+      notes.push({ t: time, beat: r.beat, lane: pair[0], dur: 0, quant: note, type: 'tap' });
+      notes.push({ t: time, beat: r.beat, lane: pair[1], dur: 0, quant: note, type: 'tap' });
+      lastFoot = -1; lastPanel = -1; prevPanel = -1;
+    } else {
+      const allowRepeat = rng() < D.footswitch;
+      const foot = lastFoot === 0 ? 1 : (lastFoot === 1 ? 0 : (rng() < 0.5 ? 0 : 1));
+      const panel = pickPanel(foot, lastPanel, prevPanel, r, rng, D, allowRepeat, useBands);
+      notes.push({ t: time, beat: r.beat, lane: panel, dur: 0, quant: note, type: 'tap' });
+      prevPanel = lastPanel; lastPanel = panel; lastFoot = foot;
+    }
+    lastBeat = r.beat;
+  }
+
+  // holds: promote a single tap to a freeze when a long gap follows it.
+  for (let i = 0; i < notes.length - 1; i++) {
+    const n = notes[i];
+    if (n.type !== 'tap' || n.dur > 0) continue;
+    // do not hold a note that shares its row with another (a jump)
+    if (notes[i + 1] && Math.abs(notes[i + 1].beat - n.beat) < 1e-3 && notes[i + 1].lane !== n.lane) continue;
+    const next = notes[i + 1];
+    const gap = next.beat - n.beat;
+    if (gap >= 1.5 && rng() < D.holdProb) {
+      let len = Math.min(gap * 0.55, 2.0); len = Math.max(0.5, Math.round(len * 2) / 2);
+      n.type = 'hold'; n.dur = len * period; n.endBeat = n.beat + len;
+    }
+  }
+
+  notes.sort((a, b) => a.t - b.t || a.lane - b.lane);
+
+  const count = notes.length, dur = analysis.duration || 1, nps = count / dur;
+  const jumps = countJumps(notes), holds = notes.filter((n) => n.dur > 0).length, busy = notes.filter((n) => n.quant >= 16).length / (count || 1);
+  const radar = {
+    stream: clamp01(nps / 8), voltage: clamp01(D.foot / 15), air: clamp01(jumps / (count || 1) * 5),
+    freeze: clamp01(holds / (count || 1) * 5), chaos: clamp01(busy * 1.5)
+  };
+
+  return {
+    bpm, offset, difficulty, foot: D.foot, meter: D.foot, duration: dur,
+    engine: options.engine || 'drum', engineUsed: options.engineUsed || (useBands ? 'drum-aware' : 'quick (onset+tempo)'),
+    notes, count, radar
+  };
+}
+
+// Count rows that carry two or more arrows (jumps).
+function countJumps(notes) {
+  let c = 0, i = 0;
+  const sorted = notes.slice().sort((a, b) => a.t - b.t);
+  while (i < sorted.length) { let j = i + 1; while (j < sorted.length && Math.abs(sorted[j].t - sorted[i].t) < 1e-3) j++; if (j - i >= 2) c++; i = j; }
+  return c;
+}
+
+// Nominal radar for a difficulty before a chart exists, so menus can preview it.
+function nominalRadar(difficulty) {
+  const D = DIFFS[difficulty] || DIFFS.basic, f = D.foot / 15;
+  return { stream: Math.min(1, f * 0.9 + 0.1), voltage: Math.min(1, f), air: Math.min(1, D.jumpProb * 3), freeze: Math.min(1, D.holdProb * 4), chaos: Math.min(1, f * 0.8) };
+}
+
+exports.DIFFS = DIFFS;
+exports.generate = generate;
+exports.countJumps = countJumps;
+exports.nominalRadar = nominalRadar;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/dsp/src/index.js", function(exports, require){
+// dsp: pure signal-processing primitives. No audio context, no DOM. Everything
+// here takes plain typed arrays so it is testable in isolation and reusable.
+
+// In-place iterative radix-2 FFT. re and im are Float32Array of length N, N a
+// power of two. Transformed in place.
+function fft(re, im) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = -2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang), half = len >> 1;
+    for (let i = 0; i < n; i += len) {
+      let cr = 1, ci = 0;
+      for (let k = 0; k < half; k++) {
+        const a = i + k, b = a + half;
+        const xr = re[b] * cr - im[b] * ci, xi = re[b] * ci + im[b] * cr;
+        re[b] = re[a] - xr; im[b] = im[a] - xi; re[a] += xr; im[a] += xi;
+        const ncr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = ncr;
+      }
+    }
+  }
+}
+
+function nextPow2(n) {
+  let p = 1;
+  while (p < n) p <<= 1;
+  return p;
+}
+
+// Periodic Hann window of length N. Periodic (dividing by N, not N-1) is the
+// correct choice for STFT analysis, where frames tile the signal.
+function hannWindow(N) {
+  const w = new Float32Array(N);
+  for (let i = 0; i < N; i++) w[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / N);
+  return w;
+}
+
+// Magnitude spectrum of the lower half of an already-transformed frame.
+function magnitudes(re, im, out) {
+  const half = re.length >> 1;
+  const m = out || new Float32Array(half);
+  for (let k = 0; k < half; k++) m[k] = Math.hypot(re[k], im[k]);
+  return m;
+}
+
+// Half-wave-rectified spectral flux split into three frequency bands. Rising
+// magnitude bins (onsets) contribute; falling bins do not. Bin ranges are given
+// as bin indices so the caller controls the Hz-to-bin mapping.
+function bandedFlux(mag, prev, loEnd, midEnd) {
+  let flux = 0, lo = 0, mid = 0, hi = 0;
+  const half = mag.length;
+  for (let k = 1; k < half; k++) {
+    const d = mag[k] - prev[k];
+    if (d > 0) {
+      flux += d;
+      if (k < loEnd) lo += d; else if (k < midEnd) mid += d; else hi += d;
+    }
+  }
+  return { flux, lo, mid, hi };
+}
+
+// Autocorrelation of a real signal over an inclusive lag range. Returns a
+// Float64Array indexed by lag; entries below minLag are zero.
+function autocorr(signal, minLag, maxLag) {
+  const out = new Float64Array(maxLag + 1);
+  const n = signal.length;
+  for (let lag = minLag; lag <= maxLag; lag++) {
+    let s = 0;
+    const limit = n - lag;
+    for (let i = 0; i < limit; i++) s += signal[i] * signal[i + lag];
+    out[lag] = limit > 0 ? s / limit : 0;
+  }
+  return out;
+}
+
+// Parabolic interpolation around a discrete peak. Returns the sub-sample shift
+// in [-1, 1] to add to the peak index for a refined estimate.
+function parabolicShift(ym1, y0, yp1) {
+  const den = ym1 - 2 * y0 + yp1;
+  if (den === 0) return 0;
+  const shift = 0.5 * (ym1 - yp1) / den;
+  return Math.max(-1, Math.min(1, shift));
+}
+
+exports.fft = fft;
+exports.nextPow2 = nextPow2;
+exports.hannWindow = hannWindow;
+exports.magnitudes = magnitudes;
+exports.bandedFlux = bandedFlux;
+exports.autocorr = autocorr;
+exports.parabolicShift = parabolicShift;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/analysis/src/index.js", function(exports, require){
+// analysis: offline spectral analysis of a decoded buffer. Pure signal work over
+// raw channel data, so it never touches the Web Audio graph and is testable with
+// a synthesized buffer. Feeds the charter with an onset envelope, per band
+// energy, and a tempo estimate.
+//
+// The pipeline follows the self-contained method proven in TREADLE: an FFT per
+// frame, half-wave-rectified spectral flux split by band for the onset envelope,
+// adaptive peak picking for discrete onsets, and autocorrelation of the envelope
+// for tempo plus first beat offset.
+
+const { fft, hannWindow, magnitudes, bandedFlux, autocorr, parabolicShift } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/dsp/src/index.js");
+// Mix any buffer down to mono Float32. Accepts a Web Audio AudioBuffer or any
+// object exposing numberOfChannels, length, and getChannelData(c).
+function toMono(buffer) {
+  const chans = buffer.numberOfChannels, len = buffer.length, mono = new Float32Array(len);
+  for (let c = 0; c < chans; c++) {
+    const d = buffer.getChannelData(c);
+    for (let i = 0; i < len; i++) mono[i] += d[i] / chans;
+  }
+  return mono;
+}
+
+// Linear-interpolated downsample to a target rate. Cheaper and steadier onset
+// analysis than working at the full rate.
+function downsample(mono, srcSR, targetSR) {
+  if (targetSR >= srcSR) return { sig: mono, sr: srcSR };
+  const ratio = srcSR / targetSR, outLen = Math.floor(mono.length / ratio), sig = new Float32Array(outLen);
+  for (let i = 0; i < outLen; i++) {
+    const x = i * ratio, i0 = x | 0, f = x - i0;
+    sig[i] = mono[i0] * (1 - f) + (mono[i0 + 1] || 0) * f;
+  }
+  return { sig, sr: targetSR };
+}
+
+function analyze(buffer, opt = {}) {
+  const N = opt.fftSize || 1024, hop = opt.hop || 512, targetSR = opt.sr || 22050;
+  const mono = toMono(buffer);
+  const { sig, sr } = downsample(mono, buffer.sampleRate, targetSR);
+
+  const win = hannWindow(N);
+  // Number of full windows that fit: floor((L-N)/hop)+1, so the last analyzable
+  // frame is not dropped.
+  const half = N >> 1, frames = sig.length >= N ? Math.floor((sig.length - N) / hop) + 1 : 0;
+  const flux = new Float32Array(frames), bands = new Array(frames), env = new Float32Array(frames);
+  const re = new Float32Array(N), im = new Float32Array(N);
+  let prev = new Float32Array(half), mag = new Float32Array(half);
+  const binHz = sr / N, loEnd = Math.max(1, Math.round(200 / binHz)), midEnd = Math.min(half, Math.round(2000 / binHz));
+
+  for (let f = 0; f < frames; f++) {
+    const off = f * hop;
+    for (let i = 0; i < N; i++) { re[i] = sig[off + i] * win[i]; im[i] = 0; }
+    fft(re, im);
+    magnitudes(re, im, mag);
+    const b = bandedFlux(mag, prev, loEnd, midEnd);
+    flux[f] = b.flux; bands[f] = { lo: b.lo, mid: b.mid, hi: b.hi };
+    const t = prev; prev = mag; mag = t; // swap so prev holds this frame's spectrum
+  }
+
+  let mx = 1e-9; for (let f = 0; f < frames; f++) if (flux[f] > mx) mx = flux[f];
+  for (let f = 0; f < frames; f++) env[f] = flux[f] / mx;
+
+  const analysis = { sr, hop, N, frames, duration: buffer.duration, binHz, flux, env, bands, onsets: [] };
+  analysis.onsets = pickOnsets(analysis);
+  return analysis;
+}
+
+// Peak-pick onsets from the envelope with an adaptive local-mean threshold and a
+// minimum gap. Returns onsets carrying their band energy for lane biasing.
+function pickOnsets(analysis, opt = {}) {
+  const { env, bands, hop, sr } = analysis;
+  const n = env.length, w = opt.window || 8, k = opt.k || 1.4, delta = opt.delta || 0.04, minGap = opt.minGap || 3;
+  const out = []; let last = -1e9;
+  for (let i = 1; i < n - 1; i++) {
+    let s = 0, c = 0;
+    for (let j = Math.max(0, i - w); j <= Math.min(n - 1, i + w); j++) { s += env[j]; c++; }
+    const thr = (s / c) * k + delta;
+    if (env[i] > thr && env[i] >= env[i - 1] && env[i] >= env[i + 1] && (i - last) >= minGap) {
+      const band = bands[i] || { lo: 0, mid: 0, hi: 0 };
+      out.push({ time: (i * hop) / sr, frame: i, strength: env[i], lo: band.lo, mid: band.mid, hi: band.hi });
+      last = i;
+    }
+  }
+  return out;
+}
+
+// BPM and first-beat offset via autocorrelation of the onset envelope. Reads env,
+// hop, and sr from the analysis object. A gentle log-distance weight toward
+// 128 BPM breaks octave ties the way most dance music sits.
+function estimateTempo(analysis, opt = {}) {
+  const env = analysis.env, hop = analysis.hop, sr = analysis.sr;
+  const minBpm = opt.min || 80, maxBpm = opt.max || 190, fps = sr / hop;
+  const minLag = Math.max(2, Math.floor(fps * 60 / maxBpm)), maxLag = Math.ceil(fps * 60 / minBpm);
+
+  let mean = 0; for (let i = 0; i < env.length; i++) mean += env[i]; mean /= (env.length || 1);
+  const e = new Float32Array(env.length); for (let i = 0; i < env.length; i++) e[i] = env[i] - mean;
+
+  const ac = autocorr(e, minLag, maxLag);
+  let best = { score: -1, lag: minLag };
+  for (let lag = minLag; lag <= maxLag; lag++) {
+    const bpm = 60 * fps / lag, wgt = 1 - Math.min(1, Math.abs(Math.log2(bpm / 128)) * 0.15);
+    const s = ac[lag] * wgt;
+    if (s > best.score) best = { score: s, lag };
+  }
+  const shift = parabolicShift(ac[best.lag - 1] || 0, ac[best.lag], ac[best.lag + 1] || 0);
+  let bpm = 60 * fps / (best.lag + shift);
+  while (bpm < minBpm) bpm *= 2; while (bpm > maxBpm) bpm /= 2; bpm = Math.round(bpm * 10) / 10;
+
+  const beatFrames = 60 * fps / bpm; let bo = { score: -1, off: 0 }; const steps = 48;
+  for (let s = 0; s < steps; s++) {
+    const phase = (s / steps) * beatFrames; let acc = 0, cnt = 0;
+    for (let b = phase; b < e.length; b += beatFrames) { const fi = Math.round(b); if (fi < env.length) { acc += env[fi]; cnt++; } }
+    const sc = cnt ? acc / cnt : 0; if (sc > bo.score) bo = { score: sc, off: phase };
+  }
+  return { bpm, offset: (bo.off * hop) / sr, fps };
+}
+
+exports.analyze = analyze;
+exports.pickOnsets = pickOnsets;
+exports.estimateTempo = estimateTempo;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/ui/src/css.js", function(exports, require){
+// The arcade candy stylesheet: design tokens as CSS variables plus the shared
+// primitives (console frame, controls bar, pills, buttons) and every screen's
+// component styles. This string is the single source of truth for styling. The
+// app injects it at boot; the bundler inlines it into the single file build.
+
+const css = `
+:root{
+  --ink:#22203F; --ink-2:#15132c; --paper:#FFFDF7; --cream:#FFF4E2;
+  --red:#FF4D5E; --blue:#3E7BFF; --yellow:#FFC83D; --green:#2EC56B; --purple:#9B5CFF; --pink:#FF5CA8; --orange:#FF9B2E; --teal:#2EC8D6;
+  --p1:#FF4D5E; --p2:#3E7BFF; --p3:#2EC56B; --p4:#FFC83D;
+  --d-beg:#2EC8D6; --d-bas:#2EC56B; --d-dif:#FF9B2E; --d-exp:#FF4D5E; --d-cha:#9B5CFF;
+  --s1:6px; --s2:10px; --s3:16px; --s4:24px; --s5:36px;
+  --r1:12px; --r2:18px; --r3:26px;
+  --sp:cubic-bezier(.34,1.7,.5,1); --ease:cubic-bezier(.4,0,.2,1);
+  --fd:'Baloo 2',system-ui,sans-serif; --fu:'Outfit',system-ui,sans-serif;
+  --maxw:1160px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{min-height:100%}
+body{font-family:var(--fu);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;background-attachment:fixed;line-height:1.5;
+  background:
+    radial-gradient(1200px 600px at 82% -12%, rgba(255,200,61,.55), transparent 60%),
+    radial-gradient(1000px 720px at 4% 112%, rgba(255,92,168,.42), transparent 55%),
+    radial-gradient(900px 600px at 60% 50%, rgba(62,123,255,.12), transparent 60%),
+    linear-gradient(180deg,#FFF6E9,#FFEFF6 55%,#EEF1FF);}
+.dots{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;background-image:radial-gradient(rgba(34,32,63,.10) 1.6px, transparent 1.6px);background-size:26px 26px}
+
+.app{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:clamp(12px,3vw,26px);min-height:100vh;display:flex;flex-direction:column}
+
+.nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:clamp(12px,2.5vw,20px)}
+.nav .brand{font-family:var(--fd);font-weight:800;font-size:clamp(14px,2.2vw,17px);letter-spacing:.5px;display:flex;align-items:center;gap:8px;cursor:pointer}
+.nav .brand .mk{width:24px;height:24px}
+.nav .brand .dot{color:var(--red)}
+.nav .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.tab{font-family:var(--fu);font-weight:700;font-size:12.5px;border:2.5px solid var(--ink);cursor:pointer;color:var(--ink);padding:6px 13px;border-radius:999px;background:var(--paper);box-shadow:0 3px 0 rgba(34,32,63,.16);transition:transform .12s var(--sp),background .12s}
+.tab.on{background:var(--ink);color:#fff}
+.tab:hover{transform:translateY(-2px)}
+.tab:focus-visible,.btn:focus-visible,.card:focus-visible,.dcard:focus-visible,.src-tab:focus-visible,.eng:focus-visible,.bindbtn:focus-visible,.lib-item:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+
+.panel{background:var(--paper);border:3px solid var(--ink);border-radius:var(--r3);padding:clamp(14px,2.6vw,24px);box-shadow:0 6px 0 rgba(34,32,63,.14), 0 16px 30px rgba(34,32,63,.10)}
+.eyebrow{font-family:var(--fu);font-weight:800;text-transform:uppercase;letter-spacing:1.6px;font-size:11px;color:#8784a8}
+.pill{font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:.4px;background:var(--paper);border:3px solid var(--ink);border-radius:999px;padding:5px 14px;box-shadow:0 3px 0 var(--ink-2);white-space:nowrap}
+h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:.4px;line-height:1}
+
+.btn{font-family:var(--fd);font-weight:800;font-size:clamp(14px,1.8vw,17px);color:#fff;border:3px solid var(--ink);border-radius:var(--r1);padding:11px 22px;cursor:pointer;background:var(--red);box-shadow:0 5px 0 var(--ink-2);transition:transform .1s var(--sp),box-shadow .1s;-webkit-tap-highlight-color:transparent;letter-spacing:.3px}
+.btn:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--ink-2)}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink-2)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:0 5px 0 var(--ink-2)}
+.btn.white{background:#fff;color:var(--ink)} .btn.blue{background:var(--blue)} .btn.green{background:var(--green)} .btn.ghost{background:transparent;color:var(--ink);box-shadow:0 4px 0 rgba(34,32,63,.14)}
+.btn.sm{font-size:13px;padding:8px 16px;box-shadow:0 4px 0 var(--ink-2);border-radius:999px}
+.btn.lg{font-size:clamp(16px,2.4vw,21px);padding:14px 34px}
+.btn.yellow{background:var(--yellow);color:var(--ink)}
+
+.screen{display:none;flex:1;flex-direction:column;animation:sIn .32s var(--sp)}
+.screen.active{display:flex}
+@keyframes sIn{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+.scr-head{display:flex;align-items:center;gap:12px;margin-bottom:var(--s3);flex-wrap:wrap}
+.scr-head h1{font-size:clamp(22px,4vw,34px);color:#fff;text-shadow:0 3px 0 var(--ink-2)}
+.scr-head .spacer{margin-left:auto}
+
+#s-title{justify-content:center}
+.frame{aspect-ratio:16/9;width:100%;border-radius:var(--r3);overflow:hidden;position:relative;border:4px solid var(--ink);box-shadow:0 10px 0 var(--ink-2), 0 30px 60px rgba(34,32,63,.3), inset 0 3px 0 rgba(255,255,255,.28)}
+.scn{position:absolute;inset:0;overflow:hidden;display:flex;flex-direction:column}
+.t-scn{place-content:center;justify-items:center;text-align:center;display:grid;background:radial-gradient(600px 300px at 50% 6%, rgba(255,255,255,.55), transparent 60%),linear-gradient(165deg,#7BD0FF 0%, #A98BFF 52%, #FF9DC4 100%)}
+.t-scn .rays{position:absolute;inset:-30%;background:repeating-conic-gradient(from 0deg at 50% 42%, rgba(255,255,255,.16) 0deg 8deg, transparent 8deg 16deg);animation:spin 40s linear infinite;pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.t-inner{position:relative;z-index:1;padding:clamp(16px,4vw,30px)}
+.logo{font-family:var(--fd);font-weight:800;line-height:.82;letter-spacing:1px;font-size:clamp(38px,8.4vw,88px);color:#fff;-webkit-text-stroke:max(3px,.5vw) var(--ink);paint-order:stroke fill;text-shadow:0 max(5px,.7vw) 0 var(--ink-2)}
+.logo .l1{display:block;color:#FFE14D}.logo .l2{display:block;color:#fff;font-size:.92em}.logo .l3{display:block;color:#FF7AB0;font-size:.64em;letter-spacing:min(6px,1.4vw)}
+.t-arrows{display:flex;gap:clamp(10px,2.4vw,22px);justify-content:center;margin:clamp(18px,4vw,40px) 0}
+.t-arrows .a{width:clamp(44px,8.4vw,84px);height:clamp(44px,8.4vw,84px);animation:hop 1.02s var(--sp) infinite;filter:drop-shadow(0 8px 0 rgba(34,32,63,.22))}
+.t-arrows .a:nth-child(2){animation-delay:.09s}.t-arrows .a:nth-child(3){animation-delay:.18s}.t-arrows .a:nth-child(4){animation-delay:.27s}
+@keyframes hop{0%,100%{transform:translateY(0)}42%{transform:translateY(-18px)}}
+.press{font-family:var(--fd);font-weight:800;font-size:clamp(15px,2.4vw,22px);color:var(--ink);background:#fff;border:3px solid var(--ink);border-radius:999px;padding:13px clamp(28px,6vw,42px);cursor:pointer;box-shadow:0 5px 0 var(--ink-2);animation:pp 1.02s ease-in-out infinite;-webkit-tap-highlight-color:transparent}
+.press:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink-2)}
+@keyframes pp{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.t-foot{position:absolute;bottom:12px;left:0;width:100%;display:flex;justify-content:space-between;padding:0 clamp(14px,3vw,22px);color:rgba(34,32,63,.6);font-family:var(--fu);font-weight:700;font-size:clamp(10px,1.6vw,12px);z-index:1;gap:10px}
+
+#s-select .frame,#s-add .frame{aspect-ratio:auto}
+#s-select .scn,#s-add .scn{position:static}
+
+.sel-scn{background:linear-gradient(180deg,#FFF4E2,#FFE9F0)}
+.sel-top{display:flex;align-items:center;gap:var(--s3);padding:12px clamp(14px,2.4vw,22px);background:var(--purple);border-bottom:4px solid var(--ink);flex-wrap:wrap}
+.sel-top h1{font-family:var(--fd);font-weight:800;font-size:clamp(16px,2.6vw,28px);color:#fff;letter-spacing:.5px;text-shadow:0 2px 0 var(--ink-2);display:flex;align-items:center;gap:10px}
+.tbadge{width:34px;height:34px;background:var(--yellow);border:3px solid var(--ink);border-radius:9px;display:grid;place-items:center;transform:rotate(-6deg);flex:0 0 auto}
+.tbadge svg{width:18px;height:18px}
+.sel-top .right{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sortpill{background:var(--paper);border:3px solid var(--ink);border-radius:999px;padding:6px 16px;font-family:var(--fd);font-weight:700;font-size:13px;box-shadow:0 3px 0 var(--ink-2);white-space:nowrap}
+.sortpill b{color:var(--purple)}
+.sel-top .scount{font-family:var(--fd);font-weight:800;font-size:clamp(20px,3vw,30px);color:#fff;text-shadow:0 2px 0 var(--ink-2)}
+.sel-body{flex:1;display:grid;grid-template-columns:1.18fr 1fr;min-height:0}
+.hero{padding:clamp(12px,2vw,22px);display:flex;flex-direction:column;gap:clamp(8px,1.4vw,14px);min-height:0;overflow:visible}
+.hero .banner{flex:0 0 auto;height:clamp(92px,15vw,150px);border-radius:var(--r2);border:4px solid var(--ink);display:flex;align-items:flex-end;padding:14px;position:relative;overflow:hidden;box-shadow:0 4px 0 rgba(34,32,63,.14),0 12px 26px rgba(34,32,63,.16)}
+.hero .banner .big-l{position:absolute;right:-8px;top:-30px;font-family:var(--fd);font-weight:800;font-size:clamp(120px,22vw,180px);color:rgba(255,255,255,.22);line-height:1;pointer-events:none}
+.hero .banner .bt{font-family:var(--fd);font-weight:800;font-size:clamp(20px,3.4vw,38px);color:#fff;text-shadow:0 3px 0 var(--ink-2);line-height:.95;position:relative}
+.hero .banner .ba{font-weight:700;color:#fff;opacity:.95;position:relative;font-size:clamp(12px,1.8vw,15px)}
+.hero .banner .eq{position:absolute;right:14px;top:14px;display:flex;gap:4px;align-items:flex-end;height:30px}
+.hero .banner .eq i{width:6px;background:#fff;border:1.5px solid var(--ink);border-radius:3px;animation:eq 1s ease-in-out infinite}
+.hero .banner .eq i:nth-child(2){animation-delay:.13s}.hero .banner .eq i:nth-child(3){animation-delay:.26s}.hero .banner .eq i:nth-child(4){animation-delay:.39s}
+@keyframes eq{0%,100%{height:7px}50%{height:28px}}
+.facts{display:flex;gap:8px;flex-wrap:wrap}
+.fact{flex:1 1 auto;background:var(--paper);border:3px solid var(--ink);border-radius:var(--r1);padding:6px 12px;box-shadow:0 3px 0 rgba(34,32,63,.14)}
+.fact span{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#8784a8}
+.fact b{font-family:var(--fd);font-weight:800;font-size:clamp(14px,1.8vw,16px)}
+.radar-card{background:var(--paper);border:3px solid var(--ink);border-radius:var(--r2);padding:10px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 0 rgba(34,32,63,.14)}
+.radar-card svg{width:clamp(120px,20vw,148px);aspect-ratio:1/1;height:auto;flex:0 0 auto;display:block}
+.radar-card .legend{flex:1;min-width:0}
+.radar-card .legend div{display:grid;grid-template-columns:1fr auto;gap:10px;font-weight:700;font-size:clamp(11px,1.5vw,13px);padding:2px 0}
+.radar-card .legend .v{font-family:var(--fd);font-weight:800;color:var(--purple);text-align:right}
+.diffs{display:flex;gap:8px;flex-wrap:wrap}
+.diff{flex:1 1 74px;border:3px solid var(--ink);border-radius:var(--r1);padding:9px 6px;text-align:center;cursor:pointer;background:var(--paper);box-shadow:0 4px 0 rgba(34,32,63,.16);transition:transform .12s var(--sp),box-shadow .12s;-webkit-tap-highlight-color:transparent}
+.diff:hover{transform:translateY(-2px)}
+.diff .nm{font-family:var(--fu);font-weight:800;font-size:9.5px;letter-spacing:.4px;text-transform:uppercase;color:#fff;border-radius:5px;padding:1px 2px;text-shadow:-1px -1px 0 var(--ink),1px -1px 0 var(--ink),-1px 1px 0 var(--ink),1px 1px 0 var(--ink)}
+.diff .ft{font-family:var(--fd);font-weight:800;font-size:clamp(22px,3vw,26px);line-height:1;color:var(--ink);margin-top:3px}
+.diff.pick{transform:translateY(-3px) scale(1.04);box-shadow:0 7px 0 var(--ink-2)}
+.hero .cta{margin-top:auto;padding-top:4px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.wheel-board{position:relative;overflow:hidden;background:rgba(34,32,63,.05);border-left:4px solid var(--ink);min-height:clamp(360px,58vh,560px)}
+.wheel-reticle{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:56px;z-index:1;pointer-events:none;background:rgba(255,200,61,.16);border-top:2px dashed rgba(34,32,63,.28);border-bottom:2px dashed rgba(34,32,63,.28)}
+.wheel-cursor{position:absolute;left:4px;top:50%;transform:translateY(-50%);z-index:100;pointer-events:none;width:0;height:0;border:10px solid transparent;border-left-color:var(--ink)}
+.card{position:absolute;left:0;top:50%;width:min(88%,420px);display:flex;align-items:center;gap:11px;padding:9px 14px;border-radius:var(--r2);cursor:pointer;background:var(--paper);border:3px solid var(--ink);box-shadow:0 4px 0 rgba(34,32,63,.16);will-change:transform,opacity;transition:transform .38s cubic-bezier(.16,.9,.2,1),opacity .26s linear,box-shadow .16s,background .16s;-webkit-tap-highlight-color:transparent;font-family:var(--fu);color:var(--ink);text-align:left}
+.card .cv{width:52px;height:38px;border-radius:9px;border:2.5px solid var(--ink);flex:0 0 auto;display:grid;place-items:center;font-family:var(--fd);font-weight:800;font-size:17px;color:#fff;text-shadow:0 1.5px 0 rgba(0,0,0,.25)}
+.card .ci{flex:1;min-width:0}
+.card .ci .t{font-family:var(--fd);font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.05}
+.card .ci .a{font-weight:600;font-size:11px;color:#8784a8}
+.card .cb{font-family:var(--fd);font-weight:800;font-size:12px;color:var(--ink);background:var(--cream);border:2px solid var(--ink);padding:2px 8px;border-radius:7px;flex:0 0 auto}
+.card.sel{background:var(--yellow);box-shadow:0 7px 0 var(--ink-2)}
+.card.sel .cb{background:#fff}
+.sel-foot{display:flex;align-items:center;gap:clamp(8px,2vw,16px);padding:9px clamp(14px,2.4vw,22px);background:var(--ink);color:#fff;font-weight:700;font-size:clamp(11px,1.6vw,13px);overflow-x:auto;white-space:nowrap}
+.sel-foot .k{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto}
+.sel-foot .btnk{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:6px;font-family:var(--fd);font-weight:800;font-size:12px;color:var(--ink)}
+.sel-foot .user{margin-left:auto;font-family:var(--fd);font-weight:700;opacity:.85;flex:0 0 auto}
+
+.diff-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.dcard{border:3px solid var(--ink);border-radius:var(--r2);background:var(--paper);padding:16px;cursor:pointer;box-shadow:0 5px 0 var(--ink-2);transition:transform .12s var(--sp),box-shadow .12s;text-align:left;font-family:var(--fu);color:var(--ink);display:flex;flex-direction:column;gap:8px}
+.dcard:hover{transform:translateY(-3px);box-shadow:0 8px 0 var(--ink-2)}
+.dcard.sel{outline:4px solid var(--ink);outline-offset:2px}
+.dcard .nm{font-family:var(--fu);font-weight:800;text-transform:uppercase;letter-spacing:.5px;font-size:12px;color:#fff;border-radius:6px;padding:2px 9px;align-self:flex-start;text-shadow:-1px -1px 0 var(--ink),1px -1px 0 var(--ink),-1px 1px 0 var(--ink),1px 1px 0 var(--ink)}
+.dcard .ft{font-family:var(--fd);font-weight:800;font-size:44px;line-height:.9}
+.dcard .meta{font-family:var(--fu);font-weight:600;font-size:12px;color:#6f6c93}
+.dmeter{display:flex;gap:3px}.dmeter i{width:8px;height:16px;border:2px solid var(--ink);border-radius:3px;background:#fff}
+
+.add-scn{background:linear-gradient(180deg,#EAF6FF,#F3ECFF)}
+.add-top{display:flex;align-items:center;gap:var(--s3);padding:12px clamp(14px,2.4vw,22px);background:var(--blue);border-bottom:4px solid var(--ink);flex-wrap:wrap}
+.add-top h1{font-family:var(--fd);font-weight:800;font-size:clamp(16px,2.6vw,28px);color:#fff;letter-spacing:.5px;text-shadow:0 2px 0 var(--ink-2);display:flex;align-items:center;gap:10px}
+.add-top .tbadge{background:var(--yellow);color:var(--ink);font-family:var(--fd);font-weight:800;font-size:20px}
+.add-top .right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.add-body{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,2vw,18px);padding:clamp(14px,2.2vw,22px)}
+.add-body .panel{background:var(--paper);border:3px solid var(--ink);border-radius:var(--r2);padding:clamp(12px,1.8vw,18px);box-shadow:0 4px 0 rgba(34,32,63,.14);display:flex;flex-direction:column;gap:11px;min-width:0}
+.src-tabs{display:flex;gap:8px}
+.src-tab{flex:1;font-family:var(--fd);font-weight:800;font-size:13px;border:2.5px solid var(--ink);border-radius:var(--r1);padding:9px 6px;background:var(--cream);cursor:pointer;box-shadow:0 3px 0 rgba(34,32,63,.16);transition:transform .12s var(--sp);-webkit-tap-highlight-color:transparent;color:var(--ink)}
+.src-tab:active{transform:translateY(1px)}
+.src-tab.on{background:var(--blue);color:#fff;box-shadow:0 3px 0 var(--ink-2)}
+.src-tab:disabled{opacity:.5;cursor:not-allowed}
+.src-pane{display:none;flex-direction:column;gap:9px}
+.src-pane.on{display:flex}
+.url-row{display:flex;gap:8px}
+.input{flex:1;font-family:var(--fu);font-weight:600;font-size:14px;border:3px solid var(--ink);border-radius:var(--r1);padding:10px 13px;background:#fff;color:var(--ink);min-width:0;width:100%}
+.input:focus{outline:none;box-shadow:0 0 0 3px var(--yellow)}
+.input::placeholder{color:#a7a4c6}
+.hint{font-size:11.5px;font-weight:500;color:#6f6c93;line-height:1.5}
+.drop{border:3px dashed var(--ink);border-radius:var(--r2);padding:24px 14px;text-align:center;background:rgba(34,32,63,.03);font-weight:600;font-size:12px;color:#6f6c93;cursor:pointer}
+.drop b{font-family:var(--fd);color:var(--ink);display:block;font-size:16px;margin-bottom:3px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8784a8}
+.engines{display:flex;flex-direction:column;gap:9px}
+.engine{display:flex;gap:11px;align-items:center;border:3px solid var(--ink);border-radius:var(--r2);padding:9px 11px;background:var(--cream);cursor:pointer;box-shadow:0 4px 0 rgba(34,32,63,.14);transition:transform .12s var(--sp);-webkit-tap-highlight-color:transparent}
+.engine:hover{transform:translateX(4px)}
+.engine.on{background:var(--yellow);box-shadow:0 6px 0 var(--ink-2)}
+.engine .en-ic{width:38px;height:38px;border-radius:10px;border:2.5px solid var(--ink);display:grid;place-items:center;font-family:var(--fd);font-weight:800;color:#fff;font-size:17px;text-shadow:0 1px 0 rgba(0,0,0,.25);flex:0 0 auto}
+.engine .en-b{flex:1;min-width:0}
+.engine .en-t{font-family:var(--fd);font-weight:800;font-size:15px;line-height:1.05}
+.engine .en-d{font-weight:600;font-size:11.5px;color:#6f6c93;line-height:1.25}
+.engine .en-m{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:0 0 auto;font-family:var(--fd);font-size:10px;font-weight:800;color:#8784a8}
+.emeter{display:flex;gap:3px}
+.emeter i{width:8px;height:8px;border-radius:2px;border:1.5px solid var(--ink);background:#fff}
+.emeter i.f{background:var(--green)}
+.emeter.q i.f{background:var(--purple)}
+.gen-diffs{display:flex;gap:8px;flex-wrap:wrap}
+.gchip{border:3px solid var(--ink);border-radius:var(--r1);padding:7px 13px;font-family:var(--fd);font-weight:800;font-size:12px;cursor:pointer;background:var(--paper);box-shadow:0 3px 0 rgba(34,32,63,.14);color:var(--ink);transition:transform .12s var(--sp);-webkit-tap-highlight-color:transparent}
+.gchip:active{transform:translateY(1px)}
+.gchip.on{color:#fff;box-shadow:0 3px 0 var(--ink-2);text-shadow:-1px -1px 0 var(--ink),1px -1px 0 var(--ink),-1px 1px 0 var(--ink),1px 1px 0 var(--ink)}
+.add-cta{grid-column:1/-1;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.add-run{position:absolute;inset:0;z-index:10;display:none;place-items:center;background:rgba(20,18,44,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);padding:20px}
+.add-run.on{display:grid}
+.run-card{width:min(460px,94%);background:var(--paper);border:4px solid var(--ink);border-radius:var(--r3);box-shadow:0 10px 0 var(--ink-2);padding:clamp(16px,3vw,26px);display:flex;flex-direction:column;gap:14px}
+.run-card h3{font-family:var(--fd);font-weight:800;font-size:clamp(16px,2.4vw,20px);display:flex;align-items:center;gap:10px}
+.run-card h3 .tbadge{width:30px;height:30px;font-size:15px;background:var(--yellow);color:var(--ink)}
+.run-bar{height:14px;border-radius:999px;background:var(--cream);border:2.5px solid var(--ink);overflow:hidden}
+.run-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--blue));transition:width .45s var(--ease)}
+.stages{display:flex;flex-direction:column;gap:7px}
+.stg{display:flex;align-items:center;gap:10px;font-weight:700;font-size:13.5px;color:#a7a4c6}
+.stg .tick{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--ink);display:grid;place-items:center;background:#fff;flex:0 0 auto;font-family:var(--fd);font-weight:800;font-size:11px;color:var(--ink)}
+.stg.on{color:var(--ink)}.stg.on .tick{background:var(--green);color:#fff}
+.stg.run .tick{background:var(--yellow);animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.14)}}
+.run-done{display:none;flex-direction:column;gap:12px}
+.run-done.on{display:flex}
+.done-tag{font-family:var(--fd);font-weight:800;color:var(--green);font-size:14px;display:flex;align-items:center;gap:8px}
+.res-cta{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+
+.rows{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:2px dashed rgba(34,32,63,.14);flex-wrap:wrap}
+.row:last-child{border-bottom:none}
+.row .rl{flex:1;min-width:180px}
+.row .rl .t{font-family:var(--fd);font-weight:800;font-size:15px}
+.row .rl .d{font-family:var(--fu);font-weight:500;font-size:12px;color:#6f6c93}
+.row .rc{display:flex;align-items:center;gap:10px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:min(240px,52vw);height:10px;border:2.5px solid var(--ink);border-radius:999px;background:#fff}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--purple);border:2.5px solid var(--ink);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--purple);border:2.5px solid var(--ink);cursor:pointer}
+.rv{font-family:var(--fd);font-weight:800;font-size:14px;min-width:52px;text-align:right}
+.sw-toggle{width:56px;height:30px;border:2.5px solid var(--ink);border-radius:999px;background:#fff;position:relative;cursor:pointer;flex:0 0 auto}
+.sw-toggle::after{content:'';position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:var(--ink);transition:transform .16s var(--sp)}
+.sw-toggle.on{background:var(--green)}.sw-toggle.on::after{transform:translateX(26px)}
+.lib-list{display:flex;flex-direction:column;gap:10px}
+.lib-item{display:flex;align-items:center;gap:12px;border:2.5px solid var(--ink);border-radius:var(--r2);background:var(--paper);padding:10px 13px;box-shadow:0 3px 0 var(--ink-2)}
+.lib-item .cv{width:40px;height:40px;border-radius:10px;border:2.5px solid var(--ink);display:grid;place-items:center;font-family:var(--fd);font-weight:800;color:#fff;flex:0 0 auto}
+.lib-item .li{flex:1;min-width:0}.lib-item .li .t{font-family:var(--fd);font-weight:800;font-size:14px}.lib-item .li .d{font-family:var(--fu);font-size:11.5px;color:#7d7aa0}
+.bind-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.bind{border:2.5px solid var(--ink);border-radius:var(--r2);background:var(--paper);padding:14px;text-align:center;box-shadow:0 4px 0 var(--ink-2)}
+.bind .ar{width:52px;height:52px;margin:0 auto 8px}
+.bindbtn{font-family:var(--fu);font-weight:800;font-size:13px;border:2.5px solid var(--ink);border-radius:999px;padding:7px 14px;background:var(--cream);cursor:pointer;width:100%}
+.bindbtn.listening{background:var(--yellow);animation:blink .7s steps(2) infinite}
+@keyframes blink{50%{opacity:.55}}
+.gp-status{font-family:var(--fu);font-weight:700;font-size:13px;color:#6f6c93}
+
+#s-game{gap:0}
+.stage{position:relative;flex:1;min-height:60vh;border:3px solid var(--ink);border-radius:var(--r3);overflow:hidden;background:linear-gradient(180deg,#3A2A6E,#241a49)}
+.stage canvas{display:block;width:100%;height:100%}
+.gp-top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:12px;padding:10px 14px;z-index:5;flex-wrap:wrap}
+.gp-top .song{color:#fff}.gp-top .song .t{font-family:var(--fd);font-weight:800;font-size:16px;text-shadow:0 2px 0 var(--ink-2)}.gp-top .song .s{font-family:var(--fu);font-size:11px;opacity:.8}
+.gp-top .acts{margin-left:auto;display:flex;gap:8px}
+.gp-prog{position:absolute;left:14px;right:14px;bottom:10px;height:8px;border:2px solid rgba(255,255,255,.5);border-radius:999px;z-index:5;overflow:hidden}
+.gp-prog>i{display:block;height:100%;width:0;background:#fff}
+.count{position:absolute;inset:0;display:grid;place-items:center;z-index:8;font-family:var(--fd);font-weight:800;font-size:clamp(60px,16vw,140px);color:#fff;text-shadow:0 6px 0 var(--ink-2);pointer-events:none}
+
+#s-results{align-items:center;text-align:center;gap:var(--s3)}
+.grade{font-family:var(--fd);font-weight:800;font-size:clamp(90px,20vw,200px);line-height:.8;color:var(--yellow);-webkit-text-stroke:max(4px,.6vw) var(--ink);paint-order:stroke fill;text-shadow:0 max(7px,1vw) 0 var(--ink-2)}
+.judges{display:flex;flex-direction:column;gap:8px;width:min(420px,92vw)}
+.jrow{display:flex;align-items:center;gap:12px}.jrow .jn{font-family:var(--fu);font-weight:800;text-transform:uppercase;letter-spacing:.6px;font-size:12px;width:110px;text-align:left}
+.jrow .jbar{flex:1;height:16px;border:2.5px solid var(--ink);border-radius:999px;background:#fff;overflow:hidden}.jrow .jbar>i{display:block;height:100%}
+.jrow .jc{font-family:var(--fd);font-weight:800;font-size:15px;width:52px;text-align:right}
+
+.editor{display:flex;flex-direction:column;gap:10px}
+.ed-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ed-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.ed-tab{font-family:var(--fd);font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.4px;border:2.5px solid var(--ink);border-radius:999px;padding:5px 12px;background:var(--paper);cursor:pointer;box-shadow:0 3px 0 rgba(34,32,63,.16);color:#fff;text-shadow:-1px -1px 0 var(--ink),1px -1px 0 var(--ink),-1px 1px 0 var(--ink),1px 1px 0 var(--ink)}
+.ed-tab.on{outline:3px solid var(--ink);outline-offset:2px}
+.ed-tools{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ed-seg{display:flex;border:2.5px solid var(--ink);border-radius:999px;overflow:hidden;box-shadow:0 3px 0 rgba(34,32,63,.16)}
+.ed-seg button{font-family:var(--fu);font-weight:800;font-size:11px;padding:5px 11px;border:none;background:var(--paper);color:var(--ink);cursor:pointer}
+.ed-seg button.on{background:var(--ink);color:#fff}
+.ed-body{display:grid;grid-template-columns:auto 1fr;gap:12px;min-height:0}
+.ed-strip{border:3px solid var(--ink);border-radius:var(--r2);overflow:hidden;background:linear-gradient(180deg,#3A2A6E,#241a49);box-shadow:0 4px 0 rgba(34,32,63,.14)}
+.ed-strip canvas{display:block;touch-action:none;cursor:crosshair}
+.ed-side{display:flex;flex-direction:column;gap:10px;min-width:0}
+.ed-read{display:flex;gap:8px;flex-wrap:wrap}
+.ed-read .fact{flex:1 1 auto}
+.ed-mini{border:3px solid var(--ink);border-radius:var(--r1);background:var(--cream);box-shadow:0 3px 0 rgba(34,32,63,.14);overflow:hidden}
+.ed-mini canvas{display:block;width:100%;height:46px;cursor:pointer;touch-action:none}
+.ed-transport{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ed-snap{display:flex;gap:5px;align-items:center}
+.ed-snap button{font-family:var(--fd);font-weight:800;font-size:11px;border:2.5px solid var(--ink);border-radius:8px;background:var(--paper);color:var(--ink);cursor:pointer;padding:4px 8px}
+.ed-snap button.on{background:var(--purple);color:#fff}
+.ed-hint{font-size:11px;font-weight:500;color:#6f6c93;line-height:1.4}
+
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);z-index:9999;background:var(--ink);color:#fff;font-family:var(--fd);font-weight:700;font-size:14px;padding:10px 20px;border-radius:999px;border:3px solid var(--ink-2);box-shadow:0 6px 0 var(--ink-2);opacity:0;transition:opacity .2s,transform .2s var(--sp);pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:860px){ .sel-body{grid-template-columns:1fr} .add-body{grid-template-columns:1fr} .wheel-board{border-left:none;border-top:4px solid var(--ink);min-height:44vh} .hero{overflow:visible} .ed-body{grid-template-columns:1fr} }
+.reduce *{animation:none!important;transition-duration:.001s!important}
+@media (prefers-reduced-motion:reduce){ *{animation:none!important} html{scroll-behavior:auto} .card{transition:none} }
+`;
+
+exports.css = css;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/ui/src/tokens.js", function(exports, require){
+// ui tokens: the arcade candy palette and scale, mirrored here as data so logic
+// and canvas code can read the same values the CSS uses. The CSS in css.js is
+// the source of truth for styling; this object is the source of truth for any
+// JavaScript that needs a hex or a spacing step.
+
+const tokens = {
+  color: {
+    ink: '#22203F', ink2: '#15132c', paper: '#FFFDF7', cream: '#FFF4E2',
+    red: '#FF4D5E', blue: '#3E7BFF', yellow: '#FFC83D', green: '#2EC56B',
+    purple: '#9B5CFF', pink: '#FF5CA8', orange: '#FF9B2E', teal: '#2EC8D6'
+  },
+  // player coding p1..p4 and difficulty coding beg..cha
+  player: { p1: '#FF4D5E', p2: '#3E7BFF', p3: '#2EC56B', p4: '#FFC83D' },
+  difficulty: {
+    beginner: '#2EC8D6', basic: '#2EC56B', difficult: '#FF9B2E',
+    expert: '#FF4D5E', challenge: '#9B5CFF'
+  },
+  space: { s1: 6, s2: 10, s3: 16, s4: 24, s5: 36 },
+  radius: { r1: 12, r2: 18, r3: 26 },
+  font: {
+    display: "'Baloo 2',system-ui,sans-serif",
+    ui: "'Outfit',system-ui,sans-serif"
+  },
+  ease: {
+    spring: 'cubic-bezier(.34,1.7,.5,1)',
+    flat: 'cubic-bezier(.4,0,.2,1)'
+  }
+};
+
+// CSS variable name for a difficulty key, matching the --d-* variables.
+const DIFF_VAR = {
+  beginner: '--d-beg', basic: '--d-bas', difficult: '--d-dif',
+  expert: '--d-exp', challenge: '--d-cha'
+};
+
+exports.tokens = tokens;
+exports.DIFF_VAR = DIFF_VAR;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/ui/src/index.js", function(exports, require){
+// ui: the arcade candy design tokens as CSS plus small shared primitives. This
+// is a rendering-support package, so it may build DOM helpers, but it holds no
+// game logic.
+
+const { css } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/ui/src/css.js");
+const { tokens, DIFF_VAR } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/ui/src/tokens.js");
+
+const FONTS_HREF = 'https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap';
+
+// Inject the stylesheet into a document once. Returns the <style> element.
+function mountCss(doc = document, id = 'ddr-css') {
+  let el = doc.getElementById(id);
+  if (!el) {
+    el = doc.createElement('style');
+    el.id = id;
+    doc.head.appendChild(el);
+  }
+  el.textContent = css;
+  return el;
+}
+
+// Add the Baloo 2 + Outfit web fonts if they are not already linked.
+function mountFonts(doc = document) {
+  if (doc.querySelector('link[data-ddr-fonts]')) return;
+  const pre1 = doc.createElement('link'); pre1.rel = 'preconnect'; pre1.href = 'https://fonts.googleapis.com';
+  const pre2 = doc.createElement('link'); pre2.rel = 'preconnect'; pre2.href = 'https://fonts.gstatic.com'; pre2.crossOrigin = 'anonymous';
+  const link = doc.createElement('link'); link.rel = 'stylesheet'; link.href = FONTS_HREF; link.setAttribute('data-ddr-fonts', '');
+  doc.head.appendChild(pre1); doc.head.appendChild(pre2); doc.head.appendChild(link);
+}
+
+// Escape a string for safe insertion into innerHTML.
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+exports.css = css;
+exports.tokens = tokens;
+exports.DIFF_VAR = DIFF_VAR;
+exports.mountCss = mountCss;
+exports.mountFonts = mountFonts;
+exports.escapeHtml = escapeHtml;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/dom.js", function(exports, require){
+// Small DOM and format helpers shared by the screens. Only screens and app.js
+// touch the DOM; logic lives in the packages.
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const on = (el, ev, fn, opt) => el && el.addEventListener(ev, fn, opt);
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+
+function fmtTime(sec) { sec = Math.max(0, sec | 0); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
+function fmtScore(n) { return String(Math.max(0, Math.round(n))).padStart(8, '0'); }
+
+let _tt;
+function toast(msg) {
+  const t = document.getElementById('toast'); if (!t) return;
+  t.textContent = msg; t.classList.add('show'); clearTimeout(_tt); _tt = setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+// Cover gradient helpers, so wheel cards, banners, and library rows share a look.
+const COVERS = ['--pink', '--purple', '--blue', '--teal', '--green', '--orange', '--red', '--yellow'];
+const covGrad = (i) => `linear-gradient(135deg,var(${COVERS[i % COVERS.length]}),var(${COVERS[(i + 3) % COVERS.length]}))`;
+
+exports.$ = $;
+exports.$$ = $$;
+exports.on = on;
+exports.clamp01 = clamp01;
+exports.fmtTime = fmtTime;
+exports.fmtScore = fmtScore;
+exports.toast = toast;
+exports.COVERS = COVERS;
+exports.covGrad = covGrad;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/demos.js", function(exports, require){
+// Synthesized demo songs so the wheel is populated and everything is playable
+// with no file. A per-track seed varies the drum pattern so each charts
+// differently. These are the only place the app makes audio itself.
+
+const { analyze, estimateTempo } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/analysis/src/index.js");
+const { generate } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/charter/src/index.js");
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+function synth(engine, bpm, seed, secs) {
+  engine.ensure(); const ctx = engine.ctx, sr = ctx.sampleRate, rnd = mulberry32(seed);
+  const buf = ctx.createBuffer(1, Math.floor(secs * sr), sr), d = buf.getChannelData(0), beat = 60 / bpm;
+  const hit = (t, freq, dur, amp, noise) => { const st = Math.floor(t * sr), n = Math.floor(dur * sr); for (let i = 0; i < n && st + i < d.length && st >= 0; i++) { const e = Math.exp(-i / (dur * sr) * 5); d[st + i] += (noise ? (rnd() * 2 - 1) : Math.sin(2 * Math.PI * freq * i / sr)) * e * amp; } };
+  const kickHalf = rnd() > 0.55, hatDiv = rnd() > 0.5 ? 4 : 2, fillEvery = rnd() > 0.5 ? 8 : 4, ghost = rnd() > 0.6;
+  const root = [55, 58.27, 61.74, 49][Math.floor(rnd() * 4)];
+  const bars = Math.ceil(secs / beat);
+  for (let b = 0; b < bars; b++) {
+    const t = b * beat;
+    hit(t, 60, 0.18, 0.9, false);
+    if (kickHalf && b % 2 === 0) hit(t + beat / 2, 60, 0.14, 0.6, false);
+    if (b % 2 === 1) hit(t, 190, 0.12, 0.6, true);
+    if (ghost && b % 4 === 2) hit(t + beat * 0.75, 190, 0.06, 0.25, true);
+    for (let h = 0; h < hatDiv; h++) hit(t + beat * h / hatDiv, 9000, 0.03, 0.18, true);
+    if (b % 2 === 0) hit(t, root, 0.22, 0.35, false);
+    if (b % fillEvery === fillEvery - 1) { for (let k = 0; k < 4; k++) hit(t + beat * (0.5 + k / 8), 7000, 0.028, 0.3, true); }
+  }
+  for (let i = 0; i < d.length; i++) d[i] = Math.max(-1, Math.min(1, d[i]));
+  return buf;
+}
+
+const DEFS = [
+  { id: 'neon-tiger', title: 'Neon Tiger', artist: 'VOLTKID', genre: 'Synthcore', bpm: 172, seed: 0x1a2b, secs: 15 },
+  { id: 'glow-worm-disco', title: 'Glow Worm Disco', artist: 'Pixel Mori', genre: 'Disco House', bpm: 138, seed: 0x51c7, secs: 15 },
+  { id: 'bubblegum-riot', title: 'Bubblegum Riot', artist: 'FizzPop', genre: 'Happy Hardcore', bpm: 160, seed: 0x77a1, secs: 14 },
+  { id: 'midnight-vending', title: 'Midnight Vending', artist: 'Tako Tako', genre: 'City Pop', bpm: 150, seed: 0x2d9e, secs: 15 },
+  { id: 'arcade-heart', title: 'Arcade Heart', artist: 'DJ Spritz', genre: 'Eurobeat', bpm: 182, seed: 0xbe11, secs: 14 },
+  { id: 'plastic-sunrise', title: 'Plastic Sunrise', artist: 'Coil Garden', genre: 'Synthwave', bpm: 145, seed: 0x3f42, secs: 15 },
+  { id: 'sugar-static', title: 'Sugar Static', artist: 'Maho', genre: 'Breakcore', bpm: 128, seed: 0x9c60, secs: 14 },
+  { id: 'metronomicon', title: 'Metronomicon', artist: 'DDR Engine', genre: 'Test Pattern', bpm: 128, seed: 0x0001, secs: 18 }
+];
+
+// Build the demo song records with charts pre-generated at three difficulties.
+function makeDemos(engine) {
+  return DEFS.map((def) => {
+    const buf = synth(engine, def.bpm, def.seed, def.secs), an = analyze(buf);
+    const tp = { bpm: def.bpm, offset: estimateTempo(an).offset, fps: an.sr / an.hop };
+    const song = {
+      id: 'demo-' + def.id, title: def.title, artist: def.artist, genre: def.genre, bpm: def.bpm, offset: tp.offset,
+      source: 'demo', duration: buf.duration, createdAt: 0, buffer: buf, _analysis: an, _tempo: tp, _engine: 'drum', charts: {}
+    };
+    ['basic', 'difficult', 'expert'].forEach((df) => { song.charts[df] = generate(an, tp, { difficulty: df, laneBias: 'drum', engine: 'drum', engineUsed: 'drum-aware', seed: song.title }); });
+    return song;
+  });
+}
+
+exports.makeDemos = makeDemos;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/radar/src/index.js", function(exports, require){
+// radar: the five axis groove radar. Compute it from a chart, or draw a radar
+// object as SVG. Axes are stream, voltage, air, freeze, and chaos, each 0..1.
+
+const AXES = [
+  ['stream', 'Stream'], ['voltage', 'Voltage'], ['air', 'Air'], ['freeze', 'Freeze'], ['chaos', 'Chaos']
+];
+
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+
+// Compute the radar from a chart's notes and foot rating. Stand-alone so a chart
+// loaded from disk gets a radar without re-running the charter.
+function computeRadar(chart) {
+  const notes = chart.notes || [], count = notes.length, dur = chart.duration || durationOf(notes) || 1;
+  const nps = count / dur;
+  let jumps = 0, i = 0;
+  const sorted = notes.slice().sort((a, b) => a.t - b.t);
+  while (i < sorted.length) { let j = i + 1; while (j < sorted.length && Math.abs(sorted[j].t - sorted[i].t) < 1e-3) j++; if (j - i >= 2) jumps++; i = j; }
+  const holds = notes.filter((n) => (n.dur || 0) > 0).length;
+  const busy = notes.filter((n) => n.quant >= 16).length / (count || 1);
+  const foot = chart.foot || 8;
+  return {
+    stream: clamp01(nps / 8), voltage: clamp01(foot / 15), air: clamp01(jumps / (count || 1) * 5),
+    freeze: clamp01(holds / (count || 1) * 5), chaos: clamp01(busy * 1.5)
+  };
+}
+
+function durationOf(notes) { let m = 0; for (const n of notes) m = Math.max(m, n.t + (n.dur || 0)); return m; }
+
+// Inner SVG markup for a radar in a 168x168 viewBox. Colors use the --purple and
+// --ink CSS variables so it inherits the palette.
+function radarSVG(radar, opt = {}) {
+  const cx = opt.cx || 84, cy = opt.cy || 84, R = opt.r || 62, N = AXES.length;
+  let grid = '', spokes = '', dots = '', pts = [];
+  for (let r = 1; r <= 3; r++) {
+    let p = '';
+    for (let i = 0; i < N; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / N, x = cx + Math.cos(a) * R * r / 3, y = cy + Math.sin(a) * R * r / 3; p += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); }
+    grid += '<path d="' + p + 'Z" fill="none" stroke="rgba(34,32,63,.18)" stroke-width="1.5"/>';
+  }
+  for (let i = 0; i < N; i++) {
+    const a = -Math.PI / 2 + i * 2 * Math.PI / N, x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R;
+    spokes += '<line x1="' + cx + '" y1="' + cy + '" x2="' + x.toFixed(1) + '" y2="' + y.toFixed(1) + '" stroke="rgba(34,32,63,.14)" stroke-width="1.5"/>';
+    const v = clamp01(radar ? radar[AXES[i][0]] : 0), px = cx + Math.cos(a) * R * v, py = cy + Math.sin(a) * R * v;
+    pts.push(px.toFixed(1) + ',' + py.toFixed(1));
+    dots += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="3.4" fill="var(--purple)" stroke="var(--ink)" stroke-width="1.5"/>';
+  }
+  return grid + spokes + '<polygon points="' + pts.join(' ') + '" fill="rgba(155,92,255,.28)" stroke="var(--purple)" stroke-width="3" stroke-linejoin="round"/>' + dots;
+}
+
+// Draw the radar into an existing <svg> element.
+function drawRadar(svgEl, radar, opt) { svgEl.innerHTML = radarSVG(radar, opt); }
+
+exports.AXES = AXES;
+exports.computeRadar = computeRadar;
+exports.radarSVG = radarSVG;
+exports.drawRadar = drawRadar;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/screens/select.js", function(exports, require){
+// Song Select: the framed console with a hero panel (banner, facts, groove radar,
+// difficulty pills, DANCE) beside an arc wheel of songs. The hero repaints on
+// select. Screen code only, wiring the wheel and the packages together.
+
+const { DIFFS, nominalRadar } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/charter/src/index.js");
+const { AXES, drawRadar } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/radar/src/index.js");
+const { escapeHtml, DIFF_VAR } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/ui/src/index.js");
+const { $, on, toast, fmtTime, covGrad } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/dom.js");
+const ENG_LABEL = { quick: 'Quick', drum: 'Drum-Aware', stem: 'Stem-Split' };
+
+function createSelect(ctx) {
+  const { App, bus, library, router, ensureChart, play } = ctx;
+  const WIN = 6, K = 5.2, SPREAD = 52;
+  let board, cards = [];
+
+  function setup() {
+    board = $('#wheel');
+    on(board, 'wheel', (e) => { if (App.screen !== 'select') return; e.preventDefault(); step(e.deltaY > 0 ? 1 : -1); }, { passive: false });
+    on($('#danceBtn'), 'click', dance);
+    on($('#modsBtn'), 'click', () => toast('Speed and mods: coming soon'));
+    bus.on('input:down', ({ lane }) => { if (App.screen !== 'select') return; if (lane === 2) step(-1); else if (lane === 1) step(1); });
+    bus.on('input:start', () => { if (App.screen === 'select') dance(); });
+    library.onChange(() => { if (App.screen === 'select') refresh(); });
+  }
+
+  async function refresh() {
+    let libs = [];
+    try { libs = (await library.list()) || []; } catch (e) { libs = []; }
+    App.songs = [...(App.demoSongs || []), ...libs].filter(Boolean);
+    if (App.sel >= App.songs.length) App.sel = 0;
+    build();
+    const tf = $('#titleFoot'); if (tf) tf.textContent = '/songs · ' + App.songs.length + ' loaded';
+  }
+
+  function focus(song) {
+    let i = App.songs.findIndex((s) => s.id === song.id);
+    if (i < 0) { App.songs = [song, ...App.songs]; i = 0; build(); }
+    App.sel = Math.max(0, i); layout(); hero(); router.show('select');
+  }
+
+  function build() {
+    [...board.querySelectorAll('.card')].forEach((c) => c.remove()); cards = [];
+    App.songs.forEach((s, i) => {
+      const b = document.createElement('button'); b.className = 'card'; b.type = 'button';
+      b.innerHTML = `<div class="cv" style="background:${covGrad(i)}">${(s.title || '?')[0].toUpperCase()}</div>` +
+        `<div class="ci"><div class="t">${escapeHtml(s.title)}</div><div class="a">${escapeHtml(s.artist || '')}</div></div>` +
+        `<div class="cb">${Math.round(s.bpm || 0) || '—'}</div>`;
+      on(b, 'click', () => { if (i === App.sel) dance(); else selectAt(i); });
+      board.appendChild(b); cards.push(b);
+    });
+    layout(); hero();
+    const c = $('#selCount'); if (c) c.textContent = App.songs.length;
+  }
+  function step(d) { selectAt(App.sel + d); }
+  function selectAt(i) { const n = App.songs.length; if (!n) return; App.sel = ((i % n) + n) % n; layout(); hero(); }
+  function layout() {
+    const n = cards.length;
+    cards.forEach((c, i) => {
+      let o = i - App.sel; if (o > n / 2) o -= n; if (o < -n / 2) o += n; const ao = Math.abs(o);
+      if (ao > WIN) { c.style.display = 'none'; return; } c.style.display = '';
+      const tx = 22 + K * o * o, ty = o * SPREAD, sc = Math.max(.66, 1 - ao * .05), op = Math.max(.18, 1 - ao * .14);
+      c.style.transform = `translate(${tx}px, calc(-50% + ${ty}px)) scale(${sc})`; c.style.opacity = op; c.style.zIndex = 60 - ao * 4;
+      c.classList.toggle('sel', o === 0); c.setAttribute('aria-current', o === 0 ? 'true' : 'false');
+    });
+  }
+  function hero() {
+    const s = App.songs[App.sel]; if (!s) return;
+    $('#selTitle').textContent = s.title || 'Untitled';
+    $('#selArtist').textContent = (s.artist || 'Unknown') + (s.genre ? (' · ' + s.genre) : '');
+    $('#selBigL').textContent = (s.title || '?')[0].toUpperCase();
+    $('#selBpm').textContent = Math.round(s.bpm || 0) || '—';
+    $('#selLen').textContent = s.duration ? fmtTime(s.duration) : '—';
+    $('#selSrc').textContent = s.source || 'file';
+    $('#selBanner').style.background = covGrad(App.sel);
+    if (!(App.diff in DIFFS)) App.diff = 'expert';
+    pills(s); paintRadar(s);
+  }
+  function pills(s) {
+    const box = $('#diffs'); box.innerHTML = '';
+    Object.keys(DIFFS).forEach((df) => {
+      const D = DIFFS[df], made = s.charts && s.charts[df], foot = made ? made.foot : D.foot;
+      const el = document.createElement('div'); el.className = 'diff' + (df === App.diff ? ' pick' : ''); el.dataset.df = df;
+      el.innerHTML = `<div class="nm" style="background:var(${DIFF_VAR[df]})">${D.name}</div><div class="ft">${foot}</div>`;
+      on(el, 'click', () => { App.diff = df; [...box.children].forEach((c) => c.classList.toggle('pick', c === el)); paintRadar(s); });
+      box.appendChild(el);
+    });
+  }
+  function paintRadar(s) {
+    const made = s.charts && s.charts[App.diff], radar = (made && made.radar) || nominalRadar(App.diff);
+    drawRadar($('#selRadar'), radar);
+    $('#selLegend').innerHTML = AXES.map(([k, label]) => `<div><span>${label}</span><span class="v">${Math.round((radar[k] || 0) * 200)}</span></div>`).join('');
+    $('#selEngine').textContent = made ? (ENG_LABEL[made.engine] || 'Drum-Aware') : (ENG_LABEL[s._engine] || '—');
+  }
+  async function dance() {
+    const s = App.songs[App.sel]; if (!s) return; const df = App.diff;
+    $('#danceBtn').textContent = '…';
+    try { const ch = await ensureChart(s, df); play(s, ch); } catch (e) { toast('Could not start: ' + e.message); } finally { $('#danceBtn').textContent = 'DANCE'; }
+  }
+  return { setup, refresh, hero, focus };
+}
+
+exports.createSelect = createSelect;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/stems/src/index.js", function(exports, require){
+// stems: optional WebGPU drum-stem isolation. This is the one path that runs a
+// real neural model in the browser, a source-separation model (Demucs) loaded
+// over WebGPU. It is heavy and needs WebGPU plus cross-origin isolation, so it is
+// feature detected and everything loads dynamically. On any failure it returns
+// null, which signals the caller to fall back to charting the full mix.
+//
+// Nothing here runs unless isolateDrums is called, so consumers that do not use
+// stems pay nothing.
+
+const ORT_URL = 'https://esm.sh/onnxruntime-web@1.27.0/webgpu';
+const DEMUCS_URL = 'https://esm.sh/demucs-web@1.0.2';
+
+function isSupported() {
+  return typeof navigator !== 'undefined' && 'gpu' in navigator;
+}
+
+// Resample any buffer to stereo Float32 at 44.1 kHz using an OfflineAudioContext,
+// the sample rate the model expects.
+async function resampleStereo(buffer) {
+  const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const off = new OC(2, Math.max(1, Math.ceil(buffer.duration * 44100)), 44100);
+  const tmp = off.createBuffer(buffer.numberOfChannels, buffer.length, buffer.sampleRate);
+  for (let c = 0; c < buffer.numberOfChannels; c++) tmp.copyToChannel(buffer.getChannelData(c), c);
+  const src = off.createBufferSource(); src.buffer = tmp; src.connect(off.destination); src.start();
+  const r = await off.startRendering();
+  return { L: r.getChannelData(0).slice(0), R: r.getChannelData(r.numberOfChannels > 1 ? 1 : 0).slice(0) };
+}
+
+let _proc = null;
+async function loadProcessor(onStatus, onProgress) {
+  if (_proc) return _proc;
+  const ort = await import(ORT_URL);
+  const demucs = await import(DEMUCS_URL);
+  try { ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.27.0/dist/'; ort.env.wasm.numThreads = 1; } catch (e) {}
+  const CONSTANTS = demucs.CONSTANTS;
+  const proc = new demucs.DemucsProcessor({
+    ort,
+    sessionOptions: { executionProviders: ['webgpu'] },
+    onProgress: (p) => { if (p && onProgress) onProgress(0.15 + 0.8 * (p.progress || 0)); if (p && onStatus && p.totalSegments) onStatus('separating ' + (p.currentSegment || 0) + '/' + p.totalSegments); },
+    onDownloadProgress: (l, t) => { if (onStatus && t) onStatus('downloading model ' + Math.round(l / t * 100) + '%'); if (onProgress && t) onProgress(0.02 + 0.1 * (l / t)); }
+  });
+  if (onStatus) onStatus('fetching htdemucs weights (first run is large, then cached)');
+  await proc.loadModel(CONSTANTS.DEFAULT_MODEL_URL);
+  _proc = { proc, CONSTANTS };
+  return _proc;
+}
+
+// Isolate the drum stem. Returns an AudioBuffer-like mono object of the drums, or
+// null to signal the caller should fall back to the full mix. options:
+// { onStatus(msg), onProgress(0..1) }.
+async function isolateDrums(buffer, options = {}) {
+  if (!isSupported()) return null;
+  try {
+    const d = await loadProcessor(options.onStatus, options.onProgress);
+    const st = await resampleStereo(buffer);
+    const r = await d.proc.separate(st.L, st.R);
+    const drums = r.drums || (d.CONSTANTS.TRACKS ? r[d.CONSTANTS.TRACKS[0]] : null);
+    if (!drums || !drums.left) return null;
+    const dl = drums.left, dr = drums.right || drums.left, n = dl.length, mono = new Float32Array(n);
+    for (let i = 0; i < n; i++) mono[i] = 0.5 * (dl[i] + dr[i]);
+    return { sampleRate: 44100, length: n, numberOfChannels: 1, duration: n / 44100, getChannelData: () => mono };
+  } catch (e) {
+    if (typeof console !== 'undefined') console.warn('stem isolation unavailable, falling back to full mix', e);
+    return null;
+  }
+}
+
+exports.isSupported = isSupported;
+exports.isolateDrums = isolateDrums;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/pipeline/src/index.js", function(exports, require){
+// pipeline: the chart engine router. Picks the analysis path for the chosen
+// engine, awaits any heavy model, applies fallback, reports progress through
+// hooks, and runs the charter for each requested difficulty. This is where an
+// engine name becomes a real technique.
+//
+// Engines are limited to those with a working in-browser method:
+//   quick  onset + tempo, lane bias off, fast.
+//   drum   per-band onsets bias lane choice. the default.
+//   stem   isolate the drum stem over WebGPU, then chart the drums. falls back
+//          to drum on the full mix when WebGPU is unavailable, and the result
+//          records which path actually ran.
+// There is no neural step-author engine, because no in-browser step-placement
+// model can be loaded and run.
+
+const { analyze, estimateTempo } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/analysis/src/index.js");
+const { generate: charterGenerate, DIFFS } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/charter/src/index.js");
+const { isolateDrums } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/stems/src/index.js");
+const ENGINES = {
+  quick: { name: 'Quick', desc: 'On-device onset and tempo. Instant.', time: '~5s', laneBias: 'none' },
+  drum: { name: 'Drum-Aware', desc: 'Per-band onsets, weighted to the beat.', time: '~15s', laneBias: 'drum' },
+  stem: { name: 'Stem-Split', desc: 'Isolates the drum stem via WebGPU, then charts the drums.', time: '~60s', laneBias: 'drum' }
+};
+
+const noop = () => {};
+
+// Resolve analysis, tempo, and the analysis to chart from for an engine. Handles
+// the stem isolation step and its fallback. Returns everything the charter needs
+// plus engineUsed describing the path that ran.
+async function prepare(source, options, hooks) {
+  const stage = hooks.stage || noop, progress = hooks.progress || noop, status = hooks.status || noop;
+  const engine = options.engine || 'drum';
+
+  stage('decode');
+  let analysis = source.analysis || analyze(source.buffer);
+  stage('tempo');
+  let tempo = source.tempo || estimateTempo(analysis);
+  if (options.bpm) tempo = { bpm: options.bpm, offset: tempo.offset, fps: tempo.fps };
+
+  let chartFrom = analysis, laneBias = ENGINES[engine] ? ENGINES[engine].laneBias : 'drum', engineUsed;
+  if (engine === 'quick') engineUsed = 'quick (onset+tempo)';
+  else if (engine === 'stem') {
+    stage('isolate');
+    let drums = null;
+    try { drums = await isolateDrums(source.buffer, { onStatus: status, onProgress: (p) => progress(p, 'isolating drums') }); } catch (e) { drums = null; }
+    if (drums) { chartFrom = analyze(drums); engineUsed = 'stem-split (drums isolated)'; }
+    else { engineUsed = 'drum-aware (stem fallback)'; status('stem isolation unavailable, charting the full mix'); }
+    laneBias = 'drum';
+  } else { engineUsed = 'drum-aware'; laneBias = 'drum'; }
+
+  return { analysis, tempo, chartFrom, laneBias, engine, engineUsed };
+}
+
+// Generate charts for one or more difficulties from a source. Returns
+// { charts, engineUsed, analysis, tempo }. source: { buffer, analysis?, tempo?,
+// title? }. options: { engine, difficulties[] | difficulty, bpm?, seed? }.
+async function generate(source, options = {}, hooks = {}) {
+  const stage = hooks.stage || noop, progress = hooks.progress || noop;
+  const diffs = options.difficulties || (options.difficulty ? [options.difficulty] : ['basic']);
+  const prep = await prepare(source, options, hooks);
+
+  stage('place');
+  const charts = {};
+  for (let i = 0; i < diffs.length; i++) {
+    const df = diffs[i];
+    if (!DIFFS[df]) continue;
+    charts[df] = charterGenerate(prep.chartFrom, prep.tempo, {
+      difficulty: df, laneBias: prep.laneBias, engine: prep.engine, engineUsed: prep.engineUsed,
+      seed: options.seed || source.title || 'ddr'
+    });
+    progress(0.4 + (i + 1) / diffs.length * 0.5, 'placing ' + df);
+  }
+  stage('balance');
+  return { charts, engineUsed: prep.engineUsed, analysis: prep.analysis, tempo: prep.tempo };
+}
+
+// Convenience: generate a single chart and return it directly.
+async function generateChart(source, options = {}, hooks = {}) {
+  const df = options.difficulty || 'basic';
+  const out = await generate(source, Object.assign({}, options, { difficulties: [df] }), hooks);
+  return out.charts[df];
+}
+
+exports.ENGINES = ENGINES;
+exports.generate = generate;
+exports.generateChart = generateChart;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/editor/src/index.js", function(exports, require){
+// editor: the embeddable review and edit widget. It shows a narrow vertical
+// notefield strip that mirrors gameplay orientation, a horizontal density
+// timeline with a draggable playhead, a small toolbar (difficulty tabs, edit or
+// select, snap, zoom, play or pause), and a readout. The whole thing fits in its
+// container with no page scroll.
+//
+// It takes charts, the decoded audio, and an onChange callback, and it returns
+// edited charts. It embeds the notefield renderer and the noteskin, and does its
+// own minimal audio playback so it depends on nothing but rendering.
+
+const { createNotefield } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/notefield/src/index.js");
+const SNAPS = [[4, '4th'], [8, '8th'], [12, '12th'], [16, '16th']];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+function quantOf(beat) { const subs = [1, 2, 3, 4, 6, 8, 12, 16]; for (let i = 0; i < subs.length; i++) { const d = subs[i]; if (Math.abs(beat * d - Math.round(beat * d)) < 0.02) return d; } return 16; }
+function denomToNote(d) { return ({ 1: 4, 2: 8, 3: 12, 4: 16, 6: 24, 8: 32, 12: 48, 16: 64 })[d] || 64; }
+
+function createEditor(container, opts = {}) {
+  const charts = {};
+  Object.keys(opts.charts || {}).forEach((k) => { charts[k] = cloneChart(opts.charts[k]); });
+  const diffKeys = Object.keys(charts);
+  let active = opts.difficulty && charts[opts.difficulty] ? opts.difficulty : diffKeys[0];
+  const audioBuffer = opts.audioBuffer || null;
+  const onChange = opts.onChange || (() => {});
+  const doc = container.ownerDocument || document;
+
+  let ctxA = opts.audioContext || null, src = null, startCtx = 0, playing = false;
+  let playTime = 0, mode = 'edit', snap = 16, speed = opts.speed || 2.2;
+  const duration = (charts[active] && charts[active].duration) || (audioBuffer && audioBuffer.duration) || 30;
+
+  const undo = [], redo = [];
+
+  container.classList.add('editor');
+  container.innerHTML = template(diffKeys, active);
+  const el = {
+    tabs: container.querySelector('.ed-tabs'),
+    modeSeg: container.querySelector('[data-seg=mode]'),
+    snapBox: container.querySelector('.ed-snap'),
+    strip: container.querySelector('.ed-strip canvas'),
+    mini: container.querySelector('.ed-mini canvas'),
+    play: container.querySelector('[data-act=play]'),
+    zoomIn: container.querySelector('[data-act=zoomin]'),
+    zoomOut: container.querySelector('[data-act=zoomout]'),
+    read: container.querySelector('.ed-read'),
+    undo: container.querySelector('[data-act=undo]'),
+    redo: container.querySelector('[data-act=redo]')
+  };
+
+  // narrow strip: playhead centered so past and future notes are visible
+  const field = createNotefield(el.strip, { recFrac: 0.5, maxGap: 46, maxLaneW: 40, spread: 1, minRecY: 30 });
+
+  function chart() { return charts[active]; }
+  function period() { return 60 / chart().bpm; }
+  function beatToTime(b) { return chart().offset + b * period(); }
+  function timeToBeat(t) { return (t - chart().offset) / period(); }
+  function snapStep() { return snap === 12 ? 1 / 3 : 4 / snap; }
+  function snapBeat(b) { const s = snapStep(); return Math.round(b / s) * s; }
+
+  function sizeCanvas(c, cssW, cssH) {
+    const dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1);
+    c.style.width = cssW + 'px'; c.style.height = cssH + 'px';
+    c.width = Math.round(cssW * dpr); c.height = Math.round(cssH * dpr);
+  }
+  function layoutCanvases() {
+    const stripH = clamp(Math.round((typeof window !== 'undefined' ? window.innerHeight : 700) * 0.42), 240, 380);
+    sizeCanvas(el.strip, 200, stripH);
+    field.resize();
+    const miniW = Math.max(120, el.mini.parentElement.clientWidth || 300);
+    sizeCanvas(el.mini, miniW, 46);
+    drawMini();
+  }
+
+  // ----- audio -----
+  function ensureCtx() { if (!ctxA) ctxA = new (window.AudioContext || window.webkitAudioContext)(); if (ctxA.state === 'suspended') ctxA.resume(); return ctxA; }
+  function play() {
+    if (!audioBuffer) return; ensureCtx(); stopAudio();
+    src = ctxA.createBufferSource(); src.buffer = audioBuffer; src.connect(ctxA.destination);
+    startCtx = ctxA.currentTime - playTime; src.start(0, clamp(playTime, 0, duration)); playing = true; el.play.textContent = 'Pause';
+  }
+  function stopAudio() { if (src) { try { src.onended = null; src.stop(); } catch (e) {} src = null; } }
+  function pause() { playing = false; stopAudio(); el.play.textContent = 'Play'; }
+  function togglePlay() { if (playing) pause(); else play(); }
+
+  // ----- editing -----
+  function pushUndo() { undo.push(JSON.stringify(chart().notes)); if (undo.length > 100) undo.shift(); redo.length = 0; }
+  function applyNotes(json) { chart().notes = JSON.parse(json); recount(); onChange(getCharts()); }
+  function doUndo() { if (!undo.length) return; redo.push(JSON.stringify(chart().notes)); applyNotes(undo.pop()); }
+  function doRedo() { if (!redo.length) return; undo.push(JSON.stringify(chart().notes)); applyNotes(redo.pop()); }
+
+  function noteAt(lane, beat) {
+    const s = snapStep() * 0.55;
+    const ns = chart().notes;
+    for (let i = 0; i < ns.length; i++) if (ns[i].lane === lane && Math.abs(ns[i].beat - beat) <= s) return i;
+    return -1;
+  }
+  function addNote(lane, beat) {
+    const b = snapBeat(beat); if (b < 0) return;
+    const note = { t: beatToTime(b), beat: b, lane, dur: 0, quant: denomToNote(quantOf(b)), type: 'tap' };
+    chart().notes.push(note); chart().notes.sort((a, b2) => a.t - b2.t || a.lane - b2.lane); recount(); onChange(getCharts());
+  }
+  function removeAt(idx) { chart().notes.splice(idx, 1); recount(); onChange(getCharts()); }
+  function setHold(idx, endBeat) {
+    const n = chart().notes[idx]; const eb = snapBeat(endBeat);
+    if (eb <= n.beat) { n.type = 'tap'; n.dur = 0; delete n.endBeat; }
+    else { n.type = 'hold'; n.endBeat = eb; n.dur = (eb - n.beat) * period(); }
+    recount(); onChange(getCharts());
+  }
+  function recount() {
+    const c = chart(); c.count = c.notes.length;
+    let holds = 0; for (const n of c.notes) if (n.dur > 0) holds++;
+    c._holds = holds;
+    renderRead();
+  }
+
+  // pointer on the strip: map to lane + beat, then add, remove, move, or hold
+  let drag = null;
+  function pointerToCell(ev) {
+    const r = el.strip.getBoundingClientRect();
+    const x = (ev.clientX - r.left), y = (ev.clientY - r.top);
+    const g = field.geom(); let lane = Math.round((x - g.startX) / g.gap); lane = clamp(lane, 0, 3);
+    const t = field.timeAtY(y, playTime, chart(), speed);
+    return { lane, beat: timeToBeat(t) };
+  }
+  function onStripDown(ev) {
+    ev.preventDefault();
+    const cell = pointerToCell(ev), idx = noteAt(cell.lane, snapBeat(cell.beat));
+    if (mode === 'select') { if (idx >= 0) { pushUndo(); removeAt(idx); } return; }
+    pushUndo();
+    if (idx >= 0) drag = { kind: 'move', idx, startBeat: chart().notes[idx].beat, lane: cell.lane };
+    else { addNote(cell.lane, cell.beat); const ni = noteAt(cell.lane, snapBeat(cell.beat)); drag = { kind: 'new', idx: ni, startBeat: snapBeat(cell.beat), lane: cell.lane }; }
+  }
+  function onStripMove(ev) {
+    if (!drag) return; ev.preventDefault();
+    const cell = pointerToCell(ev);
+    if (drag.kind === 'new' || drag.kind === 'hold') { if (Math.abs(cell.beat - drag.startBeat) > snapStep() * 0.75) { drag.kind = 'hold'; setHold(drag.idx, cell.beat); } }
+    else if (drag.kind === 'move') { const n = chart().notes[drag.idx]; if (n) { n.lane = clamp(Math.round(cell.lane), 0, 3); n.beat = snapBeat(cell.beat); n.t = beatToTime(n.beat); onChange(getCharts()); } }
+  }
+  function onStripUp() { if (drag && drag.kind === 'new') { /* a plain click added a tap */ } drag = null; }
+
+  // wheel scrubs time
+  function onWheel(ev) { ev.preventDefault(); if (playing) pause(); const dt = (ev.deltaY > 0 ? 1 : -1) * snapStep() * period(); playTime = clamp(playTime + dt, 0, duration); }
+
+  // ----- timeline minimap -----
+  function drawMini() {
+    const c = el.mini, g = c.getContext('2d'), W = c.width, H = c.height; g.clearRect(0, 0, W, H);
+    g.fillStyle = 'rgba(34,32,63,.06)'; g.fillRect(0, 0, W, H);
+    const ns = chart().notes, arr = new Float32Array(W);
+    for (const n of ns) { const x = Math.floor(n.t / Math.max(0.001, duration) * W); if (x >= 0 && x < W) arr[x] += 1 + (n.dur > 0 ? 0.5 : 0); }
+    let mx = 1; for (let i = 0; i < W; i++) if (arr[i] > mx) mx = arr[i];
+    g.fillStyle = '#9B5CFF'; for (let i = 0; i < W; i++) { const h = arr[i] / mx * H; if (h > 0) g.fillRect(i, H - h, 1, h); }
+    const px = Math.floor(playTime / Math.max(0.001, duration) * W);
+    g.fillStyle = '#FFC83D'; g.fillRect(px - 1, 0, 2, H);
+    g.strokeStyle = '#22203F'; g.lineWidth = 2; g.strokeRect(1, 1, W - 2, H - 2);
+  }
+  function onMiniSeek(ev) {
+    const r = el.mini.getBoundingClientRect(); const x = clamp(ev.clientX - r.left, 0, r.width);
+    if (playing) pause(); playTime = clamp(x / r.width * duration, 0, duration);
+  }
+
+  // ----- readout -----
+  function renderRead() {
+    const c = chart(), nps = c.count / Math.max(1, duration);
+    el.read.innerHTML =
+      '<div class="fact"><span>NPS</span><b>' + nps.toFixed(1) + '</b></div>' +
+      '<div class="fact"><span>Steps</span><b>' + c.count + '</b></div>' +
+      '<div class="fact"><span>Holds</span><b>' + (c._holds || c.notes.filter((n) => n.dur > 0).length) + '</b></div>' +
+      '<div class="fact"><span>Engine</span><b style="font-size:12px">' + (c.engineUsed || c.engine || 'drum') + '</b></div>';
+  }
+
+  // ----- loop -----
+  let raf = 0;
+  function frame() {
+    raf = requestAnimationFrame(frame);
+    if (playing && ctxA) { playTime = ctxA.currentTime - startCtx; if (playTime >= duration) { playTime = duration; pause(); } }
+    field.render(playTime, chart(), { speed, beats: true, showFeedback: false });
+    drawPlayhead();
+    drawMini();
+  }
+  function drawPlayhead() {
+    const g = el.strip.getContext('2d');
+    const gm = field.geom();
+    g.save(); g.strokeStyle = 'rgba(255,200,61,.9)'; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(0, gm.recY); g.lineTo(gm.w, gm.recY); g.stroke(); g.restore();
+  }
+
+  // ----- wiring -----
+  el.tabs.querySelectorAll('.ed-tab').forEach((b) => b.addEventListener('click', () => setDifficulty(b.dataset.df)));
+  el.modeSeg.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { mode = b.dataset.m; el.modeSeg.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); }));
+  el.snapBox.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { snap = +b.dataset.s; el.snapBox.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); }));
+  el.play.addEventListener('click', togglePlay);
+  el.zoomIn.addEventListener('click', () => { speed = clamp(speed + 0.4, 1, 6); });
+  el.zoomOut.addEventListener('click', () => { speed = clamp(speed - 0.4, 1, 6); });
+  el.undo.addEventListener('click', doUndo);
+  el.redo.addEventListener('click', doRedo);
+  el.strip.addEventListener('pointerdown', (e) => { el.strip.setPointerCapture(e.pointerId); onStripDown(e); });
+  el.strip.addEventListener('pointermove', onStripMove);
+  el.strip.addEventListener('pointerup', onStripUp);
+  el.strip.addEventListener('wheel', onWheel, { passive: false });
+  el.mini.addEventListener('pointerdown', (e) => { el.mini.setPointerCapture(e.pointerId); onMiniSeek(e); });
+  el.mini.addEventListener('pointermove', (e) => { if (e.buttons) onMiniSeek(e); });
+  const keyHandler = (e) => {
+    if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+    else if (e.key === 'ArrowRight') { if (playing) pause(); playTime = clamp(playTime + snapStep() * period(), 0, duration); }
+    else if (e.key === 'ArrowLeft') { if (playing) pause(); playTime = clamp(playTime - snapStep() * period(), 0, duration); }
+    else if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); doUndo(); }
+    else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) { e.preventDefault(); doRedo(); }
+  };
+  container.setAttribute('tabindex', '0');
+  container.addEventListener('keydown', keyHandler);
+  const onResize = () => layoutCanvases();
+  if (typeof window !== 'undefined') window.addEventListener('resize', onResize);
+
+  function setDifficulty(df) { if (!charts[df]) return; if (playing) pause(); active = df; el.tabs.querySelectorAll('.ed-tab').forEach((b) => b.classList.toggle('on', b.dataset.df === df)); recount(); }
+  function getCharts() { return charts; }
+  function destroy() { pause(); if (raf) cancelAnimationFrame(raf); if (typeof window !== 'undefined') window.removeEventListener('resize', onResize); container.removeEventListener('keydown', keyHandler); field.disconnect(); container.innerHTML = ''; }
+
+  // observe() re-measures if the strip is mounted hidden and shown later.
+  layoutCanvases(); field.observe(); recount(); frame();
+  return { getCharts, setDifficulty, destroy, get active() { return active; } };
+}
+
+function cloneChart(c) { const cp = JSON.parse(JSON.stringify(c)); cp.notes = cp.notes || []; return cp; }
+
+function template(diffKeys, active) {
+  const tabs = diffKeys.map((df) => '<button class="ed-tab' + (df === active ? ' on' : '') + '" data-df="' + df + '" style="background:var(--d-' + shortDiff(df) + ')">' + df + '</button>').join('');
+  const snaps = SNAPS.map(([v, label], i) => '<button data-s="' + v + '"' + (v === 16 ? ' class="on"' : '') + '>' + label + '</button>').join('');
+  return (
+    '<div class="ed-top">' +
+    '<div class="ed-tabs">' + tabs + '</div>' +
+    '<div class="ed-tools">' +
+    '<div class="ed-seg" data-seg="mode"><button data-m="edit" class="on">Edit</button><button data-m="select">Select</button></div>' +
+    '<div class="ed-snap"><span class="eyebrow" style="font-size:9px">Snap</span>' + snaps + '</div>' +
+    '<button class="btn white sm" data-act="zoomout">-</button><button class="btn white sm" data-act="zoomin">+</button>' +
+    '<button class="btn white sm" data-act="undo">Undo</button><button class="btn white sm" data-act="redo">Redo</button>' +
+    '<button class="btn green sm" data-act="play">Play</button>' +
+    '</div></div>' +
+    '<div class="ed-body">' +
+    '<div class="ed-strip"><canvas></canvas></div>' +
+    '<div class="ed-side">' +
+    '<div class="ed-read"></div>' +
+    '<div class="ed-mini"><canvas></canvas></div>' +
+    '<div class="ed-hint">Scrub with the wheel, the timeline, or the arrow keys. In Edit, click a lane to add or remove an arrow, and drag down from an arrow to make a hold. Space plays.</div>' +
+    '</div></div>'
+  );
+}
+function shortDiff(df) { return ({ beginner: 'beg', basic: 'bas', difficult: 'dif', expert: 'exp', challenge: 'cha' })[df] || 'bas'; }
+
+exports.createEditor = createEditor;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/screens/add.js", function(exports, require){
+// Add a Song: pull audio, pick an engine and difficulties, generate, then review
+// and edit the result before saving. The review step embeds the editor package
+// and fits inside the console frame.
+
+const { analyze, estimateTempo } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/analysis/src/index.js");
+const { DIFFS } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/charter/src/index.js");
+const { ENGINES, generate } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/pipeline/src/index.js");
+const { computeRadar } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/radar/src/index.js");
+const { createEditor } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/editor/src/index.js");
+const { DIFF_VAR } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/ui/src/index.js");
+const { $, $$, on, toast, fmtTime } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/dom.js");
+const ENGINE_UI = {
+  quick: { ic: 'Q', color: '--green', time: '~5s', q: 2, cls: '' },
+  drum: { ic: 'D', color: '--blue', time: '~15s', q: 2, cls: '' },
+  stem: { ic: 'S', color: '--purple', time: '~60s', q: 3, cls: 'q' }
+};
+const STAGE_LABELS = ['Decode & resample', 'Detect tempo', 'Isolate drums · WebGPU', 'Place steps per subdivision', 'Balance feet & write .doot'];
+const STAGE_INDEX = { decode: 0, tempo: 1, isolate: 2, place: 3, balance: 4 };
+
+function createAdd(ctx) {
+  const { App, engine, library, router, play } = ctx;
+  let engineSel = 'drum', diffSet = new Set(['basic', 'difficult', 'expert']), stages = [], editor = null;
+
+  function setup() {
+    $$('.src-tab').forEach((b) => on(b, 'click', () => {
+      if (b.disabled) return; const s = b.dataset.src;
+      $$('.src-tab').forEach((x) => x.classList.toggle('on', x === b));
+      $$('.src-pane').forEach((p) => p.classList.toggle('on', p.dataset.src === s));
+    }));
+    const fi = $('#file'); on($('#drop'), 'click', () => fi.click());
+    on(fi, 'change', (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+    on($('#drop'), 'dragover', (e) => { e.preventDefault(); $('#drop').style.background = 'rgba(155,92,255,.10)'; });
+    on($('#drop'), 'dragleave', () => { $('#drop').style.background = ''; });
+    on($('#drop'), 'drop', (e) => { e.preventDefault(); $('#drop').style.background = ''; const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+    buildEngines(); buildDiffs();
+    on($('#genBtn'), 'click', run);
+    on($('#runCancel'), 'click', () => $('#addRun').classList.remove('on'));
+    on($('#reviewBtn'), 'click', openReview);
+    on($('#reviewBack'), 'click', closeReview);
+    on($('#reviewPlay'), 'click', preview);
+    on($('#saveBtn'), 'click', save);
+  }
+
+  function buildEngines() {
+    const wrap = $('#engines'); wrap.innerHTML = '';
+    Object.keys(ENGINE_UI).forEach((k) => {
+      const U = ENGINE_UI[k], E = ENGINES[k]; let m = ''; for (let i = 0; i < 3; i++) m += `<i class="${i < U.q ? 'f' : ''}"></i>`;
+      const b = document.createElement('div'); b.className = 'engine' + (k === engineSel ? ' on' : ''); b.dataset.e = k;
+      b.innerHTML = `<div class="en-ic" style="background:var(${U.color})">${U.ic}</div>` +
+        `<div class="en-b"><div class="en-t">${E.name}</div><div class="en-d">${E.desc}</div></div>` +
+        `<div class="en-m"><span>${U.time}</span><div class="emeter ${U.cls}">${m}</div></div>`;
+      on(b, 'click', () => { engineSel = k; $$('.engine', wrap).forEach((x) => x.classList.toggle('on', x === b)); if (App.draft) App.draft.engine = k; });
+      wrap.appendChild(b);
+    });
+  }
+  function buildDiffs() {
+    const wrap = $('#genDiffs'); wrap.innerHTML = '';
+    Object.keys(DIFFS).forEach((df) => {
+      const D = DIFFS[df], onNow = diffSet.has(df);
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'gchip' + (onNow ? ' on' : ''); b.textContent = D.name;
+      if (onNow) b.style.background = `var(${DIFF_VAR[df]})`;
+      on(b, 'click', () => { if (diffSet.has(df)) { diffSet.delete(df); b.classList.remove('on'); b.style.background = ''; } else { diffSet.add(df); b.classList.add('on'); b.style.background = `var(${DIFF_VAR[df]})`; } });
+      wrap.appendChild(b);
+    });
+  }
+
+  async function handleFile(file) {
+    $('#genBtn').disabled = true;
+    try {
+      await engine.resume(); const buf = await engine.decode(await file.arrayBuffer());
+      const an = analyze(buf), tp = estimateTempo(an), name = file.name.replace(/\.[^.]+$/, '');
+      App.draft = { file, buffer: buf, analysis: an, tempo: tp, engine: engineSel, charts: {} };
+      $('#mTitle').value = name; if ($('#mArtist').value === '') $('#mArtist').value = 'Unknown';
+      $('#mBpm').value = Math.round(tp.bpm); $('#mLen').value = fmtTime(buf.duration);
+      $('#genBtn').disabled = false; toast('Loaded · ~' + Math.round(tp.bpm) + ' BPM · ' + fmtTime(buf.duration));
+    } catch (e) { console.error(e); toast('Could not decode this file'); }
+  }
+
+  function openRun() { const box = $('#stages'); box.innerHTML = STAGE_LABELS.map((l, i) => `<div class="stg"><span class="tick">${i + 1}</span><span class="lbl">${l}</span></div>`).join(''); stages = [...box.children]; $('#runDone').classList.remove('on'); bar(0); $('#addRun').classList.add('on'); }
+  function setStage(i, state, msg) { const el = stages[i]; if (!el) return; el.classList.remove('run', 'on'); const t = el.querySelector('.tick'); if (state === 'run') el.classList.add('run'); else if (state === 'done') { el.classList.add('on'); t.textContent = '✓'; } else if (state === 'skip') { el.style.opacity = '.55'; t.textContent = '–'; } if (msg) el.querySelector('.lbl').textContent = msg; }
+  function bar(p) { $('#runBar').style.width = Math.round(Math.max(0, Math.min(1, p)) * 100) + '%'; }
+  const tick = () => new Promise((r) => setTimeout(r, 16));
+
+  async function run() {
+    const d = App.draft; if (!d) { toast('Load a file first'); return; }
+    const diffs = [...diffSet]; if (!diffs.length) { toast('Pick at least one difficulty'); return; }
+    d.engine = engineSel;
+    const bpm = parseFloat($('#mBpm').value) || d.tempo.bpm;
+    openRun(); await tick();
+    if (engineSel !== 'stem') setStage(2, 'skip', 'Isolate drums · not needed');
+
+    const hooks = {
+      stage: (name) => { const i = STAGE_INDEX[name]; if (i == null) return; if (i > 0 && engineSel !== 'stem' && i >= 3) { /* keep */ } setStage(i, 'run'); },
+      progress: (p) => bar(p),
+      status: (msg) => setStage(2, 'run', 'Isolate drums · ' + msg)
+    };
+
+    try {
+      const out = await generate({ buffer: d.buffer, analysis: d.analysis, tempo: d.tempo, title: $('#mTitle').value }, { engine: engineSel, difficulties: diffs, bpm, seed: $('#mTitle').value }, hooks);
+      d.charts = out.charts; d.engineUsed = out.engineUsed;
+      for (let i = 0; i <= 4; i++) if (stages[i] && !stages[i].classList.contains('skip') && !stages[i].classList.contains('on')) setStage(i, 'done');
+      if (engineSel === 'stem') setStage(2, 'done', 'Isolate drums · ' + (out.engineUsed.indexOf('isolated') >= 0 ? 'done' : 'unavailable, used mix'));
+      bar(1); $('#doneTag').textContent = '✓ Chart ready · ' + Object.keys(d.charts).length + ' difficult' + (Object.keys(d.charts).length === 1 ? 'y' : 'ies'); $('#runDone').classList.add('on');
+    } catch (e) { console.error(e); toast('Charting failed: ' + e.message); $('#addRun').classList.remove('on'); }
+  }
+
+  function openReview() {
+    const d = App.draft; if (!d || !Object.keys(d.charts).length) { toast('Generate a chart first'); return; }
+    $('#addRun').classList.remove('on');
+    $('#reviewPath').textContent = d.engineUsed || 'drum-aware';
+    // Show the overlay before mounting so the editor's canvases measure a real
+    // size rather than the zero size of a hidden element.
+    $('#addReview').style.display = 'flex';
+    if (editor) editor.destroy();
+    editor = createEditor($('#edHost'), {
+      charts: d.charts, difficulty: Object.keys(d.charts).includes('expert') ? 'expert' : Object.keys(d.charts)[0],
+      audioBuffer: d.buffer, audioContext: engine.ensure(), onChange: (charts) => { d.charts = charts; }
+    });
+  }
+  function closeReview() { if (editor) { editor.destroy(); editor = null; } $('#addReview').style.display = 'none'; }
+
+  function preview() {
+    const d = App.draft; if (!d) return; const charts = editor ? editor.getCharts() : d.charts;
+    const df = charts.expert ? 'expert' : Object.keys(charts)[0], bpm = parseFloat($('#mBpm').value) || d.tempo.bpm;
+    const song = { id: 'draft-preview', title: $('#mTitle').value || 'Preview', artist: $('#mArtist').value || '', bpm, offset: d.tempo.offset || 0, source: 'file', duration: d.buffer.duration, buffer: d.buffer, charts, audio: d.file };
+    closeReview(); play(song, charts[df]);
+  }
+
+  async function save() {
+    const d = App.draft; if (!d) return; const charts = editor ? editor.getCharts() : d.charts;
+    if (!Object.keys(charts).length) { toast('Generate a chart first'); return; }
+    Object.keys(charts).forEach((df) => { charts[df].radar = computeRadar(charts[df]); charts[df].count = charts[df].notes.length; });
+    const bpm = parseFloat($('#mBpm').value) || d.tempo.bpm;
+    const rec = { id: 'song-' + Date.now(), title: $('#mTitle').value || 'Untitled', artist: $('#mArtist').value || 'Unknown', bpm, offset: d.tempo.offset || 0, source: 'file', createdAt: Date.now(), duration: d.buffer.duration, audio: d.file, charts };
+    await library.put(rec); toast('Saved to library'); closeReview(); router.show('library');
+  }
+
+  return { setup };
+}
+
+exports.createAdd = createAdd;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/screens/menus.js", function(exports, require){
+// The lighter screens: difficulty, results, settings, library, and gamepad. Each
+// is thin DOM wiring over the packages. Grouped here to keep the app small.
+
+const { DIFFS } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/charter/src/index.js");
+const { arrowSVG, LANE_DIRS } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/noteskin/src/index.js");
+const { escapeHtml, DIFF_VAR } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/ui/src/index.js");
+const { $, $$, on, toast, fmtTime, covGrad } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/dom.js");
+function createMenus(ctx) {
+  const { App, engine, settings, input, library, router, bus, ensureChart, play } = ctx;
+
+  // ---- difficulty ----
+  const difficulty = {
+    setup() { on($('#startPlay'), 'click', diffStart); },
+    open(song) { App.song = song; App.diff = null; $('#diffSong').textContent = song.title || 'Difficulty'; diffBuild(); $('#startPlay').disabled = true; $('#diffHint').textContent = 'select a difficulty above'; router.show('diff'); }
+  };
+  function diffBuild() {
+    const grid = $('#diffGrid'); grid.innerHTML = '';
+    Object.keys(DIFFS).forEach((df) => {
+      const D = DIFFS[df], made = App.song.charts && App.song.charts[df], foot = made ? made.foot : D.foot, lit = Math.min(5, Math.ceil(foot / 3));
+      let m = ''; for (let i = 0; i < 5; i++) m += `<i class="${i < lit ? 'on' : ''}" style="${i < lit ? 'background:var(' + DIFF_VAR[df] + ')' : ''}"></i>`;
+      const b = document.createElement('button'); b.className = 'dcard'; b.type = 'button'; b.dataset.df = df;
+      b.innerHTML = `<span class="nm" style="background:var(${DIFF_VAR[df]})">${D.name}</span><span class="ft" style="color:var(${DIFF_VAR[df]})">${foot}</span>` +
+        `<span class="dmeter">${m}</span><span class="meta">${made ? (made.count + ' notes · ' + made.engineUsed) : 'generates on start'}</span>`;
+      on(b, 'click', () => { App.diff = df; $$('.dcard', grid).forEach((x) => x.classList.toggle('sel', x === b)); $('#startPlay').disabled = false; $('#diffHint').textContent = D.name + ' · foot ' + foot; });
+      grid.appendChild(b);
+    });
+  }
+  async function diffStart() { if (!App.diff) return; const s = App.song, df = App.diff; $('#diffHint').textContent = 'generating chart…'; $('#startPlay').disabled = true; const ch = await ensureChart(s, df); $('#startPlay').disabled = false; play(s, ch); }
+  function openDifficulty(song) { ctx.select.focus(song); }
+
+  // ---- results ----
+  function showResults(results, song, chart) {
+    $('#resTitle').textContent = (song.title || '') + ' · ' + ((DIFFS[chart.difficulty] || {}).name || '');
+    $('#resGrade').textContent = results.grade;
+    $('#resCombo').textContent = results.fullCombo ? 'FULL COMBO' : (results.maxCombo + ' MAX COMBO');
+    const rows = [['Marvelous', results.counts.marvelous, '--teal'], ['Perfect', results.counts.perfect, '--blue'], ['Great', results.counts.great, '--green'], ['Good', results.counts.good, '--purple'], ['Boo', results.counts.boo, '--orange'], ['Miss', results.counts.miss, '--red']];
+    const tot = results.total || 1;
+    $('#resJudges').innerHTML = rows.map(([n, c, col]) => `<div class="jrow"><span class="jn">${n}</span><span class="jbar"><i style="width:${Math.round(c / tot * 100)}%;background:var(${col})"></i></span><span class="jc">${c}</span></div>`).join('');
+    router.show('results');
+  }
+
+  // ---- settings ----
+  const spec = [
+    { t: 'Scroll speed', d: 'How fast arrows travel. Higher is faster.', kind: 'range', key: 'speed', min: 1, max: 5, step: 0.1, fmt: (v) => Number(v).toFixed(1) + 'x' },
+    { t: 'Judge offset', d: 'Nudge timing if hits feel early or late.', kind: 'range', key: 'offsetMs', min: -100, max: 100, step: 1, fmt: (v) => (v > 0 ? '+' : '') + Math.round(v) + ' ms' },
+    { t: 'Master volume', d: '', kind: 'vol', key: 'volMaster' },
+    { t: 'Music volume', d: '', kind: 'vol', key: 'volMusic' },
+    { t: 'SFX volume', d: 'Loudness of the hit tick.', kind: 'vol', key: 'volSfx' },
+    { t: 'Reduced motion', d: 'Calmer menus. Gameplay still animates.', kind: 'toggle', key: 'reducedMotion' }
+  ];
+  function applyVolumes() { engine.setVolumes({ master: settings.get('volMaster'), music: settings.get('volMusic'), sfx: settings.get('volSfx') }); }
+  const settingsScreen = {
+    setup() {},
+    build() {
+      const box = $('#setRows'); box.innerHTML = '';
+      spec.forEach((s) => {
+        const row = document.createElement('div'); row.className = 'row'; let control;
+        if (s.kind === 'toggle') { const v = settings.get(s.key); control = `<span class="sw-toggle${v ? ' on' : ''}" role="switch" aria-checked="${v}"></span>`; }
+        else { const isVol = s.kind === 'vol', min = isVol ? 0 : s.min, max = isVol ? 100 : s.max, step = isVol ? 1 : s.step, raw = isVol ? Math.round(settings.get(s.key) * 100) : settings.get(s.key); control = `<input type="range" min="${min}" max="${max}" step="${step}" value="${raw}" data-vol="${isVol ? 1 : 0}"><span class="rv"></span>`; }
+        row.innerHTML = `<div class="rl"><div class="t">${s.t}</div>${s.d ? `<div class="d">${s.d}</div>` : ''}</div><div class="rc">${control}</div>`;
+        box.appendChild(row);
+        if (s.kind !== 'toggle') { const rv = $('.rv', row), inp = $('input', row); const upd = () => { const val = Number(inp.value); rv.textContent = inp.dataset.vol === '1' ? val + '%' : s.fmt(val); }; upd(); on(inp, 'input', () => { const val = Number(inp.value); if (inp.dataset.vol === '1') { settings.set(s.key, val / 100); applyVolumes(); } else settings.set(s.key, val); upd(); }); }
+        else { const sw = $('.sw-toggle', row); on(sw, 'click', () => { const v = !settings.get(s.key); settings.set(s.key, v); sw.classList.toggle('on', v); sw.setAttribute('aria-checked', v); if (s.key === 'reducedMotion') document.body.classList.toggle('reduce', v); }); }
+      });
+      const r = document.createElement('div'); r.className = 'row'; r.innerHTML = `<div class="rl"><div class="t">Reset</div><div class="d">Restore default settings.</div></div><div class="rc"><button class="btn white sm" id="setReset">Reset all</button></div>`; box.appendChild(r);
+      on($('#setReset'), 'click', () => { settings.reset(); applyVolumes(); document.body.classList.toggle('reduce', settings.get('reducedMotion')); settingsScreen.build(); toast('Settings reset'); });
+    }
+  };
+
+  // ---- library ----
+  const libraryScreen = {
+    setup() {
+      if (!library.canFolder) { $('#chooseFolder').disabled = true; $('#storeDesc').textContent = 'Songs live in this browser (IndexedDB). Folder sync needs a Chromium-based browser; use the .ddr backup to move a library between machines.'; }
+      on($('#chooseFolder'), 'click', async () => { try { const nm = await library.chooseFolder(); toast('Folder: ' + nm); $('#exportFolder').disabled = false; $('#importFolder').disabled = false; $('#storeDesc').textContent = 'Folder "' + nm + '" linked. Export writes songs there; Import reads them back.'; } catch (e) { if (e && e.message === 'unsupported') toast('Not supported here'); } });
+      on($('#exportFolder'), 'click', async () => { try { const n = await library.exportToFolder(); toast(n + ' song' + (n === 1 ? '' : 's') + ' written'); } catch (e) { toast('Export failed'); } });
+      on($('#importFolder'), 'click', async () => { try { const n = await library.importFromFolder(); toast(n + ' imported'); libraryScreen.refresh(); } catch (e) { toast('Import failed'); } });
+      on($('#exportFile'), 'click', async () => { const blob = await library.exportFile(); download('doot-library.ddr', blob); toast('Downloaded backup'); });
+      on($('#importFileBtn'), 'click', () => $('#importFile').click());
+      on($('#importFile'), 'change', async (e) => { const f = e.target.files[0]; if (!f) return; try { const n = await library.importFile(f); toast('Restored ' + n + ' song' + (n === 1 ? '' : 's')); libraryScreen.refresh(); } catch (err) { toast('Not a valid .ddr file'); } e.target.value = ''; });
+    },
+    async refresh() {
+      let libs = []; try { libs = (await library.list()) || []; } catch (e) {}
+      libs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      $('#libCount').textContent = '· ' + libs.length; const box = $('#libList');
+      if (!libs.length) { box.innerHTML = '<div style="font-family:var(--fu);color:#7d7aa0;font-weight:600">No saved songs yet. Add one from the Add Song tab. The demo tracks are always available on the Play screen.</div>'; return; }
+      box.innerHTML = '';
+      libs.forEach((s, i) => {
+        const it = document.createElement('div'); it.className = 'lib-item';
+        it.innerHTML = `<div class="cv" style="background:${covGrad(i + 1)}">${(s.title || '?')[0].toUpperCase()}</div>` +
+          `<div class="li"><div class="t">${escapeHtml(s.title)}</div><div class="d">${escapeHtml(s.artist || '')} · ${Math.round(s.bpm || 0)} BPM · ${Object.keys(s.charts || {}).length} charts · ${s.duration ? fmtTime(s.duration) : '—'}</div></div>` +
+          `<button class="btn sm play">Play</button><button class="btn white sm del">Delete</button>`;
+        on($('.play', it), 'click', () => openDifficulty(s));
+        on($('.del', it), 'click', async () => { await library.remove(s.id); toast('Deleted'); libraryScreen.refresh(); });
+        box.appendChild(it);
+      });
+    }
+  };
+
+  // ---- gamepad ----
+  const gamepad = {
+    timer: 0,
+    setup() {
+      const sw = $('#gpEnable'); sw.classList.toggle('on', input.padEnabled()); sw.setAttribute('role', 'switch');
+      on(sw, 'click', () => { const v = !input.padEnabled(); input.setPadEnabled(v); sw.classList.toggle('on', v); });
+      bus.on('input:bound', () => gamepad.build());
+      bus.on('screen', (n) => { clearInterval(gamepad.timer); if (n === 'gamepad') { gamepad.build(); gamepad.timer = setInterval(gamepad.detect, 500); gamepad.detect(); } else input.cancelListen(); });
+    },
+    detect() { const gp = input.connectedPad(); $('#gpDetect').textContent = gp ? ('Connected: ' + gp.id) : 'None detected — press a button on a controller to wake it.'; },
+    build() {
+      const grid = $('#bindGrid'); if (!grid) return; grid.innerHTML = '';
+      for (let l = 0; l < 4; l++) {
+        const cell = document.createElement('div'); cell.className = 'bind';
+        cell.innerHTML = `<div class="ar">${arrowSVG(LANE_DIRS[l])}</div><div style="font-family:var(--fd);font-weight:800;font-size:13px;margin-bottom:6px">${input.LANE_NAMES[l]}</div><div style="font-family:var(--fu);font-size:11px;color:#7d7aa0;margin-bottom:8px">${escapeHtml(input.describe(l))}</div><button class="bindbtn" data-lane="${l}">Bind</button>`;
+        grid.appendChild(cell);
+      }
+      $$('.bindbtn', grid).forEach((b) => on(b, 'click', () => { $$('.bindbtn', grid).forEach((x) => x.classList.remove('listening')); b.classList.add('listening'); b.textContent = 'press key / button…'; input.listen(+b.dataset.lane); }));
+    }
+  };
+
+  function setup() { difficulty.setup(); settingsScreen.setup(); libraryScreen.setup(); gamepad.setup(); }
+  return { setup, difficulty, showResults, settings: settingsScreen, library: libraryScreen, gamepad, openDifficulty, applyVolumes };
+}
+
+function download(name, blob) { const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 500); }
+
+exports.createMenus = createMenus;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/judge/src/index.js", function(exports, require){
+// judge: timing windows, judgment, scoring, combo, life, and hold handling. Pure
+// logic driven by song time, no DOM and no audio. The renderer reads its public
+// fields (lastJudge, combo, holdActive, life, score) each frame.
+//
+// Timing windows are the modern StepMania 5 defaults, verified against
+// src/Player.cpp: Marvelous 22.5ms, Perfect 45ms, Great 90ms, Good 135ms,
+// Boo 180ms (half-windows). Freeze release grace is 0.25s, also from the source.
+
+// Half-window in seconds per judgment.
+const WINDOWS = { marvelous: 0.0225, perfect: 0.045, great: 0.090, good: 0.135, boo: 0.180 };
+// Freeze may be released for up to this long before it drops.
+const HOLD_GRACE = 0.25;
+// Accuracy weight per judgment, normalized so an all-Marvelous run is 100%.
+const ACC = { marvelous: 1, perfect: 0.9, great: 0.6, good: 0.3, boo: 0.1, miss: 0 };
+// Life delta per judgment on the dance gauge (0..100).
+const LIFE = { marvelous: 1, perfect: 1, great: 0.5, good: 0, boo: -2, miss: -4 };
+const ORDER = ['marvelous', 'perfect', 'great', 'good', 'boo', 'miss'];
+
+// DDR-flavored grade from accuracy percent. Full combo is reported separately.
+function gradeFor(accuracyPct) {
+  if (accuracyPct >= 99) return 'AAA';
+  if (accuracyPct >= 93) return 'AA';
+  if (accuracyPct >= 80) return 'A';
+  if (accuracyPct >= 65) return 'B';
+  if (accuracyPct >= 45) return 'C';
+  return 'D';
+}
+
+class Judge {
+  constructor(chart, options = {}) {
+    this.notes = chart.notes.map((n, i) => ({
+      t: n.t, lane: n.lane, dur: n.dur || 0, quant: n.quant, i,
+      judged: false, holding: false, dropped: false, done: false, releaseAt: null
+    }));
+    this.W = WINDOWS;
+    this.maxScore = options.maxScore || 1000000;
+    this.counts = { marvelous: 0, perfect: 0, great: 0, good: 0, boo: 0, miss: 0 };
+    this.holdsHeld = 0; this.holdsDropped = 0;
+    this.combo = 0; this.maxCombo = 0; this.score = 0; this.holdBonus = 0; this.life = 50; this.lastJudge = null;
+    this.total = this.notes.length || 1; this._accSum = 0; this._judgedCount = 0;
+    this.holdActive = [null, null, null, null];
+    this.onJudge = options.onJudge || null;
+    this._now = options.now || (() => (typeof performance !== 'undefined' ? performance.now() : Date.now()));
+  }
+
+  // Register a tap at song time t on a lane. Returns the judgment name or null.
+  hit(lane, t) {
+    let best = -1, bd = 1e9;
+    for (let k = 0; k < this.notes.length; k++) {
+      const n = this.notes[k];
+      if (n.lane !== lane || n.judged) continue;
+      const d = Math.abs(n.t - t);
+      if (d < bd) { bd = d; best = k; }
+    }
+    if (best < 0 || bd > this.W.boo) return null;
+    const n = this.notes[best];
+    const type = bd <= this.W.marvelous ? 'marvelous' : bd <= this.W.perfect ? 'perfect' : bd <= this.W.great ? 'great' : bd <= this.W.good ? 'good' : 'boo';
+    n.judged = type; n.dt = t - n.t;
+    this._apply(type, n.dt);
+    if (n.dur > 0 && type !== 'boo') { n.holding = true; this.holdActive[lane] = n; }
+    return type;
+  }
+
+  // Advance to song time t. held is the current per-lane key-down state, used for
+  // the freeze release grace. Sweeps missed taps and finishes or drops holds.
+  update(t, held = [false, false, false, false]) {
+    for (let l = 0; l < 4; l++) {
+      const n = this.holdActive[l];
+      if (!n) continue;
+      const tail = n.t + n.dur;
+      if (held[l]) { n.releaseAt = null; }
+      else if (n.releaseAt == null) { n.releaseAt = t; }
+      // Measure the release only up to the tail, so a release beyond the grace
+      // window still drops the freeze even if updates skip past the tail.
+      if (n.releaseAt != null && (Math.min(t, tail) - n.releaseAt) > HOLD_GRACE && !n.dropped) { this._dropHold(l, n); continue; }
+      if (t >= tail && !n.dropped) { n.holding = false; n.done = true; this.holdActive[l] = null; this.holdsHeld++; this.holdBonus += 200; this._rescore(); this.life = Math.min(100, this.life + 1); }
+    }
+    for (let k = 0; k < this.notes.length; k++) {
+      const n = this.notes[k];
+      if (n.judged) continue;
+      if (t > n.t + this.W.boo) { n.judged = 'miss'; this._apply('miss', 0); }
+    }
+  }
+
+  _dropHold(l, n) { n.holding = false; n.dropped = true; n.done = true; this.holdActive[l] = null; this.holdsDropped++; this.combo = 0; this.life = Math.max(0, this.life - 2); this.lastJudge = { type: 'drop', at: this._now() }; if (this.onJudge) this.onJudge({ type: 'drop', combo: 0 }); }
+
+  _apply(type, dt) {
+    this.counts[type]++; this._judgedCount++;
+    // ITG combo rule: Marvelous, Perfect, and Great keep the combo; Good, Boo, and Miss break it.
+    if (type === 'good' || type === 'boo' || type === 'miss') this.combo = 0;
+    else { this.combo++; this.maxCombo = Math.max(this.maxCombo, this.combo); }
+    this.life = Math.max(0, Math.min(100, this.life + LIFE[type]));
+    this._accSum += ACC[type];
+    this._rescore();
+    this.lastJudge = { type, at: this._now(), dt: dt || 0 };
+    if (this.onJudge) this.onJudge({ type, combo: this.combo });
+  }
+
+  // Score is accuracy over the note total plus a flat bonus for freezes fully
+  // held. Kept in one place so a completed hold and a judged tap agree.
+  _rescore() { this.score = Math.round(this.maxScore * (this._accSum / this.total)) + this.holdBonus; }
+
+  accuracy() { return this._accSum / this.total * 100; }
+
+  results() {
+    const acc = this.accuracy();
+    return {
+      counts: this.counts, holdsHeld: this.holdsHeld, holdsDropped: this.holdsDropped,
+      maxCombo: this.maxCombo, score: this.score, accuracy: acc, grade: gradeFor(acc),
+      fullCombo: this.counts.miss === 0 && this.counts.boo === 0, total: this.total, order: ORDER
+    };
+  }
+}
+
+function createJudge(chart, options) { return new Judge(chart, options); }
+
+exports.WINDOWS = WINDOWS;
+exports.HOLD_GRACE = HOLD_GRACE;
+exports.gradeFor = gradeFor;
+exports.Judge = Judge;
+exports.createJudge = createJudge;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/screens/game.js", function(exports, require){
+// Gameplay: one play session. Decodes audio, runs a 3-2-1 count, then plays and
+// drives the render and judge loop off the audio clock until the song ends. The
+// screen is thin; the judging, timing, and drawing all live in packages.
+
+const { Judge } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/judge/src/index.js");
+const { $, clamp01, fmtScore } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/dom.js");
+const BLAST = { marvelous: '#89f0d8', perfect: '#89f0d8', great: '#86EE72', good: '#8fc0ff' };
+
+function createSession(ctx) {
+  const { engine, input, settings, notefield, bus } = ctx;
+  let raf = 0, active = false, subs = [], song = null, chart = null, judge = null;
+  // Each start bumps the epoch. stop() bumps it too, so a start that is quit or
+  // restarted mid-await sees a stale epoch after decode or the countdown and bails
+  // out instead of playing onto a screen the player already left.
+  let epoch = 0;
+
+  function hud() {
+    if ($('#gpScore')) return; const top = $('.gp-top'); if (!top) return; const acts = $('.acts', top);
+    const el = document.createElement('div'); el.style.cssText = 'margin:0 auto;text-align:center;color:#fff';
+    el.innerHTML = '<div id="gpScore" style="font-family:var(--fd);font-weight:800;font-size:22px;letter-spacing:2px;text-shadow:0 2px 0 var(--ink-2)">00000000</div>' +
+      '<div style="width:min(200px,40vw);height:10px;border:2.5px solid #fff;border-radius:999px;overflow:hidden;margin:3px auto 0"><i id="gpLife" style="display:block;height:100%;width:50%;background:#89f0d8;transition:width .12s"></i></div>';
+    top.insertBefore(el, acts);
+  }
+  const off = () => settings.get('offsetMs') / 1000;
+
+  async function start(s, c) {
+    stop(); const mine = ++epoch; song = s; chart = c; judge = new Judge(c);
+    let buf = s.buffer; if (!buf) { buf = await engine.decode(await s.audio.arrayBuffer()); if (mine !== epoch) return; s.buffer = buf; }
+    engine.load(buf); engine.applyVolumes();
+    $('#gpTitle').textContent = s.title || 'Untitled';
+    $('#gpSub').textContent = (s.artist || '') + ' · ' + Math.round(c.bpm) + ' BPM · ' + c.difficulty;
+    hud(); notefield.resize();
+
+    subs.push(input.on('down', ({ lane }) => {
+      if (!active) return;
+      const type = judge.hit(lane, engine.time() + off());
+      if (type && BLAST[type]) notefield.blast(lane, BLAST[type], engine.time());
+      engine.tick();
+    }));
+
+    await engine.resume(); if (mine !== epoch) return;
+    await countdown(); if (mine !== epoch) return;
+    engine.play(0); active = true; loop();
+  }
+
+  function countdown() {
+    return new Promise((res) => {
+      const el = $('#gpCount'), steps = ['3', '2', '1', 'GO']; let i = 0; el.style.display = 'grid';
+      const step = () => { if (i >= steps.length) { el.style.display = 'none'; return res(); } el.textContent = steps[i++]; setTimeout(step, 600); };
+      step();
+    });
+  }
+
+  function loop() {
+    raf = requestAnimationFrame(loop);
+    if (!active) return;
+    const t = engine.time(), held = input.laneDown();
+    judge.update(t, held);
+    notefield.render(t, chart, { speed: settings.get('speed'), judge, held });
+    const dur = engine.duration();
+    const p = $('#gpProg'); if (p) p.style.width = clamp01(t / (dur || 1)) * 100 + '%';
+    const sc = $('#gpScore'); if (sc) sc.textContent = fmtScore(judge.score);
+    const lf = $('#gpLife'); if (lf) { lf.style.width = judge.life + '%'; lf.style.background = judge.life < 25 ? '#FF7A8A' : judge.life < 55 ? '#FFC83D' : '#89f0d8'; }
+    if (t >= dur + 0.6) { end(); }
+  }
+
+  function stop() { epoch++; active = false; if (raf) cancelAnimationFrame(raf); raf = 0; subs.forEach((u) => u && u()); subs = []; if (engine) engine.stop(); }
+  function restart() { if (song && chart) start(song, chart); }
+  function end() { const results = judge.results(); stop(); bus.emit('game:end', { results, song, chart }); }
+
+  return { start, stop, restart };
+}
+
+exports.createSession = createSession;
+
+});
+__d("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/app.js", function(exports, require){
+// APP BOOT. Construct the platform singletons, wire the nav and screens, seed the
+// demo songs, and start. This file is the only place the pieces meet; each
+// package stays unaware of the others and of the DOM router.
+
+const { createBus, createSettings } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/core/src/index.js");
+const { createEngine } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/engine/src/index.js");
+const { createInput } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/input/src/index.js");
+const { createLibrary } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/library/src/index.js");
+const { createNotefield } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/notefield/src/index.js");
+const { generate: charterGenerate } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/charter/src/index.js");
+const { analyze, estimateTempo } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/analysis/src/index.js");
+const { arrowSVG, LANE_DIRS } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/noteskin/src/index.js");
+const { mountCss } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/packages/ui/src/index.js");
+const { $, $$, on, toast } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/dom.js");
+const { makeDemos } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/demos.js");
+const { createSelect } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/screens/select.js");
+const { createAdd } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/screens/add.js");
+const { createMenus } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/screens/menus.js");
+const { createSession } = require("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/screens/game.js");
+const SCREENS = ['title', 'select', 'diff', 'add', 'game', 'results', 'settings', 'library', 'gamepad'];
+
+function boot() {
+  mountCss(document);
+
+  const bus = createBus();
+  const settings = createSettings({ defaults: { speed: 2.4, offsetMs: 0, volMaster: 0.9, volMusic: 0.85, volSfx: 0.7, reducedMotion: false } });
+  const engine = createEngine();
+  engine.setVolumes({ master: settings.get('volMaster'), music: settings.get('volMusic'), sfx: settings.get('volSfx') });
+  const input = createInput();
+  const library = createLibrary();
+  const notefield = createNotefield($('#field'), { recFrac: 0.18 }); notefield.observe();
+
+  const App = { screen: 'title', songs: [], sel: 0, diff: 'expert', song: null, draft: null, lastPlay: null, demoSongs: [] };
+
+  const router = {
+    show(name) {
+      App.screen = name;
+      SCREENS.forEach((n) => { const s = document.getElementById('s-' + n); if (s) s.classList.toggle('active', n === name); });
+      $$('.tab').forEach((t) => t.classList.toggle('on', t.dataset.goto === name));
+      if (name !== 'game' && session) session.stop();
+      window.scrollTo(0, 0); bus.emit('screen', name);
+    }
+  };
+
+  function serialize(s) { const c = Object.assign({}, s); delete c._analysis; delete c._tempo; delete c.buffer; return c; }
+  async function ensureAnalysis(song) {
+    if (song._analysis) return;
+    let buf = song.buffer; if (!buf) { buf = await engine.decode(await song.audio.arrayBuffer()); song.buffer = buf; }
+    const an = analyze(buf); let tp;
+    if (song.bpm) tp = { bpm: song.bpm, offset: song.offset || 0, fps: an.sr / an.hop };
+    else { tp = estimateTempo(an); song.bpm = tp.bpm; song.offset = tp.offset; }
+    song._analysis = an; song._tempo = tp; if (!song.duration) song.duration = buf.duration;
+  }
+  async function ensureChart(song, diff) {
+    if (song.charts && song.charts[diff]) return song.charts[diff];
+    await ensureAnalysis(song);
+    const laneBias = song._engine === 'quick' ? 'none' : 'drum';
+    const ch = charterGenerate(song._analysis, song._tempo, { difficulty: diff, laneBias, engine: song._engine || 'drum', engineUsed: (song._engine === 'quick' ? 'quick (onset+tempo)' : 'drum-aware'), seed: song.title });
+    song.charts = song.charts || {}; song.charts[diff] = ch;
+    if (song.source !== 'demo' && song.audio) library.put(serialize(song)).catch(() => {});
+    return ch;
+  }
+  function play(song, chart) { App.lastPlay = { song, chart }; router.show('game'); session.start(song, chart).catch((err) => { console.error(err); toast('Could not start: ' + err.message); router.show('select'); }); }
+
+  const ctx = { bus, engine, settings, input, library, notefield, App, router, play, ensureAnalysis, ensureChart, serialize };
+  const select = createSelect(ctx); ctx.select = select;
+  const add = createAdd(ctx);
+  const menus = createMenus(ctx);
+  const session = createSession(ctx); ctx.session = session;
+
+  // bridge input events onto the app bus for the menu screens
+  input.on('down', (d) => bus.emit('input:down', d));
+  input.on('up', (d) => bus.emit('input:up', d));
+  input.on('start', () => bus.emit('input:start'));
+  input.on('back', () => bus.emit('input:back'));
+  input.on('bound', (d) => bus.emit('input:bound', d));
+
+  // brand mark and title arrows from the shared noteskin
+  const mk = arrowSVG('up').replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+  const bm = $('#brandMark'); if (bm) bm.outerHTML = '<svg class="mk" viewBox="0 0 512 512" aria-hidden="true">' + mk + '</svg>';
+  $('#titleArrows').innerHTML = LANE_DIRS.map((d) => `<div class="a">${arrowSVG(d)}</div>`).join('');
+
+  $$('[data-goto]').forEach((b) => on(b, 'click', () => router.show(b.dataset.goto)));
+  bus.on('input:back', () => { if (App.screen === 'game') { session.stop(); router.show('select'); } else if (App.screen === 'select') { router.show('title'); } else if (App.screen !== 'title') { router.show('select'); } });
+  bus.on('input:start', () => { if (App.screen === 'title') router.show('select'); });
+  bus.on('game:end', ({ results, song, chart }) => menus.showResults(results, song, chart));
+  bus.on('screen', (n) => { if (n === 'select') select.refresh(); else if (n === 'library') menus.library.refresh(); else if (n === 'settings') menus.settings.build(); else if (n === 'game') notefield.resize(); });
+
+  select.setup(); add.setup(); menus.setup();
+  on($('#gpRestart'), 'click', () => session.restart());
+  on($('#gpQuit'), 'click', () => { session.stop(); router.show('select'); });
+  on($('#resRetry'), 'click', () => { if (App.lastPlay) play(App.lastPlay.song, App.lastPlay.chart); });
+
+  document.body.classList.toggle('reduce', settings.get('reducedMotion'));
+  App.demoSongs = makeDemos(engine);
+  select.refresh();
+  router.show('title');
+
+  const wake = () => { engine.resume(); window.removeEventListener('pointerdown', wake); window.removeEventListener('keydown', wake); };
+  window.addEventListener('pointerdown', wake); window.addEventListener('keydown', wake);
+  input.attach(window);
+
+  // one persistent loop samples gamepads for every screen
+  (function idle() { input.poll(); requestAnimationFrame(idle); })();
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+
+
+});
+__r("/Users/obsidian/Projects/ossuary-projects/doot-doot-revolution/apps/ddr/src/app.js");
+})();
+
+</script>
+</body>
+</html>

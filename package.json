@@ -1,0 +1,23 @@
+{
+  "name": "doot-doot-revolution",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Browser rhythm game in the DDR and StepMania tradition, built as a workspace of small libraries.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Moheeb Zara",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "build": "node tools/build-singlefile.mjs",
+    "check": "node tools/check-bundle.mjs",
+    "render-check": "node tools/check-screens.mjs",
+    "validate": "npm test && npm run build && npm run render-check"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

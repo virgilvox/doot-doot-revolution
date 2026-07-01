@@ -1,0 +1,27 @@
+{
+  "name": "@doot-games/app-ddr",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Doot Doot Revolution: the thin app that composes the libraries into the game.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Moheeb Zara",
+  "dependencies": {
+    "@doot-games/analysis": "0.1.0",
+    "@doot-games/charter": "0.1.0",
+    "@doot-games/core": "0.1.0",
+    "@doot-games/dsp": "0.1.0",
+    "@doot-games/editor": "0.1.0",
+    "@doot-games/engine": "0.1.0",
+    "@doot-games/input": "0.1.0",
+    "@doot-games/judge": "0.1.0",
+    "@doot-games/library": "0.1.0",
+    "@doot-games/noteskin": "0.1.0",
+    "@doot-games/notefield": "0.1.0",
+    "@doot-games/pipeline": "0.1.0",
+    "@doot-games/radar": "0.1.0",
+    "@doot-games/simfile": "0.1.0",
+    "@doot-games/stems": "0.1.0",
+    "@doot-games/ui": "0.1.0"
+  }
+}
