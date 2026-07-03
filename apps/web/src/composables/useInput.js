@@ -17,8 +17,8 @@ export function useInput() {
   if (started) return;
   started = true;
 
-  input.on('down', ({ lane }) => { bus.emit('lane:down', { lane }); bus.emit('move', { dir: DIR[lane] }); });
-  input.on('up', ({ lane }) => bus.emit('lane:up', { lane }));
+  input.on('down', ({ lane, device }) => { bus.emit('lane:down', { lane, device }); bus.emit('move', { dir: DIR[lane] }); });
+  input.on('up', ({ lane, device }) => bus.emit('lane:up', { lane, device }));
   input.on('start', () => bus.emit('confirm'));
   input.on('back', () => bus.emit('cancel'));
 

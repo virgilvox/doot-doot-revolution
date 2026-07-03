@@ -84,7 +84,7 @@ function createSession() {
   function loop() {
     raf = requestAnimationFrame(loop);
     if (!active) return;
-    const t = engine.time(), held = input.laneDown();
+    const t = engine.time(), held = input.held();
     if (endless && conductor) {
       conductor.pump(t, 4);                                    // keep music + notes ~4s ahead
       const cut = state.judge.pruneBefore(t - 2);              // drop notes behind the playhead
