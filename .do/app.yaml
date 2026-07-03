@@ -15,12 +15,13 @@ static_sites:
       repo: virgilvox/doot-doot-revolution
       branch: main
       deploy_on_push: true
-    # npm install, not npm ci: the committed lockfile is generated on macOS, and
-    # npm ci would skip the Linux-only Rollup native binary that Vite needs on the
-    # builder (the well-known optional-dependency bug). npm install re-resolves the
-    # platform optionals. --include=dev keeps the build tools when the buildpack
-    # sets NODE_ENV=production.
-    build_command: npm install --include=dev && npm run build
+    # The committed lockfile is generated on macOS, so it lacks the Linux-only
+    # Rollup native binary (@rollup/rollup-linux-x64-gnu) that Vite needs, and both
+    # npm ci and npm install honor that tree (the well-known npm optional-dependency
+    # bug, npm/cli#4828). Removing the lockfile and node_modules first lets npm
+    # resolve the platform binaries fresh on the Linux builder. --include=dev keeps
+    # the build tools when the buildpack sets NODE_ENV=production.
+    build_command: rm -rf node_modules package-lock.json && npm install --include=dev && npm run build
     output_dir: apps/web/dist
     index_document: index.html
     catchall_document: index.html
