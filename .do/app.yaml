@@ -5,17 +5,27 @@
 #
 # Deploy: doctl apps create --spec .do/app.yaml  (or import this file in the
 # DigitalOcean dashboard). Update the github.repo/branch to your fork if needed.
-name: doot-doot-revolution
+name: dance-doot-games
 region: nyc
+# One Static Site component (the free/cheapest App Platform tier: no server, no
+# container, just the built assets on the CDN).
 static_sites:
   - name: web
     github:
       repo: virgilvox/doot-doot-revolution
       branch: main
       deploy_on_push: true
-    build_command: npm ci && npm run build
+    # --include=dev so the build tools (vite, the Vue plugin) install even if the
+    # buildpack sets NODE_ENV=production, which would otherwise skip devDependencies.
+    build_command: npm ci --include=dev && npm run build
     output_dir: apps/web/dist
     index_document: index.html
     catchall_document: index.html
     routes:
       - path: /
+# Custom subdomain. doot.games is a DigitalOcean-managed zone, so App Platform
+# creates the DNS record and TLS certificate automatically.
+domains:
+  - domain: dance.doot.games
+    type: PRIMARY
+    zone: doot.games
