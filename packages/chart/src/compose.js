@@ -61,12 +61,14 @@ const HARM = [
 ];
 function nextDegree(rng, cur) { return rWeighted(rng, HARM[cur]); }
 
-/* Euclidean rhythm (maximally even distribution of k hits over n steps) */
+/* Euclidean rhythm (maximally even distribution of k hits over n steps), anchored so
+   the first hit lands on step 0. This matters for dance music: E(4,16) is a proper
+   four-on-the-floor (0,4,8,12), not a phase-shifted offbeat, so kicks and bass fall on
+   the beat and the charter can place on-beat steps. rotate shifts the pattern after. */
 function euclid(k, n, rotate) {
   k = Math.max(0, Math.min(n, k | 0)); const out = new Array(n).fill(0);
   if (k === 0) return out;
-  let bucket = 0;
-  for (let i = 0; i < n; i++) { bucket += k; if (bucket >= n) { bucket -= n; out[i] = 1; } }
+  for (let i = 0; i < n; i++) if (((i * k) % n) < k) out[i] = 1;
   if (rotate) { const r = ((rotate % n) + n) % n; return out.slice(n - r).concat(out.slice(0, n - r)); }
   return out;
 }
