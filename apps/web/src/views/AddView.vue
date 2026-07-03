@@ -5,19 +5,32 @@
       <div class="add-body add-cols">
         <div class="panel">
           <span class="eyebrow">Source</span>
-          <div class="drop" @click="$refs.file.click()" @dragover.prevent @drop.prevent="onDrop">
-            <b>Drop an audio file</b>mp3 · wav · ogg · m4a, or click to browse. Decoded locally, nothing uploaded.
-            <input ref="file" type="file" accept="audio/*" hidden @change="onFile">
+          <div class="src-tabs">
+            <button :class="{ on: srcTab === 'file' }" @click="srcTab = 'file'">Audio file</button>
+            <button v-if="plat.canImportUrl" :class="{ on: srcTab === 'url' }" @click="srcTab = 'url'">URL / YouTube</button>
+            <button :class="{ on: srcTab === 'sim' }" @click="srcTab = 'sim'">StepMania</button>
           </div>
-          <p v-if="plat.canImportUrl" class="hint">{{ plat.urlImportHint }}</p>
-          <div v-if="plat.canImportUrl" class="url-row"><input class="input" v-model="url" placeholder="Paste an audio URL or a YouTube link"><button class="btn blue sm" @click="fromUrl">Import</button></div>
-          <span class="eyebrow" style="margin-top:2px">Import StepMania</span>
-          <div class="drop" @click="$refs.simFolder.click()">
-            <b>Import a simfile or pack</b>Pick a song folder or a whole pack folder. The .sm or .ssc and its audio import together, with every difficulty and any BPM changes.
-            <input ref="simFolder" type="file" webkitdirectory hidden @change="onSimPick">
-            <input ref="simFiles" type="file" accept=".sm,.ssc,audio/*" multiple hidden @change="onSimPick">
+
+          <div v-show="srcTab === 'file'" class="src-pane">
+            <div class="drop" @click="$refs.file.click()" @dragover.prevent @drop.prevent="onDrop">
+              <b>Drop an audio file</b>mp3 · wav · ogg · m4a, or click to browse. Decoded locally, nothing uploaded.
+              <input ref="file" type="file" accept="audio/*" hidden @change="onFile">
+            </div>
           </div>
-          <p class="hint">No folder access? <button class="btn white sm" @click.stop="$refs.simFiles.click()">Choose files instead</button></p>
+
+          <div v-show="srcTab === 'url' && plat.canImportUrl" class="src-pane">
+            <p class="hint">{{ plat.urlImportHint }}</p>
+            <div class="url-row"><input class="input" v-model="url" placeholder="Paste an audio URL or a YouTube link"><button class="btn blue sm" @click="fromUrl">Import</button></div>
+          </div>
+
+          <div v-show="srcTab === 'sim'" class="src-pane">
+            <div class="drop" @click="$refs.simFolder.click()">
+              <b>Import a simfile or pack</b>Pick a song folder or a whole pack folder. The .sm or .ssc and its audio import together, with every difficulty and any BPM changes.
+              <input ref="simFolder" type="file" webkitdirectory hidden @change="onSimPick">
+              <input ref="simFiles" type="file" accept=".sm,.ssc,audio/*" multiple hidden @change="onSimPick">
+            </div>
+            <p class="hint">No folder access? <button class="btn white sm" @click.stop="$refs.simFiles.click()">Choose files instead</button></p>
+          </div>
           <span class="eyebrow" style="margin-top:2px">Track</span>
           <div class="grid2">
             <div class="field"><label>Title</label><input class="input" v-model="meta.title"></div>
@@ -101,6 +114,7 @@ const meta = reactive({ title: 'Untitled', artist: 'Unknown', bpm: '-', len: '-'
 const engineSel = ref('drum');
 const diffSet = reactive(new Set(['basic', 'difficult', 'expert']));
 const url = ref('');
+const srcTab = ref('file');
 const running = ref(false);
 const done = ref(false);
 const bar = ref(0);
@@ -185,6 +199,11 @@ useScope({ cancel: () => { if (reviewing.value) reviewing.value = false; else ba
 <style scoped>
 .add-cols { padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 @media (max-width: 860px) { .add-cols { grid-template-columns: 1fr; } }
+/* segmented source picker: one import method at a time, mirroring the nav pills */
+.src-tabs { display: flex; gap: 6px; margin: 2px 0 12px; }
+.src-tabs button { flex: 1; padding: 9px 6px; border: 2px solid var(--ink); border-radius: var(--r2); background: #fff; color: var(--ink); font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer; }
+.src-tabs button.on { background: var(--ink); color: #fff; }
+.src-pane { display: flex; flex-direction: column; gap: 10px; }
 .ed-mount { border: 3px solid var(--ink); border-radius: var(--r2); background: var(--paper); padding: 12px; margin-top: 10px; height: clamp(320px, 60vh, 560px); }
 .review { display: flex; flex-direction: column; gap: 10px; }
 </style>
