@@ -14,7 +14,10 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
+      # npm install, not npm ci: a macOS-generated lockfile omits the Linux Rollup
+      # optional binary (npm/cli#4828), and strict `npm ci` then fails on the runner.
+      # `npm install` re-resolves the platform-correct binary, matching the deploy.
+      - run: npm install
       - name: Package tests
         run: npm test
       - name: Web tests
