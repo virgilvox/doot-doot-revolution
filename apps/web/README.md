@@ -31,16 +31,17 @@ secure defaults left on. Cross-OS installers need a CI matrix (a dmg needs macOS
 
 ## Architecture
 
-- `src/game/singletons.js` creates the shared bus, settings, engine, input, and
-  library once. Composables and Pinia stores wrap them; components never touch
-  them directly.
+- `src/game/singletons.js` creates the shared engine, input, and library once. The
+  event bus is `game/bus.js` and settings is `game/settings.js` (one reactive object
+  the render loop and the UI both read). Composables and Pinia stores wrap these;
+  components never touch them directly.
 - Composables are the seam to the imperative packages: `useInput` (raw lanes to
   `move`/`confirm`/`cancel` plus `lane:down`/`lane:up`), `useNavigation` (a focus
   scope stack for controller-first menus and modal focus trapping), `useSession`
   (one play, with the abort-epoch guard), `useChart`, `usePlatform`.
-- Canvas packages are wrapped: `NoteField.vue` over `@doot-games/notefield`,
-  `ChartEditor.vue` over `@doot-games/editor`, `GrooveRadar.vue` over
-  `@doot-games/radar`.
+- Canvas packages are wrapped: `NoteField.vue` over `@doot-games/render`,
+  `ChartEditor.vue` over `@doot-games/render`, `GrooveRadar.vue` over
+  `@doot-games/chart`.
 - No router: screens are state-driven (`game/screen.js`), so one build runs as a
   static site and inside Electron with no route URLs to keep in sync.
 
@@ -52,4 +53,4 @@ Down move the wheel and Right moves onto the top nav, so a controller can reach
 Add, Library, Settings, and Pads. Every menu screen has a visible focus ring
 (`useRovingFocus`). Selecting a song opens the difficulty modal, navigated the same
 way. In gameplay the four arrows are the lanes, and a clean hit pops its receptor
-with a glow scaled by the judgment (`@doot-games/notefield` `hit()`).
+with a glow scaled by the judgment (`@doot-games/render` `hit()`).

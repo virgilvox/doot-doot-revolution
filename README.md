@@ -82,16 +82,19 @@ and adapts.
 ## Repository layout
 
 ```
-packages/        the libraries, published under @doot-games
-  core dsp analysis charter pipeline stems simfile
-  engine input judge noteskin notefield radar editor library ui
+packages/        four framework-agnostic, private (unpublished) packages
+  chart          dsp, analysis, charter, pipeline, simfile, radar, stems
+  render         noteskin, notefield, editor
+  play           engine, input, judge
+  library        the song store
 apps/web/        the Vue 3 app; also the Electron desktop target
 tools/           shared test helpers
 ```
 
-Logic packages depend only on other logic packages and on `dsp`. Rendering
-packages depend on `noteskin`. The editor depends on rendering. The app depends on
-everything. No package depends on the app. Each package has its own README.
+The four packages are self-contained (none imports another) and hold all logic and
+rendering; the app wires them together and adds no game logic. No package touches
+Vue or depends on the app. `chart` and `play` are pure logic and test in Node;
+`render` draws to a canvas. Each package has its own README.
 
 ## Commands
 

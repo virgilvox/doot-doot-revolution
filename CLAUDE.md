@@ -8,13 +8,13 @@ Doot Doot Revolution is a rhythm game in the DDR and StepMania tradition. It loa
 
 ## Layout
 
-- `packages/*` are standalone libraries published under the `@doot-games` scope. Each has `src/index.js`, a `README.md`, tests under `test/`, and a `package.json` marked side effect free with an ES module entry. They are framework-agnostic and hold all logic and rendering.
-- `apps/web` is the Vue 3 app: component views and wiring only, plus the Electron target (`apps/web/electron`). It depends on the packages and adds no logic of its own. Composables (`useInput`, `useNavigation`, `useSession`) are the seam to the imperative packages.
+- `packages/*` are four framework-agnostic, private (unpublished) packages: `chart` (dsp, analysis, charter, pipeline, simfile, radar, stems), `render` (noteskin, notefield, editor), `play` (engine, input, judge), and `library`. Each holds its members as files under `src/` behind a barrel `index.js`, plus a `README.md` and tests under `test/`. They are side-effect-free ES modules and hold all game logic and rendering.
+- `apps/web` is the Vue 3 app: component views and wiring only, plus the Electron target (`apps/web/electron`). It depends on the four packages and adds no game logic. Composables (`useInput`, `useNavigation`, `useSession`) are the seam to the imperative singletons. The design system is a real stylesheet (`styles/design.css` + `styles/tokens.js`), settings are a reactive module (`game/settings.js`), and the event bus is `game/bus.js`.
 - `tools/` holds shared test helpers (`testutil.mjs`, `fakecanvas.mjs`).
 
 ## Dependency direction
 
-Logic packages depend only on other logic packages and on `dsp`. Rendering packages depend on `noteskin`. The editor depends on rendering. The app depends on everything. No package depends on the app. Nothing depends on `stems` unless it opts in.
+The four packages are self-contained: none imports another (`chart`/`render`/`play`/`library` have no `@doot-games` dependencies), and the app wires them together. No package depends on the app or touches Vue. `chart` and `play` are pure logic (Node-testable); `render` draws to a canvas; `library` and the browser parts of `play` use browser APIs but no framework.
 
 ## Working rules that bite most often
 

@@ -6,11 +6,9 @@ State of Doot Doot Revolution and how to pick it up. Read `README.md`,
 ## What it is now
 
 A DDR/StepMania-style rhythm game as a Vue 3 + Vite single-page app that also
-packages as an Electron desktop app. All game logic and rendering live in 16
-framework-agnostic `@doot-games/*` packages. Every package is published on npm at
-0.1.0; eight packages are bumped in the workspace but not yet republished (see
-Publishing): `notefield` and `simfile` at 0.1.2, and `engine`, `ui`, `input`,
-`library`, `noteskin`, and `charter` at 0.1.1. The Vue app in `apps/web`
+packages as an Electron desktop app. All game logic and rendering live in four
+framework-agnostic, private (unpublished) `@doot-games/*` packages: `chart`,
+`render`, `play`, and `library`. The Vue app in `apps/web`
 is a thin layer of views,
 composables, and stores over those packages. There is no landing page: the app
 opens on the Title attract screen.
@@ -18,7 +16,7 @@ opens on the Title attract screen.
 The earlier vanilla single-file app (`apps/ddr`) was retired; the packages remain
 the proof the logic is framework-free.
 
-Current status: builds clean, 62 tests pass (57 package, 5 Vue), deployed live at
+Current status: builds clean, 58 tests pass (53 package, 5 Vue), deployed live at
 https://dance.doot.games, verified end to end in the browser (controller-only play,
 difficulty modal, viewport-fit gameplay with the game-feel pass, StepMania import,
 add/review/save, all menus). Navigation is state-driven (no router). No console
@@ -32,24 +30,29 @@ npm run dev            # web dev server at http://localhost:4318
 npm run build          # web build (apps/web/dist)
 npm run dev:desktop    # Vite inside an Electron window
 npm run build:desktop  # electron-builder installers (needs a desktop OS; dmg needs macOS)
-npm test               # 44 package unit tests (node --test)
-npm run test:web       # 5 Vue component/nav/store tests (Vitest)
+npm test               # 53 package unit tests (node --test)
+npm run test:web       # 5 Vue component/nav/settings tests (Vitest)
 npm run test:all       # both
 ```
 
 ## Layout
 
 ```
-packages/    core dsp analysis charter pipeline stems simfile engine input judge
-             noteskin notefield radar editor library ui   (published @doot-games)
+packages/    chart (dsp analysis charter pipeline simfile radar stems)
+             render (noteskin notefield editor)  play (engine input judge)  library
+             (private, not published; members are files behind a barrel index.js)
 apps/web/    Vue 3 app; electron/ is the desktop target; electron-builder.yml
 tools/       shared test helpers (testutil.mjs, fakecanvas.mjs)
 ```
 
 ## App architecture (apps/web)
 
-- `src/game/singletons.js` creates the shared bus, settings, engine, input, and
-  library once. Nothing else instantiates them.
+- `src/game/singletons.js` creates the shared engine, input, and library once.
+  Nothing else instantiates them. The event bus is `game/bus.js`, and settings is
+  `game/settings.js`, one reactive object (Vue `reactive` + `watch`) that the render
+  loop reads directly and the UI binds to, with persistence and side effects as
+  watchers. The design system is a real stylesheet (`styles/design.css`) plus
+  `styles/tokens.js` for the values JS needs.
 - Composables are the seam to the imperative packages:
   - `useInput` attaches input once, runs one global rAF, and bridges raw lane and
     start/back events into `move`/`confirm`/`cancel` (nav) plus `lane:down`/`lane:up`
@@ -63,8 +66,8 @@ tools/       shared test helpers (testutil.mjs, fakecanvas.mjs)
     loop, and holds the abort-epoch guard. The Judge, chart, and song are `markRaw`
     so Vue does not deep-proxy them in the 60fps loop.
   - `useChart`, `usePlatform` (web vs desktop capabilities).
-- Pinia stores: `settings`, `library`, `songs`.
-- Canvas packages are wrapped: `NoteField.vue`, `ChartEditor.vue`, `GrooveRadar.vue`.
+- Pinia stores: `library`, `songs` (settings is the reactive module above, not a store).
+- Canvas members of `render` are wrapped: `NoteField.vue`, `ChartEditor.vue`, `GrooveRadar.vue`.
 - No router: screens are swapped by state (`game/screen.js`, read `screen`, call
   `go`), so there are no route URLs, browser Back never interrupts a song, and one
   build runs as a static site and inside Electron with nothing to keep in sync.
@@ -103,7 +106,7 @@ Two review passes ran (UI/color/accessibility and Vue/Electron correctness). Fix
 
 ## Game feel
 
-Feedback is a rendering concern, so it lives in `@doot-games/notefield` (and the
+Feedback is a rendering concern, so it lives in `@doot-games/render` (and the
 engine for sound), keeping logic pure. A hit stacks channels and scales them by
 the judgment (accumulation, not substitution): receptor pop, spark burst,
 expanding ring, a judgment word scaled by tier, a combo counter that punches per
@@ -120,7 +123,7 @@ behind a default-low intensity slider and apply it to a background layer only.
 
 Arrow color follows the Dance Dance Revolution "Note" scheme, by beat not by lane:
 4th red, 8th blue, 12th green, 16th gold (24th and 32nd kept distinct in
-`@doot-games/noteskin`). The notefield draws each note with `colorFor(n.quant)` and
+`@doot-games/render`). The notefield draws each note with `colorFor(n.quant)` and
 uses the lane only for rotation, so a jump is one color. The per-direction palette
 is decoration for menu specimens only. Cycling the song wheel plays a soft
 `engine.cursor` blip (SelectView watches `songs.sel`).
@@ -210,10 +213,8 @@ use `remove`/`put`/`get` actions), and stale references to the retired vanilla a
 and single-file bundler. The old unused Electron filesystem IPC bridge (which took
 uncontained renderer paths) was deleted; a path-contained one was then
 reintroduced deliberately to back the desktop filesystem library. The `.sm` export
-is now real: `@doot-games/simfile` gained `songToSM(record)` and the Library screen
-exports any song's charts as one StepMania `.sm`. Bumped in the workspace (not yet
-republished): `notefield`, `engine`, `ui`, `input`, `simfile`, and `library` at
-0.1.1.
+is now real: `@doot-games/chart` gained `songToSM(record)` and the Library screen
+exports any song's charts as one StepMania `.sm`.
 
 ## Known limitations and next steps
 
@@ -230,13 +231,8 @@ republished): `notefield`, `engine`, `ui`, `input`, `simfile`, and `library` at
   Electron window (the browser test harness cannot drive Electron). Run
   `npm run dev:desktop`, open Library or add a song, pick a folder, and confirm the
   `.ddr` files appear and reload.
-- Eight packages are bumped in the workspace but not yet republished to npm:
-  `notefield` 0.1.2 (juice plus beat-space scrolling) and `simfile` 0.1.2 (`.ssc`,
-  full tempo map, `parseSimfile`); and at 0.1.1 `engine` (`tick(freq)` plus the
-  `cursor` blip), `ui` (contrast, stage check, underline reset), `input` (unbound
-  label), `library` (pluggable store), `noteskin` (DDR palette), and `charter`
-  (`createTiming` plus `bpms`/`stops` on charts). `simfile` now depends on `charter`.
-  The workspace links pick them up locally; republish when ready.
+- The packages are private (unpublished) internal workspace modules, so there is no
+  versioning treadmill; the app links them directly and `node --test` runs them.
 - Component test coverage is smoke-level. Deeper tests for the roving focus and the
   session loop would help.
 
@@ -254,12 +250,12 @@ to review and commit this work (imperative subject, no AI attribution per
 `RULES.md`), for example a commit that adds the Vue app and desktop target and
 removes the vanilla app.
 
-## Publishing
+## Packages are private
 
-`@doot-games/*` packages are on npm at 0.1.0. Five are at 0.1.1 locally
-(`notefield`, `engine`, `ui`, `input`, `simfile`); republish them when ready.
-To publish from the repo root: `npm publish --workspaces --access public` (the app
-is private and is skipped). Bump versions first per semver; dependents pin `^0.1.0`,
+The four `@doot-games/*` packages are `private: true` internal workspace modules,
+not published to npm (nothing outside this app consumes them). The app links them
+through the workspace and `node --test` runs their tests. If you ever want to
+publish one, drop its `private` flag and add a version.
 which is satisfied by a 0.1.x bump.
 
 ## Rules reminder

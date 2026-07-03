@@ -2,37 +2,39 @@
 
 The whole system is two layers with one rule between them.
 
-1. **Libraries** (`packages/*`): sixteen small, framework-agnostic modules that hold
-   all the game logic and rendering, published under `@doot-games`.
+1. **Packages** (`packages/*`): four framework-agnostic, private (unpublished)
+   packages that hold all the game logic and rendering.
 2. **App** (`apps/web`): a thin Vue 3 layer of views, composables, and stores over
-   those libraries, which also packages as an Electron desktop app from the same
+   those packages, which also packages as an Electron desktop app from the same
    renderer.
 
-**The rule:** logic packages never touch the DOM and never import the app. The
-browser globals they legitimately need (canvas, audio, storage) are confined to the
-I/O packages. Nothing under `packages/` imports `apps/web`. This is what lets the
-same engine run in a browser tab, an Electron window, and a Node test.
+**The rule:** packages never touch Vue and never import the app. The browser globals
+some of them legitimately need (canvas, audio, storage) are confined to those
+packages. Nothing under `packages/` imports `apps/web`. This is what lets the same
+engine run in a browser tab, an Electron window, and a Node test.
 
-## The libraries
+## The packages
 
-Grouped by role, with the dependency direction pointing rightward (a package may
-use those to its left, never the reverse):
+Four self-contained packages (none imports another; the app wires them together).
+Each keeps its members as files under `src/` behind a barrel `index.js`.
 
-- **Primitives:** `dsp` (FFT, windows, onset math), `core` (event bus, settings).
-- **Analysis and authoring:** `analysis` (tempo and onset detection), `charter`
-  (turn analysis into step charts, plus `createTiming`, the beat-to-second map),
-  `stems` (optional WebGPU drum isolation), `pipeline` (orchestrates analyze then
-  chart), `simfile` (read and write StepMania `.sm` and `.ssc`, full tempo map),
-  `radar` (the five-axis groove radar).
-- **Play:** `judge` (timing windows, scoring, combo, life, holds; pure logic driven
-  by song time), `engine` (the Web Audio clock and hit sounds), `input` (keyboard
-  and gamepad to lane events and bindable controls).
-- **Rendering:** `noteskin` (the one arrow silhouette and its coloring), `notefield`
-  (the scrolling play field on a 2D canvas, where the game feel lives), `editor`
-  (the chart editor canvas), `library` (IndexedDB store plus `.ddr` backup and
-  optional folder sync).
-- **Design language:** `ui` (the stylesheet as a string, tokens, and small DOM
-  helpers).
+- **chart** the audio-to-chart domain, pure logic: `dsp` (FFT, windows, onset math),
+  `analysis` (onset and tempo detection), `charter` (generate step charts, plus
+  `createTiming`, the beat-to-second map), `pipeline` (the engine router; its
+  `generate` is exported as `generateFromAudio`), `simfile` (read and write
+  StepMania `.sm`/`.ssc` with the full tempo map), `radar` (the groove radar), and
+  `stems` (optional WebGPU drum isolation).
+- **render** canvas and SVG drawing: `noteskin` (the one arrow silhouette and its
+  coloring), `notefield` (the scrolling play field, where the game feel lives), and
+  `editor` (the chart editor canvas).
+- **play** the runtime primitives: `engine` (the Web Audio clock and sounds),
+  `input` (keyboard and gamepad to lane events), and `judge` (timing, scoring,
+  combo, life, holds; pure).
+- **library** the IndexedDB or filesystem song store, with `.ddr` backup.
+
+The design system is a real Vite stylesheet in the app (`styles/design.css` plus
+`styles/tokens.js`), and settings and the event bus are small app modules
+(`game/settings.js`, `game/bus.js`), not packages.
 
 Each package has a README documenting its public interface. Logic packages are
 intentionally terse; correctness lives here and is covered by `node --test` suites.
