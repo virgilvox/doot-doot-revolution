@@ -5,7 +5,7 @@
         <div class="sel-top">
           <h1><span class="tbadge"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#22203F" d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.6" fill="#22203F"/><circle cx="16.5" cy="16" r="2.6" fill="#22203F"/></svg></span> SELECT MUSIC</h1>
           <div class="right">
-            <router-link class="btn yellow sm" :to="{ name: 'add' }">+ Add Song</router-link>
+            <button class="btn yellow sm" @click="go('add')">+ Add Song</button>
             <span class="sortpill">SORT &middot; <b>GROUP</b></span>
             <span class="scount">{{ songs.all.length }}</span>
           </div>
@@ -63,7 +63,7 @@
 
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { go } from '../game/screen.js';
 import { DIFFS, nominalRadar } from '@doot-games/charter';
 import { DIFF_VAR } from '@doot-games/ui';
 import { AXES } from '@doot-games/radar';
@@ -76,7 +76,6 @@ import { useScope } from '../composables/useNavigation.js';
 import { navFocus } from '../game/navFocus.js';
 import { engine } from '../game/singletons.js';
 
-const router = useRouter();
 const songs = useSongsStore();
 const modalOpen = ref(false);
 const cur = computed(() => songs.current);
@@ -119,7 +118,7 @@ useScope({
     if (zone.value === 'wheel') { if (d === 'up') songs.move(-1); else if (d === 'down') songs.move(1); else if (d === 'right') toNav(); }
     else navMove(d);
   },
-  confirm: () => { if (zone.value === 'wheel') open(); else router.push({ name: TAB_ROUTES[NAV[navPos]] }); },
-  cancel: () => { if (zone.value === 'nav') toWheel(); else router.push({ name: 'title' }); }
+  confirm: () => { if (zone.value === 'wheel') open(); else go(TAB_ROUTES[NAV[navPos]]); },
+  cancel: () => { if (zone.value === 'nav') toWheel(); else go('title'); }
 });
 </script>

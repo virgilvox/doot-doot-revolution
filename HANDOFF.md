@@ -63,7 +63,9 @@ tools/       shared test helpers (testutil.mjs, fakecanvas.mjs)
   - `useChart`, `usePlatform` (web vs desktop capabilities).
 - Pinia stores: `settings`, `library`, `songs`.
 - Canvas packages are wrapped: `NoteField.vue`, `ChartEditor.vue`, `GrooveRadar.vue`.
-- Router is hash history so one build runs as a static site and inside Electron.
+- No router: screens are swapped by state (`game/screen.js`, read `screen`, call
+  `go`), so there are no route URLs, browser Back never interrupts a song, and one
+  build runs as a static site and inside Electron with nothing to keep in sync.
 
 ## Controller-first navigation
 

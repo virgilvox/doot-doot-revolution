@@ -4,13 +4,11 @@
     <nav v-if="showNav" class="nav webnav">
       <div class="brand" @click="go('title')"><span class="mk" v-html="brandMark"></span>DOOT DOOT REVOLUTION<span class="dot">.</span></div>
       <div class="tabs">
-        <button v-for="(t, i) in tabs" :key="t.name" class="tab" :class="{ on: route.name === t.name, kfocus: navFocus === i }" @click="go(t.name)">{{ t.label }}</button>
+        <button v-for="(t, i) in tabs" :key="t.name" class="tab" :class="{ on: screen === t.name, kfocus: navFocus === i }" @click="go(t.name)">{{ t.label }}</button>
       </div>
     </nav>
     <main class="shell-main">
-      <router-view v-slot="{ Component }">
-        <component :is="Component" />
-      </router-view>
+      <component :is="view" />
     </main>
     <Toast />
   </div>
@@ -18,18 +16,29 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import { arrowSVG } from '@doot-games/noteskin';
 import Toast from './components/Toast.vue';
+import TitleView from './views/TitleView.vue';
+import SelectView from './views/SelectView.vue';
+import GameView from './views/GameView.vue';
+import ResultsView from './views/ResultsView.vue';
+import AddView from './views/AddView.vue';
+import LibraryView from './views/LibraryView.vue';
+import SettingsView from './views/SettingsView.vue';
+import PadsView from './views/PadsView.vue';
 import { useInput } from './composables/useInput.js';
 import { bus } from './game/singletons.js';
 import { navFocus } from './game/navFocus.js';
+import { screen, go } from './game/screen.js';
 
-const router = useRouter();
-const route = useRoute();
+// Screens are swapped by state, not routed by URL. Imported directly (the app is
+// small) so a switch is instant, which matters for starting a game.
+const VIEWS = { title: TitleView, select: SelectView, game: GameView, results: ResultsView, add: AddView, library: LibraryView, settings: SettingsView, pads: PadsView };
+const view = computed(() => VIEWS[screen.value] || TitleView);
+
 onMounted(() => {
   useInput();
-  bus.on('game:end', () => router.push({ name: 'results' }));
+  bus.on('game:end', () => go('results'));
 });
 const brandMark = arrowSVG('up');
 const tabs = [
@@ -39,6 +48,5 @@ const tabs = [
   { name: 'settings', label: 'Settings' },
   { name: 'pads', label: 'Pads' }
 ];
-const showNav = computed(() => route.name !== 'title' && route.name !== 'game');
-const go = (name) => { if (route.name !== name) router.push({ name }); };
+const showNav = computed(() => screen.value !== 'title' && screen.value !== 'game');
 </script>

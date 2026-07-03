@@ -71,7 +71,7 @@
 
 <script setup>
 import { reactive, ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { go } from '../game/screen.js';
 import { analyze, estimateTempo } from '@doot-games/analysis';
 import { DIFFS } from '@doot-games/charter';
 import { ENGINES, generate as pipelineGenerate } from '@doot-games/pipeline';
@@ -86,7 +86,6 @@ import { useScope } from '../composables/useNavigation.js';
 import { toast } from '../game/toast.js';
 import { fmtTime } from '../game/covers.js';
 
-const router = useRouter();
 const plat = usePlatform();
 const lib = useLibraryStore();
 const ctx = engine.ensure();
@@ -114,7 +113,7 @@ const enginePath = ref('drum-aware');
 const editor = ref(null);
 const firstDiff = computed(() => (draft.value && draft.value.charts && draft.value.charts.expert) ? 'expert' : (draft.value ? Object.keys(draft.value.charts)[0] : 'basic'));
 
-function back() { router.push({ name: 'select' }); }
+function back() { go('select'); }
 function toggleDiff(df) { if (diffSet.has(df)) diffSet.delete(df); else diffSet.add(df); }
 
 async function loadBuffer(buf, name) {
@@ -131,7 +130,7 @@ async function onSimPick(e) {
   toast('Importing simfiles...');
   try {
     const { imported, errors } = await importSimfiles(files);
-    if (imported) { toast('Imported ' + imported + ' song' + (imported === 1 ? '' : 's')); router.push({ name: 'library' }); }
+    if (imported) { toast('Imported ' + imported + ' song' + (imported === 1 ? '' : 's')); go('library'); }
     else toast(errors[0] ? ('Import: ' + errors[0]) : 'No simfiles found in that selection');
   } catch (err) { console.error(err); toast('Import failed'); }
   e.target.value = '';
@@ -164,7 +163,7 @@ async function save() {
   Object.keys(charts).forEach((df) => { charts[df].radar = computeRadar(charts[df]); charts[df].count = charts[df].notes.length; });
   const bpm = parseFloat(meta.bpm) || draft.value.tempo.bpm;
   const rec = { id: 'song-' + Date.now(), title: meta.title || 'Untitled', artist: meta.artist || 'Unknown', bpm, offset: draft.value.tempo.offset || 0, source: 'file', createdAt: Date.now(), duration: draft.value.buffer.duration, audio: draft.value.file || null, charts };
-  await lib.put(rec); toast('Saved to library'); router.push({ name: 'library' });
+  await lib.put(rec); toast('Saved to library'); go('library');
 }
 
 useScope({ cancel: () => { if (reviewing.value) reviewing.value = false; else back(); } });

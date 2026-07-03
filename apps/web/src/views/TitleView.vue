@@ -15,14 +15,13 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { go } from '../game/screen.js';
 import { arrowSVG, LANE_DIRS } from '@doot-games/noteskin';
 import { useScope } from '../composables/useNavigation.js';
 
-const router = useRouter();
 const arrows = LANE_DIRS.map((d) => arrowSVG(d));
 const foot = '/songs · ready';
-const start = () => router.push({ name: 'select' });
+const start = () => go('select');
 
 // controller/keyboard: confirm starts, so the mouse is optional here too
 useScope({ confirm: start, cancel: () => {} });

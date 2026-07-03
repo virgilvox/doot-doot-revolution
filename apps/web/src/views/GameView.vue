@@ -14,20 +14,19 @@
 
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { go } from '../game/screen.js';
 import NoteField from '../components/NoteField.vue';
 import GameHud from '../components/GameHud.vue';
 import { session } from '../composables/useSession.js';
 import { useScope } from '../composables/useNavigation.js';
 import { pendingPlay } from '../game/play.js';
 
-const router = useRouter();
 const field = ref(null);
 const state = session.state;
 const song = computed(() => state.song);
 const sub = computed(() => state.chart ? `${state.song?.artist || ''} · ${Math.round(state.chart.bpm)} BPM · ${state.chart.difficulty}` : '');
 
-function quit() { session.stop(); router.push({ name: 'select' }); }
+function quit() { session.stop(); go('select'); }
 function restart() { session.restart(); }
 
 useScope({ cancel: quit });
@@ -36,7 +35,7 @@ onMounted(() => {
   session.attachField(field.value);
   const p = pendingPlay.value;
   if (p) session.start(p.song, p.chart);
-  else router.push({ name: 'select' });
+  else go('select');
 });
 
 // Leaving the game (quit, nav, or route change) must halt the play so a finished

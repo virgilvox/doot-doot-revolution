@@ -32,8 +32,7 @@
     "@doot-games/simfile": "^0.1.0",
     "@doot-games/ui": "^0.1.0",
     "pinia": "^2.2.0",
-    "vue": "^3.5.0",
-    "vue-router": "^4.4.0"
+    "vue": "^3.5.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.0",

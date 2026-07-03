@@ -23,14 +23,13 @@
 
 <script setup>
 import { reactive, onBeforeUnmount } from 'vue';
-import { useRouter } from 'vue-router';
+import { go } from '../game/screen.js';
 import { useSettingsStore } from '../stores/settings.js';
 import { useRovingFocus } from '../composables/useRovingFocus.js';
 import { engine } from '../game/singletons.js';
 
-const router = useRouter();
 const s = useSettingsStore();
-const back = () => router.push({ name: 'select' });
+const back = () => go('select');
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 const calib = reactive({ running: false, msg: '', clicks: [], taps: [] });

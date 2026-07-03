@@ -1,7 +1,7 @@
 # DigitalOcean App Platform spec for the web build. The app is a static SPA:
-# DigitalOcean runs the build at the repo root and serves apps/web/dist. Hash
-# routing means no server rewrites are needed, and catchall_document is set so the
-# deploy still works if routing is ever switched to history mode.
+# DigitalOcean runs the build at the repo root and serves apps/web/dist. There is
+# no routing (screens are state-driven), so no server rewrites are needed;
+# index_document and catchall_document below are a harmless safety net.
 #
 # Deploy: doctl apps create --spec .do/app.yaml  (or import this file in the
 # DigitalOcean dashboard). Update the github.repo/branch to your fork if needed.

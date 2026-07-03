@@ -2,7 +2,6 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import { mountCss, mountFonts } from '@doot-games/ui';
 import App from './App.vue';
-import { router } from './router/index.js';
 import './styles/app.css';
 
 // The arcade candy stylesheet and web fonts come from the shared ui package, so
@@ -10,4 +9,6 @@ import './styles/app.css';
 mountFonts(document);
 mountCss(document);
 
-createApp(App).use(createPinia()).use(router).mount('#app');
+// No router: screens are swapped by state (see game/screen.js), so there are no
+// URLs to keep in sync and the browser history stays out of the game.
+createApp(App).use(createPinia()).mount('#app');

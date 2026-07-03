@@ -107,9 +107,9 @@ npm run build:desktop  # Electron installers
 
 The web build is a static single-page app. `.do/app.yaml` is a ready DigitalOcean
 App Platform spec: it builds at the repo root (`npm ci && npm run build`) and
-serves `apps/web/dist`. Any static host works the same way; hash routing means no
-server rewrites are needed. See `ARCHITECTURE.md` for how the web and desktop
-targets share one renderer.
+serves `apps/web/dist`. Any static host works the same way; there is no routing at
+all (screens are state-driven), so no server rewrites are needed. See
+`ARCHITECTURE.md` for how the web and desktop targets share one renderer.
 
 ## Releases
 

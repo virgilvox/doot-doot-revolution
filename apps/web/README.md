@@ -41,7 +41,8 @@ secure defaults left on. Cross-OS installers need a CI matrix (a dmg needs macOS
 - Canvas packages are wrapped: `NoteField.vue` over `@doot-games/notefield`,
   `ChartEditor.vue` over `@doot-games/editor`, `GrooveRadar.vue` over
   `@doot-games/radar`.
-- Router is hash history, so one build runs as a static site and inside Electron.
+- No router: screens are state-driven (`game/screen.js`), so one build runs as a
+  static site and inside Electron with no route URLs to keep in sync.
 
 ## Controls
 

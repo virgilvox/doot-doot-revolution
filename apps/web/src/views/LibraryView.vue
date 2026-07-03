@@ -43,7 +43,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { go } from '../game/screen.js';
 import { covGrad, fmtTime } from '../game/covers.js';
 import { useLibraryStore } from '../stores/library.js';
 import { useSongsStore } from '../stores/songs.js';
@@ -51,7 +51,6 @@ import { usePlatform } from '../composables/usePlatform.js';
 import { useRovingFocus } from '../composables/useRovingFocus.js';
 import { toast } from '../game/toast.js';
 
-const router = useRouter();
 const lib = useLibraryStore();
 const songs = useSongsStore();
 const plat = usePlatform();
@@ -60,7 +59,7 @@ const folder = ref(false);
 const libDir = ref(null);
 const storeDesc = ref(plat.storageDescription);
 
-function back() { router.push({ name: 'select' }); }
+function back() { go('select'); }
 function updateDesc() { storeDesc.value = plat.storageDescription + (libDir.value ? '  Folder: ' + libDir.value : ''); }
 
 // desktop: the library lives in a folder on disk
@@ -70,7 +69,7 @@ async function chooseFolder() { try { const nm = await plat.chooseFolder(); fold
 async function exportFolder() { try { const n = await plat.exportFolder(); toast(n + ' written'); } catch (e) { toast('Export failed'); } }
 async function importFolder() { try { const n = await plat.importFolder(); toast(n + ' imported'); lib.refresh(); } catch (e) { toast('Import failed'); } }
 async function onRestore(e) { const f = e.target.files[0]; if (!f) return; try { const n = await plat.restore(f); toast('Restored ' + n + ' song' + (n === 1 ? '' : 's')); lib.refresh(); } catch (err) { toast('Not a valid .ddr file'); } e.target.value = ''; }
-function play(sng) { songs.ensureDemos(); songs.selectId(sng.id); router.push({ name: 'select' }); }
+function play(sng) { songs.ensureDemos(); songs.selectId(sng.id); go('select'); }
 async function del(sng) { await lib.remove(sng.id); toast('Deleted'); }
 function exportSM(sng) { plat.exportSM(sng); toast('Exported ' + (sng.title || 'song') + '.sm'); }
 

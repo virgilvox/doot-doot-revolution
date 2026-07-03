@@ -65,8 +65,8 @@ routing, reactive view state, and layout.
 
 There is one renderer. Electron is a second build target, not a fork.
 
-- **Web:** a static single-page app with hash routing, so it deploys to any static
-  host with no server rewrites.
+- **Web:** a static single-page app with state-driven screens and no router, so it
+  deploys to any static host with no server rewrites.
 - **Desktop:** Electron with the secure defaults left on (context isolation on, node
   integration off, sandbox on). The packaged app serves the SPA from a registered
   `app://` secure scheme, because `file://` disables IndexedDB and cross-origin

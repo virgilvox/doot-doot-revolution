@@ -27,7 +27,7 @@
 
 <script setup>
 import { ref, computed, onBeforeUnmount } from 'vue';
-import { useRouter } from 'vue-router';
+import { go } from '../game/screen.js';
 import { DIFFS, nominalRadar } from '@doot-games/charter';
 import { DIFF_VAR } from '@doot-games/ui';
 import { AXES } from '@doot-games/radar';
@@ -38,7 +38,6 @@ import { setPlay } from '../game/play.js';
 
 const props = defineProps({ song: Object });
 const emit = defineEmits(['close']);
-const router = useRouter();
 const { ensureChart } = useChart();
 
 const diffs = Object.keys(DIFFS);
@@ -62,7 +61,7 @@ async function confirm() {
     if (aborted) return; // player pressed Back while the chart was generating
     setPlay(props.song, chart);
     emit('close');
-    router.push({ name: 'game' });
+    go('game');
   } finally { busy.value = false; }
 }
 

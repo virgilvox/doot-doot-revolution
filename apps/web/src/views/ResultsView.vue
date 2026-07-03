@@ -25,13 +25,12 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { go } from '../game/screen.js';
 import { DIFFS } from '@doot-games/charter';
 import { session } from '../composables/useSession.js';
 import { useRovingFocus } from '../composables/useRovingFocus.js';
 import { setPlay } from '../game/play.js';
 
-const router = useRouter();
 const state = session.state;
 const results = computed(() => state.results);
 const title = computed(() => state.song ? `${state.song.title} · ${(DIFFS[state.chart?.difficulty] || {}).name || ''}` : 'Results');
@@ -63,12 +62,12 @@ function countUp() {
   requestAnimationFrame(step);
 }
 
-function retry() { if (state.song && state.chart) { setPlay(state.song, state.chart); router.push({ name: 'game' }); } }
-function toSelect() { router.push({ name: 'select' }); }
+function retry() { if (state.song && state.chart) { setPlay(state.song, state.chart); go('game'); } }
+function toSelect() { go('select'); }
 const { index } = useRovingFocus({ size: () => 2, onConfirm: (i) => (i === 0 ? retry() : toSelect()), onCancel: toSelect });
 
 onMounted(() => {
-  if (!results.value) { router.push({ name: 'select' }); return; }
+  if (!results.value) { go('select'); return; }
   requestAnimationFrame(() => { revealed.value = true; });
   countUp();
   // slam the grade in after the tallies and numbers have counted up: the payoff

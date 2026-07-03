@@ -22,12 +22,11 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { useRouter } from 'vue-router';
+import { go } from '../game/screen.js';
 import { arrowSVG, LANE_DIRS } from '@doot-games/noteskin';
 import { input } from '../game/singletons.js';
 import { useRovingFocus } from '../composables/useRovingFocus.js';
 
-const router = useRouter();
 const arrows = LANE_DIRS.map((d) => arrowSVG(d));
 const names = input.LANE_NAMES;
 const labels = ref(names.map((_, l) => input.describe(l)));
@@ -38,7 +37,7 @@ const detect = ref('None detected. Press a button on a controller to wake it.');
 function refresh() { labels.value = names.map((_, l) => input.describe(l)); }
 function bind(l) { listening.value = l; input.listen(l); }
 function togglePad() { padOn.value = !padOn.value; input.setPadEnabled(padOn.value); }
-function back() { input.cancelListen(); router.push({ name: 'select' }); }
+function back() { input.cancelListen(); go('select'); }
 
 const offBound = input.on('bound', () => { listening.value = -1; refresh(); });
 let timer = 0;
