@@ -74,7 +74,8 @@ const sub = computed(() => {
   return state.chart ? `${state.song?.artist || ''} · ${Math.round(state.chart.bpm)} BPM · ${state.chart.difficulty}` : '';
 });
 
-function quit() { if (state.endless) session.quit(); else { session.stop(); go('select'); } }
+// endless and versus quit to a results/standings screen; a solo fixed song abandons
+function quit() { if (state.endless || state.multi) session.quit(); else { session.stop(); go('select'); } }
 function restart() { session.restart(); }
 useScope({ cancel: quit });
 
