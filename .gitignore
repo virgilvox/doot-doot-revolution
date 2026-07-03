@@ -8,3 +8,6 @@ coverage/
 dist/
 dist-electron/
 release/
+
+# ytdl-core writes this when it cannot parse YouTube changes
+*-player-script.js
