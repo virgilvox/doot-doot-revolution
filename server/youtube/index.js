@@ -35,7 +35,10 @@ const server = http.createServer(async (req, res) => {
   const cors = { 'Access-Control-Allow-Origin': ALLOW_ORIGIN, 'Access-Control-Expose-Headers': 'X-Video-Title' };
   if (req.method === 'OPTIONS') { res.writeHead(204, cors); return res.end(); }
   const target = new URL(req.url, 'http://x').searchParams.get('url');
-  if (!target || !isYouTube(target)) { res.writeHead(400, cors); return res.end('bad or missing YouTube url'); }
+  // no url is the health/root probe (App Platform checks the container root); 200 keeps
+  // the component healthy. a present-but-non-YouTube url is a real bad request.
+  if (!target) { res.writeHead(200, cors); return res.end('doot yt-service ok'); }
+  if (!isYouTube(target)) { res.writeHead(400, cors); return res.end('not a YouTube url'); }
   const base = { noPlaylist: true, noWarnings: true, jsRuntimes: 'node' };
   const out = path.join(tmpdir(), `yt-${Date.now()}-${Math.floor(process.hrtime()[1])}.audio`);
   try {
