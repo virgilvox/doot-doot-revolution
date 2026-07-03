@@ -1,27 +1,31 @@
 <template>
   <div class="view player-setup"><div class="view-inner">
     <div class="scr-head"><button class="btn white sm" @click="back">&larr; Back</button><h1>Players</h1></div>
-    <div class="panel ps-panel">
-      <div class="ps-song">{{ song?.title }} <span class="ps-diff">{{ diffName }}</span></div>
 
-      <div class="ps-count">
-        <button class="ps-arrow" :class="{ off: count <= 1 }" :disabled="count <= 1" @click="dec">&#9664;</button>
-        <div class="ps-num" :style="{ color: color(0) }">{{ count }}</div>
-        <button class="ps-arrow" :class="{ off: count >= maxPlayers }" :disabled="count >= maxPlayers" @click="inc">&#9654;</button>
+    <div class="panel ps-panel">
+      <div class="ps-song"><span class="ps-title">{{ song?.title }}</span><span class="ps-diff" :style="{ background: diffColor }">{{ diffName }}</span></div>
+
+      <div class="ps-stepper-wrap">
+        <div class="ps-prompt">How many players?</div>
+        <div class="ps-stepper">
+          <button class="ps-arrow" :disabled="count <= 1" @click="dec" aria-label="fewer players">&#9664;</button>
+          <div class="ps-num" :style="{ color: color(0) }">{{ count }}</div>
+          <button class="ps-arrow" :disabled="count >= maxPlayers" @click="inc" aria-label="more players">&#9654;</button>
+        </div>
+        <div class="ps-mode" :style="{ color: count > 1 ? color(0) : '' }">{{ count === 1 ? 'Solo' : 'Versus' }}</div>
       </div>
-      <div class="ps-mode">{{ count === 1 ? 'Solo' : count + ' players &middot; versus' }}</div>
 
       <div class="ps-players">
-        <div v-for="i in count" :key="i" class="ps-p" :style="{ '--pc': color(i - 1) }">
-          <span class="ps-tag">P{{ i }}</span>
+        <div v-for="i in count" :key="i" class="ps-card" :style="{ '--pc': color(i - 1) }">
+          <span class="ps-badge">P{{ i }}</span>
           <span class="ps-dev">{{ deviceLabel(i - 1) }}</span>
         </div>
       </div>
 
-      <div v-if="!hasPads" class="ps-note">No controllers detected &mdash; playing on the keyboard (P1 arrow keys, P2 = W A S D). Plug in gamepads for up to 4 players.</div>
+      <div v-if="!hasPads" class="ps-note"><b>No controllers detected.</b> Playing on the keyboard — P1 uses the arrow keys, P2 uses W A S D. Plug in gamepads for up to 4 players.</div>
 
-      <div class="ps-cta"><button class="btn green" :disabled="busy" @click="start">{{ busy ? '…' : 'DANCE' }}</button></div>
-      <div class="eyebrow ps-hint">&#9664; &#9654; change players &middot; A / Enter to dance &middot; B / Esc back</div>
+      <button class="btn green ps-dance" :disabled="busy" @click="start">{{ busy ? '…' : 'DANCE' }}</button>
+      <div class="eyebrow ps-hint">&#9664; &#9654; change &middot; A / Enter to dance &middot; B / Esc back</div>
     </div>
   </div></div>
 </template>
@@ -30,6 +34,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { go } from '../game/screen.js';
 import { DIFFS } from '@doot-games/chart';
+import { DIFF_VAR } from '../styles/tokens.js';
 import { input } from '../game/singletons.js';
 import { useChart } from '../composables/useChart.js';
 import { useScope } from '../composables/useNavigation.js';
@@ -41,9 +46,10 @@ const setup = pendingSetup.value || {};
 const song = setup.song;
 const difficulty = setup.difficulty || 'basic';
 const diffName = computed(() => (DIFFS[difficulty] || {}).name || difficulty);
+const diffColor = `var(${DIFF_VAR[difficulty] || '--green'})`;
 
 function cleanId(id) { return String(id || 'Controller').replace(/\(.*?\)/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 28) || 'Controller'; }
-// Devices to assign, controllers first then the two keyboards; capped at four players.
+// devices to assign, controllers first then the two keyboards; capped at four players
 const padList = ref(input.pads());
 const order = computed(() => [
   ...padList.value.map((p) => ({ device: p.device, label: cleanId(p.id) })),
@@ -96,20 +102,30 @@ onBeforeUnmount(() => { aborted = true; clearInterval(timer); });
 </script>
 
 <style scoped>
-.player-setup :deep(.view-inner) { align-items: center; }
-.ps-panel { align-items: center; text-align: center; gap: 16px; width: min(520px, 96vw); }
-.ps-song { font-family: var(--fd); font-weight: 800; font-size: 20px; }
-.ps-diff { font-family: var(--fu); font-weight: 800; font-size: 13px; color: #605d84; text-transform: uppercase; letter-spacing: 1px; margin-left: 6px; }
-.ps-count { display: flex; align-items: center; gap: 22px; }
-.ps-arrow { width: 52px; height: 52px; border: 3px solid var(--ink); border-radius: var(--r2); background: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 4px 0 var(--ink-2); }
-.ps-arrow.off { opacity: .35; box-shadow: none; cursor: default; }
-.ps-num { font-family: var(--fd); font-weight: 800; font-size: 72px; min-width: 70px; }
-.ps-mode { font-family: var(--fu); font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1.4px; color: #605d84; }
-.ps-players { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-.ps-p { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px; border: 2px solid var(--ink); border-radius: var(--r2); border-left: 7px solid var(--pc); background: #fff; }
-.ps-tag { font-family: var(--fd); font-weight: 800; color: #fff; background: var(--pc); border-radius: 999px; padding: 2px 9px; font-size: 13px; }
-.ps-dev { font-family: var(--fu); font-weight: 700; font-size: 13px; }
-.ps-note { font-family: var(--fu); font-weight: 700; font-size: 12px; color: #7d5a2e; background: var(--cream); border: 2px solid var(--ink); border-radius: var(--r2); padding: 8px 12px; max-width: 440px; }
-.ps-cta { margin-top: 4px; }
-.ps-hint { text-align: center; }
+.player-setup :deep(.view-inner) { align-items: center; justify-content: center; }
+.ps-panel { align-items: center; text-align: center; gap: 20px; width: min(460px, 94vw); padding: clamp(20px, 4vw, 34px); }
+
+.ps-song { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.ps-title { font-family: var(--fd); font-weight: 800; font-size: clamp(20px, 4vw, 26px); }
+.ps-diff { font-family: var(--fd); font-weight: 800; font-size: 12px; color: #fff; text-transform: uppercase; letter-spacing: .5px; padding: 3px 10px; border-radius: 999px; border: 2px solid var(--ink); }
+
+.ps-stepper-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ps-prompt { font-family: var(--fu); font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 1.6px; color: #7d7aa0; }
+.ps-stepper { display: flex; align-items: center; gap: clamp(16px, 5vw, 30px); }
+.ps-arrow { width: 56px; height: 56px; border: 3px solid var(--ink); border-radius: var(--r2); background: #fff; color: var(--ink); font-size: 20px; cursor: pointer; box-shadow: 0 5px 0 var(--ink-2); transition: transform .1s, box-shadow .1s; }
+.ps-arrow:hover:not(:disabled) { transform: translateY(-1px); }
+.ps-arrow:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 0 0 var(--ink-2); }
+.ps-arrow:disabled { opacity: .3; box-shadow: none; cursor: default; }
+.ps-num { font-family: var(--fd); font-weight: 800; font-size: clamp(72px, 16vw, 92px); line-height: 1; min-width: 72px; text-shadow: 0 4px 0 var(--ink-2); }
+.ps-mode { font-family: var(--fd); font-weight: 800; font-size: 15px; text-transform: uppercase; letter-spacing: 2px; color: #7d7aa0; }
+
+.ps-players { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.ps-card { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 104px; padding: 12px 10px; background: #fff; border: 3px solid var(--ink); border-top: 7px solid var(--pc); border-radius: var(--r2); box-shadow: 0 4px 0 var(--ink-2); }
+.ps-badge { font-family: var(--fd); font-weight: 800; color: #fff; background: var(--pc); border: 2px solid var(--ink); border-radius: 999px; padding: 1px 12px; font-size: 14px; }
+.ps-dev { font-family: var(--fu); font-weight: 700; font-size: 12px; color: var(--ink); }
+
+.ps-note { font-family: var(--fu); font-weight: 600; font-size: 12px; line-height: 1.45; color: #7d5a2e; background: var(--cream); border: 2px solid var(--ink); border-radius: var(--r2); padding: 9px 13px; max-width: 400px; }
+.ps-note b { font-weight: 800; }
+.ps-dance { font-size: 18px; padding: 12px 40px; }
+.ps-hint { text-align: center; letter-spacing: 1px; }
 </style>

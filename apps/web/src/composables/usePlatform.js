@@ -92,12 +92,16 @@ export function usePlatform() {
       try { title = decodeURIComponent(title); } catch (err) { /* header was plain */ }
       return { bytes, title, mime: (res.headers.get('Content-Type') || 'audio/webm').split(';')[0].trim() };
     },
-    // adaptive one-line hint for the import row
+    // one-line hint for the import row. On web with no YouTube backend it covers only
+    // the direct-URL case; the YouTube-needs-desktop note (with the downloader link) is
+    // shown separately via showYtHelp so the message is not duplicated.
     urlImportHint: isDesktop
       ? 'Paste a direct audio URL or a YouTube link, fetched and ripped locally.'
       : (YT_ENDPOINT
         ? 'Paste a direct audio URL or a YouTube link.'
-        : 'Paste a direct audio URL' + (CORS_PROXY ? '' : ' (CORS-friendly hosts only)') + '. YouTube links need the desktop app or a configured backend.'),
+        : 'Paste a direct audio URL' + (CORS_PROXY ? '.' : ' (CORS-friendly hosts).')),
+    // show the "use a downloader" note only when YouTube cannot work here (web, no backend)
+    showYtHelp: !isDesktop && !YT_ENDPOINT,
     chooseFolder: () => library.chooseFolder(),
     exportFolder: () => library.exportToFolder(),
     importFolder: () => library.importFromFolder()
