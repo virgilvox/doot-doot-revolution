@@ -9,6 +9,7 @@ import { createTiming } from '@doot-games/chart';
 import { engine, input } from '../game/singletons.js';
 import { settings } from '../game/settings.js';
 import { bus } from '../game/bus.js';
+import { ensureBuffer } from '../game/audio.js';
 
 // hit tick pitch per judgment: brighter for a better hit
 const TICK_FREQ = { marvelous: 1245, perfect: 1046, great: 880, good: 740, boo: 620 };
@@ -27,8 +28,9 @@ function createSession() {
     state.song = markRaw(song); state.chart = markRaw(chart); state.results = null; state.score = 0; state.combo = 0; state.life = 50; state.progress = 0;
     const judge = new Judge(chart); state.judge = markRaw(judge);
     timing = createTiming(chart); // beat<->time map, so variable-BPM charts scroll right
-    let buf = song.buffer; if (!buf) { buf = await engine.decode(await song.audio.arrayBuffer()); if (mine !== epoch) return; song.buffer = buf; }
-    engine.load(buf); engine.applyVolumes();
+    // imported songs need a decoded buffer; composed songs play from the live synth
+    if (!song._piece) { const buf = song.buffer || await ensureBuffer(song); if (mine !== epoch || !buf) return; engine.load(buf); }
+    engine.applyVolumes();
     subs.push(bus.on('lane:down', ({ lane }) => {
       if (!active) return;
       const type = judge.hit(lane, engine.time() + off());
@@ -38,7 +40,8 @@ function createSession() {
     await engine.resume(); if (mine !== epoch) return;
     if (field) { field.resize(); field.setReducedMotion(settings.reducedMotion); }
     await countdown(() => mine === epoch); if (mine !== epoch) return;
-    engine.play(0); active = true; state.playing = true; loop();
+    if (song._piece) engine.playPiece(song._piece); else engine.play(0);
+    active = true; state.playing = true; loop();
   }
 
   function countdown(alive) {

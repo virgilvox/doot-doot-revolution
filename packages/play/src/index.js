@@ -5,3 +5,4 @@
 export * from './engine.js';
 export * from './input.js';
 export * from './judge.js';
+export * from './synth.js';

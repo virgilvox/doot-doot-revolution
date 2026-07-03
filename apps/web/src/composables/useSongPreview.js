@@ -7,6 +7,7 @@
 
 import { watch, onBeforeUnmount } from 'vue';
 import { engine } from '../game/singletons.js';
+import { ensureBuffer } from '../game/audio.js';
 
 const SETTLE_MS = 350; // let the wheel settle before a preview fades in
 const LOOP_LEN = 26;   // seconds of the looped window for full-length songs
@@ -24,14 +25,19 @@ export function useSongPreview(currentSong) {
   let timer = 0, token = 0;
 
   async function playFor(song) {
+    if (!song || song.endless) return; // the endless tile has nothing to preview
     const mine = ++token;
+    // composed songs preview live from the synth, looping from a hook a third in
+    if (song._piece) {
+      const fromStep = Math.floor(song._piece.totalSteps * 0.33 / 16) * 16;
+      engine.previewPiece(song._piece, { fromStep });
+      return;
+    }
     let buf = song.buffer;
     if (!buf) {
-      if (!song.audio) return; // nothing decodable (e.g. a record with no audio)
-      try { buf = await engine.decode(await song.audio.arrayBuffer()); }
+      try { buf = await ensureBuffer(song); } // decodes an imported blob
       catch (e) { return; }
-      if (mine !== token) return; // the selection moved on while we were decoding
-      song.buffer = buf;
+      if (!buf || mine !== token) return; // moved on while decoding
     }
     if (mine !== token) return;
     engine.preview(buf, { start: startPoint(buf), loopLen: LOOP_LEN });

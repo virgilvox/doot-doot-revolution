@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { engine } from '../game/singletons.js';
 import { makeDemos } from '../game/demos.js';
 import { useLibraryStore } from './library.js';
 
@@ -13,7 +12,7 @@ export const useSongsStore = defineStore('songs', () => {
   const all = computed(() => [...demos.value, ...lib.songs]);
   const current = computed(() => all.value[sel.value] || null);
 
-  function ensureDemos() { if (!demos.value.length) demos.value = makeDemos(engine); lib.init(); }
+  function ensureDemos() { if (!demos.value.length) demos.value = makeDemos(); lib.init(); }
   function move(delta) { const n = all.value.length; if (!n) return; sel.value = ((sel.value + delta) % n + n) % n; }
   function selectId(id) { const i = all.value.findIndex((s) => s.id === id); if (i >= 0) sel.value = i; }
 

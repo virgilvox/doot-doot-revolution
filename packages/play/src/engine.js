@@ -1,6 +1,16 @@
 // engine: Web Audio playback and the master clock. The audio hardware clock
-// (ctx.currentTime) is the single source of truth for song time; the renderer
-// and the judge both read it through here, so audio and visuals never drift.
+// (ctx.currentTime) is the single source of truth for song time; the renderer and
+// the judge both read it through here, so audio and visuals never drift. Songs play
+// two ways: imported audio through a buffer source (play/load), and composed songs
+// through a live subtractive synth scheduled a little ahead of the clock (playPiece)
+// — only the sounding voices ever exist, so dense generated music is cheap. A
+// composed song can carry a `source.extend()` hook so the scheduler keeps pulling
+// new bars forever (the perpetual stream).
+
+import { createSynthChain, scheduleStep, pieceStepDur } from './synth.js';
+
+const LOOKAHEAD = 0.15; // seconds scheduled ahead of the clock
+const TICK = 25;        // scheduler timer, ms
 
 export class AudioEngine {
   constructor() {
@@ -8,6 +18,11 @@ export class AudioEngine {
     this.master = null; this.music = null; this.sfx = null;
     this.startAt = 0; this.pauseAt = 0; this.playing = false; this._onend = null;
     this.previewSrc = null; this.previewGain = null;
+    // live synth scheduler (game)
+    this.synth = null; this.schedTimer = null; this.schedStep = 0; this.schedNext = 0;
+    this._piece = null; this._pieceDur = 0; this._stepDur = 0; this._source = null;
+    // live synth preview (select wheel)
+    this.previewSynth = null; this.previewTimer = null; this.previewStep = 0; this.previewNext = 0; this.previewFrom = 0; this._prPiece = null; this._prStepDur = 0;
     this.volumes = { master: 0.9, music: 0.85, sfx: 0.7 };
   }
   _ensure() {
@@ -18,7 +33,6 @@ export class AudioEngine {
     this.applyVolumes();
   }
   ensure() { this._ensure(); return this.ctx; }
-  // outputLatency (or baseLatency) in milliseconds, for a first-guess offset.
   latencyMs() { if (!this.ctx) return 0; return Math.round((this.ctx.outputLatency || this.ctx.baseLatency || 0) * 1000); }
 
   setVolumes(v) { Object.assign(this.volumes, v); this.applyVolumes(); }
@@ -28,20 +42,53 @@ export class AudioEngine {
   async decode(arrayBuffer) { this._ensure(); return await this.ctx.decodeAudioData(arrayBuffer.slice(0)); }
   load(buffer) { this.buffer = buffer; }
 
+  // Imported-audio playback via a buffer source.
   play(fromSec = 0) {
     this._ensure(); this.stop(); this.stopPreview(0.1);
     const s = this.ctx.createBufferSource(); s.buffer = this.buffer; s.connect(this.music);
     s.onended = () => { if (this.playing && this._onend) this._onend(); };
     this.startAt = this.ctx.currentTime - fromSec; s.start(0, Math.max(0, fromSec));
-    this.src = s; this.playing = true;
+    this.src = s; this.playing = true; this._piece = null;
   }
-  stop() { if (this.src) { try { this.src.onended = null; this.src.stop(); } catch (e) {} this.src = null; } this.playing = false; }
 
-  // A looping, faded song preview on the music bus for the select wheel. It is
-  // fully independent of the game buffer and the master clock, so previewing a
-  // track never disturbs a session's timing. Starting a new preview crossfades out
-  // the previous one; real playback (play) stops it. loopLen, when the buffer is
-  // longer, loops a window from start rather than the whole track.
+  // Composed-song playback via the live synth. `source.extend()`, if present, is
+  // called when the scheduler reaches the end of the composed material, letting a
+  // conductor append more bars for an endless stream.
+  playPiece(piece, { from = 0, onEnd = null, source = null } = {}) {
+    this._ensure(); this.stop(); this.stopPreview(0.1);
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    this._stepDur = pieceStepDur(piece);
+    this._piece = piece; this._pieceDur = piece.totalSteps * this._stepDur; this._source = source; this._onend = onEnd;
+    this.synth = createSynthChain(this.ctx, piece.M, piece.tempo, this.music);
+    const startAt = this.ctx.currentTime + 0.12;
+    this.startAt = startAt; this.schedStep = from; this.schedNext = startAt + from * this._stepDur;
+    this.buffer = null; this.playing = true;
+    this._scheduler();
+  }
+  _scheduler() {
+    if (!this.playing || !this.synth) return;
+    while (this.schedNext < this.ctx.currentTime + LOOKAHEAD) {
+      if (this.schedStep >= this._piece.totalSteps) {
+        if (this._source && this._source.extend) this._source.extend();
+        if (this.schedStep >= this._piece.totalSteps) break; // finite song: nothing more to schedule
+      }
+      scheduleStep(this.ctx, this.synth, this._piece, this.schedStep, this.schedNext);
+      this.schedNext += this._stepDur; this.schedStep++;
+    }
+    const done = !this._source && this.schedStep >= this._piece.totalSteps;
+    this.schedTimer = done ? null : setTimeout(() => this._scheduler(), TICK);
+  }
+
+  stop() {
+    if (this.src) { try { this.src.onended = null; this.src.stop(); } catch (e) {} this.src = null; }
+    if (this.schedTimer) { clearTimeout(this.schedTimer); this.schedTimer = null; }
+    if (this.synth) { this.synth.dispose(0.06); this.synth = null; }
+    this._piece = null; this._source = null; this.playing = false;
+  }
+
+  // A looping, faded song preview on the music bus for the select wheel, independent
+  // of the game clock. Imported songs preview from a decoded buffer; composed songs
+  // preview from the live synth (previewPiece). Real playback stops either.
   preview(buffer, { start = 0, loopLen = 0, fadeIn = 0.35, gain = 1 } = {}) {
     if (!buffer) return;
     this._ensure();
@@ -59,27 +106,42 @@ export class AudioEngine {
     this.previewSrc = s; this.previewGain = g;
   }
 
-  // Fade out and stop the current preview, if any. Safe to call when none is set.
+  // Live preview of a composed piece: loop the piece from a hook point, faded in,
+  // on its own synth chain so it never touches the game scheduler.
+  previewPiece(piece, { fromStep = 0, fadeIn = 0.4 } = {}) {
+    this._ensure();
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    this.stopPreview(0.25);
+    this._prStepDur = pieceStepDur(piece); this._prPiece = piece; this.previewFrom = fromStep;
+    this.previewSynth = createSynthChain(this.ctx, piece.M, piece.tempo, this.music, { gain: 0.9 });
+    this.previewSynth.fadeIn(fadeIn);
+    this.previewStep = fromStep; this.previewNext = this.ctx.currentTime + 0.12;
+    this._previewScheduler();
+  }
+  _previewScheduler() {
+    if (!this.previewSynth) return;
+    while (this.previewNext < this.ctx.currentTime + LOOKAHEAD) {
+      if (this.previewStep >= this._prPiece.totalSteps) this.previewStep = this.previewFrom; // loop the hook window
+      scheduleStep(this.ctx, this.previewSynth, this._prPiece, this.previewStep, this.previewNext);
+      this.previewNext += this._prStepDur; this.previewStep++;
+    }
+    this.previewTimer = setTimeout(() => this._previewScheduler(), TICK);
+  }
+
+  // Fade out and stop any preview (buffer or synth). Safe to call when none is set.
   stopPreview(fade = 0.28) {
     const s = this.previewSrc, g = this.previewGain;
     this.previewSrc = null; this.previewGain = null;
-    if (!s || !this.ctx) return;
-    const t = this.ctx.currentTime;
-    try {
-      if (g) { g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(Math.max(0.0001, g.gain.value), t); g.gain.exponentialRampToValueAtTime(0.0001, t + fade); }
-      s.stop(t + fade + 0.05);
-    } catch (e) {}
+    if (s && this.ctx) { const t = this.ctx.currentTime; try { if (g) { g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(Math.max(0.0001, g.gain.value), t); g.gain.exponentialRampToValueAtTime(0.0001, t + fade); } s.stop(t + fade + 0.05); } catch (e) {} }
+    if (this.previewTimer) { clearTimeout(this.previewTimer); this.previewTimer = null; }
+    if (this.previewSynth) { this.previewSynth.dispose(fade); this.previewSynth = null; this._prPiece = null; }
   }
 
-  // Current song time in seconds, read from the audio clock.
   time() { if (!this.ctx || !this.playing) return this.pauseAt; return this.ctx.currentTime - this.startAt; }
-  duration() { return this.buffer ? this.buffer.duration : 0; }
-  // Beat position given the chart's bpm and first-beat offset.
+  duration() { if (this._piece) return this._pieceDur; return this.buffer ? this.buffer.duration : 0; }
   beat(bpm, offsetSec) { return (this.time() - offsetSec) / (60 / bpm); }
   onended(fn) { this._onend = fn; }
 
-  // A short hit blip on the sfx bus. freq lets callers brighten the tick for a
-  // better judgment (a Marvelous rings higher than a Good).
   tick(freq = 880) {
     if (!this.ctx) return;
     const o = this.ctx.createOscillator(), g = this.ctx.createGain();
@@ -90,9 +152,6 @@ export class AudioEngine {
     o.connect(g); g.connect(this.sfx); o.start(); o.stop(this.ctx.currentTime + 0.09);
   }
 
-  // A short, soft cursor blip for menu navigation (cycling the song wheel). A
-  // quick upward chirp on a triangle wave, gentler than the gameplay tick so it
-  // does not fatigue on fast scrolling. dir < 0 (moving up the list) rings higher.
   cursor(dir = 1) {
     this._ensure(); if (!this.ctx) return;
     if (this.ctx.state === 'suspended') this.ctx.resume();

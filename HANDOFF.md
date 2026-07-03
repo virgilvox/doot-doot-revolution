@@ -16,11 +16,12 @@ opens on the Title attract screen.
 The earlier vanilla single-file app (`apps/ddr`) was retired; the packages remain
 the proof the logic is framework-free.
 
-Current status: builds clean, 58 tests pass (53 package, 5 Vue), deployed live at
+Current status: builds clean, 61 tests pass (53 package, 8 Vue), deployed live at
 https://dance.doot.games, verified end to end in the browser (controller-only play,
 difficulty modal, viewport-fit gameplay with the game-feel pass, StepMania import,
-add/review/save, all menus). Navigation is state-driven (no router). No console
-errors.
+add/review/save, all menus, and a looping song preview on the select wheel).
+Navigation is state-driven (no router). No console errors. CI is green (it installs
+with `npm install` after clearing the lockfile, working around npm/cli#4828).
 
 ## Run, build, test
 
@@ -31,7 +32,7 @@ npm run build          # web build (apps/web/dist)
 npm run dev:desktop    # Vite inside an Electron window
 npm run build:desktop  # electron-builder installers (needs a desktop OS; dmg needs macOS)
 npm test               # 53 package unit tests (node --test)
-npm run test:web       # 5 Vue component/nav/settings tests (Vitest)
+npm run test:web       # 8 Vue component/nav/settings/preview tests (Vitest)
 npm run test:all       # both
 ```
 
