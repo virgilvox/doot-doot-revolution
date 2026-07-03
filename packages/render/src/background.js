@@ -16,17 +16,23 @@ function f(x) { let s = (+x).toFixed(4); if (!/[.]/.test(s)) s += '.0'; return s
 function v3(r, g, b) { return `vec3(${f(r)},${f(g)},${f(b)})`; }
 
 const FIELD_NAMES = ['fbm', 'ridged', 'voronoi', 'rings', 'plasma', 'cells', 'waves', 'swirl', 'gyroid', 'truchet', 'flow'];
+// Trypophobia-safe: voronoi (idx 2), cells (5) and truchet (9) are removed from every
+// mood (weight 0) because they cluster holes/bumps; their weight is redistributed to the
+// smooth flowing fields (fbm, plasma, swirl, gyroid, flow). rings (3) is kept only at a
+// low weight and softened. Palettes raise the trough (a vs b) so no channel clamps to a
+// pure-black hole center, cap the colour frequency c <= 1.0, and drop scanlines/heavy
+// grain that add a stippled lattice.
 export const BG_MOODS = [
-  { name: 'AURORA', fieldW: [3, 1, 0, 2, 3, 1, 2, 3, 2, 0, 4], pal: { a: [.15, .30, .35], b: [.50, .50, .40], c: [1, 1, .80], d: [0, .25, .55] }, zoom: 1.4, rot: .05, warp: .9, fScale: 2.0, drift: .12, cScale: 1.1, cShift: .05, gamma: 1.2, vig: .30, grain: .05, scan: false, scanAmt: 0 },
-  { name: 'NOCTURNE', fieldW: [4, 1, 1, 2, 2, 1, 1, 2, 1, 1, 3], pal: { a: [.20, .20, .30], b: [.40, .30, .50], c: [1, 1, 1], d: [0, .15, .42] }, zoom: 1.6, rot: .03, warp: .6, fScale: 2.2, drift: .08, cScale: 1.0, cShift: .03, gamma: 1.4, vig: .42, grain: .07, scan: false, scanAmt: 0 },
-  { name: 'MAGMA', fieldW: [1, 4, 3, 1, 1, 3, 1, 1, 2, 1, 1], pal: { a: [.50, .20, .15], b: [.50, .35, .20], c: [1, .85, .60], d: [0, .10, .20] }, zoom: 1.8, rot: .02, warp: .7, fScale: 3.0, drift: .10, cScale: 1.3, cShift: .04, gamma: 1.6, vig: .40, grain: .06, scan: false, scanAmt: 0 },
-  { name: 'GLASS', fieldW: [1, 1, 3, 3, 1, 2, 2, 1, 2, 3, 1], pal: { a: [.50, .50, .55], b: [.45, .45, .50], c: [1, 1, 1], d: [.10, .22, .35] }, zoom: 1.5, rot: .06, warp: .5, fScale: 2.4, drift: .07, cScale: 1.2, cShift: .05, gamma: 1.1, vig: .35, grain: .04, scan: false, scanAmt: 0 },
-  { name: 'VAPOR', fieldW: [4, 0, 0, 2, 3, 0, 2, 2, 1, 0, 3], pal: { a: [.60, .50, .60], b: [.35, .30, .35], c: [.80, .90, 1], d: [.20, .42, .62] }, zoom: 1.3, rot: .04, warp: .8, fScale: 1.8, drift: .09, cScale: 1.0, cShift: .06, gamma: 1.0, vig: .28, grain: .05, scan: false, scanAmt: 0 },
-  { name: 'CIRCUIT', fieldW: [1, 1, 3, 2, 1, 3, 1, 1, 1, 3, 1], pal: { a: [.10, .25, .25], b: [.30, .50, .45], c: [1, 1, .90], d: [.20, .42, .22] }, zoom: 2.0, rot: .03, warp: .6, fScale: 3.2, drift: .10, cScale: 1.4, cShift: .04, gamma: 1.5, vig: .40, grain: .08, scan: true, scanAmt: .28 },
-  { name: 'OCEAN', fieldW: [2, 1, 0, 1, 2, 0, 3, 3, 1, 0, 4], pal: { a: [.10, .25, .35], b: [.30, .40, .45], c: [1, 1, .90], d: [.10, .35, .60] }, zoom: 1.5, rot: .04, warp: .9, fScale: 2.1, drift: .11, cScale: 1.1, cShift: .05, gamma: 1.2, vig: .33, grain: .05, scan: false, scanAmt: 0 },
-  { name: 'ACID', fieldW: [1, 1, 2, 2, 1, 2, 2, 1, 3, 3, 1], pal: { a: [.55, .50, .45], b: [.45, .50, .50], c: [1.10, 1.0, 1.30], d: [0, .25, .50] }, zoom: 1.6, rot: .06, warp: .8, fScale: 2.6, drift: .12, cScale: 1.5, cShift: .07, gamma: 1.2, vig: .30, grain: .06, scan: false, scanAmt: 0 },
-  { name: 'SOLAR', fieldW: [2, 1, 0, 2, 4, 0, 3, 1, 3, 0, 2], pal: { a: [.60, .40, .20], b: [.40, .40, .20], c: [1, 1, .60], d: [0, .12, .25] }, zoom: 1.5, rot: .03, warp: .7, fScale: 2.2, drift: .10, cScale: 1.2, cShift: .05, gamma: 1.3, vig: .34, grain: .05, scan: false, scanAmt: 0 },
-  { name: 'EMBER', fieldW: [2, 3, 1, 1, 2, 2, 1, 2, 1, 1, 2], pal: { a: [.45, .28, .12], b: [.45, .32, .15], c: [1, .90, .70], d: [0, .10, .20] }, zoom: 1.6, rot: .03, warp: .7, fScale: 2.5, drift: .09, cScale: 1.2, cShift: .04, gamma: 1.5, vig: .40, grain: .07, scan: false, scanAmt: 0 }
+  { name: 'AURORA', fieldW: [4, 1, 0, 1, 3, 0, 2, 3, 2, 0, 4], pal: { a: [.45, .45, .35], b: [.50, .50, .40], c: [1, 1, .80], d: [0, .25, .55] }, zoom: 1.4, rot: .05, warp: .9, fScale: 2.0, drift: .12, cScale: 1.1, cShift: .05, gamma: 1.2, vig: .30, grain: .05, scan: false, scanAmt: 0 },
+  { name: 'NOCTURNE', fieldW: [6, 1, 0, 1, 2, 0, 1, 2, 1, 0, 3], pal: { a: [.28, .28, .36], b: [.32, .24, .40], c: [1, 1, 1], d: [0, .15, .42] }, zoom: 1.6, rot: .03, warp: .6, fScale: 2.2, drift: .08, cScale: 1.0, cShift: .03, gamma: 1.4, vig: .42, grain: .05, scan: false, scanAmt: 0 },
+  { name: 'MAGMA', fieldW: [2, 5, 0, 1, 3, 0, 1, 1, 2, 0, 2], pal: { a: [.50, .28, .22], b: [.42, .28, .18], c: [1, .85, .60], d: [0, .10, .20] }, zoom: 1.8, rot: .02, warp: .7, fScale: 3.0, drift: .10, cScale: 1.15, cShift: .04, gamma: 1.6, vig: .40, grain: .05, scan: false, scanAmt: 0 },
+  { name: 'GLASS', fieldW: [2, 1, 0, 2, 3, 0, 3, 2, 3, 0, 2], pal: { a: [.50, .50, .55], b: [.45, .45, .50], c: [1, 1, 1], d: [.10, .22, .35] }, zoom: 1.5, rot: .06, warp: .5, fScale: 2.4, drift: .07, cScale: 1.2, cShift: .05, gamma: 1.1, vig: .35, grain: .04, scan: false, scanAmt: 0 },
+  { name: 'VAPOR', fieldW: [4, 0, 0, 1, 3, 0, 2, 2, 1, 0, 4], pal: { a: [.60, .50, .60], b: [.35, .30, .35], c: [.80, .90, 1], d: [.20, .42, .62] }, zoom: 1.3, rot: .04, warp: .8, fScale: 1.8, drift: .09, cScale: 1.0, cShift: .06, gamma: 1.0, vig: .28, grain: .05, scan: false, scanAmt: 0 },
+  { name: 'CIRCUIT', fieldW: [2, 2, 0, 1, 3, 0, 2, 2, 3, 0, 3], pal: { a: [.30, .40, .40], b: [.30, .50, .45], c: [1, 1, .90], d: [.20, .42, .22] }, zoom: 2.0, rot: .03, warp: .6, fScale: 3.2, drift: .10, cScale: 1.15, cShift: .04, gamma: 1.5, vig: .40, grain: .05, scan: false, scanAmt: 0 },
+  { name: 'OCEAN', fieldW: [2, 1, 0, 1, 2, 0, 3, 3, 1, 0, 4], pal: { a: [.25, .35, .40], b: [.30, .40, .45], c: [1, 1, .90], d: [.10, .35, .60] }, zoom: 1.5, rot: .04, warp: .9, fScale: 2.1, drift: .11, cScale: 1.1, cShift: .05, gamma: 1.2, vig: .33, grain: .05, scan: false, scanAmt: 0 },
+  { name: 'ACID', fieldW: [2, 1, 0, 1, 2, 0, 3, 2, 4, 0, 2], pal: { a: [.55, .50, .45], b: [.45, .50, .50], c: [1.0, 1.0, 1.0], d: [0, .25, .50] }, zoom: 1.6, rot: .06, warp: .8, fScale: 2.6, drift: .12, cScale: 1.1, cShift: .07, gamma: 1.2, vig: .30, grain: .05, scan: false, scanAmt: 0 },
+  { name: 'SOLAR', fieldW: [2, 1, 0, 1, 4, 0, 3, 1, 3, 0, 3], pal: { a: [.60, .40, .20], b: [.40, .40, .20], c: [1, 1, .60], d: [0, .12, .25] }, zoom: 1.5, rot: .03, warp: .7, fScale: 2.2, drift: .10, cScale: 1.2, cShift: .05, gamma: 1.3, vig: .34, grain: .05, scan: false, scanAmt: 0 },
+  { name: 'EMBER', fieldW: [3, 4, 0, 1, 2, 0, 1, 2, 1, 0, 2], pal: { a: [.45, .28, .12], b: [.45, .32, .15], c: [1, .90, .70], d: [0, .10, .20] }, zoom: 1.6, rot: .03, warp: .7, fScale: 2.5, drift: .09, cScale: 1.2, cShift: .04, gamma: 1.5, vig: .40, grain: .05, scan: false, scanAmt: 0 }
 ];
 const MOOD_SALT = [0x9e3779b1, 0x85ebca77, 0xc2b2ae3d, 0x27d4eb2f, 0x165667b1, 0x3b97a19b, 0x452821e6, 0x38d01377, 0xbe5466cf, 0x34e90c6c];
 
@@ -74,12 +80,12 @@ function buildFragSource(state) {
   if (fieldName === 'fbm') S.push(`fld=fbm(p*u_fScale+vec2(1.3,4.7)+time*u_drift);`);
   else if (fieldName === 'ridged') S.push(`fld=ridged(p*u_fScale+time*u_drift);`);
   else if (fieldName === 'voronoi') S.push(`fld=voronoi(p*u_fScale+time*u_drift);`);
-  else if (fieldName === 'rings') S.push(`fld=0.5+0.5*sin(length(p)*u_fScale-time*u_drift*2.0+fbm(p*2.0)*3.0);`);
+  else if (fieldName === 'rings') S.push(`fld=0.5+0.4*sin(length(p)*u_fScale*0.45-time*u_drift*2.0+fbm(p*1.5)*5.0);`);
   else if (fieldName === 'plasma') S.push(`fld=0.5+0.5*sin(p.x*u_fScale+time*u_drift)*cos(p.y*u_fScale-time*u_drift*0.8)+0.35*fbm(p*u_fScale*0.5);`);
   else if (fieldName === 'cells') S.push(`fld=1.0-voronoiEdge(p*u_fScale+time*u_drift);`);
-  else if (fieldName === 'waves') S.push(`fld=0.5+(sin(p.x*u_fScale+time*u_drift)+sin((0.5*p.x+0.866*p.y)*u_fScale-time*u_drift)+sin((0.5*p.x-0.866*p.y)*u_fScale+time*u_drift*0.7))*0.16667;`);
+  else if (fieldName === 'waves') S.push(`fld=0.5+0.5*(sin(p.x*u_fScale+time*u_drift)+sin(p.y*u_fScale*0.9-time*u_drift*0.8))*0.5;`);
   else if (fieldName === 'swirl') S.push(`fld=fbm(rot(p,length(p)*2.0+time*u_drift)*u_fScale);`);
-  else if (fieldName === 'gyroid') S.push(`{ float gx=sin(p.x*u_fScale)*cos(p.y*u_fScale); float gy=sin(p.y*u_fScale)*cos(p.x*u_fScale); fld=0.5+0.5*sin((gx+gy)*2.0+time*u_drift); }`);
+  else if (fieldName === 'gyroid') S.push(`{ float gx=sin(p.x*u_fScale)*cos(p.y*u_fScale); float gy=sin(p.y*u_fScale)*cos(p.x*u_fScale); fld=0.5+0.4*sin((gx+gy)*1.4+time*u_drift); }`);
   else if (fieldName === 'truchet') S.push(`{ vec2 gp=p*u_fScale; vec2 gc=floor(gp); vec2 gf=fract(gp)-0.5; float rr=step(0.5,hash21(gc)); vec2 ctr=mix(vec2(-0.5),vec2(0.5),rr); float bd=smoothstep(0.62,0.38,abs(length(gf-ctr)-0.5)*4.0); fld=0.5+0.5*sin(bd*6.28318-time*u_drift*2.0); }`);
   else S.push(`{ vec2 q=vec2(fbm(p*u_fScale+time*u_drift),fbm(p*u_fScale+vec2(5.2,1.3)-time*u_drift)); fld=fbm(p*u_fScale+2.0*q); }`);
   if (R.layer) {
@@ -88,15 +94,17 @@ function buildFragSource(state) {
     const g = pick(rng, [3, 2, 2, 2]);
     if (g === 0) S.push(`float fld2=fbm(pb*${f(bS)}+${f(bO)}+time*u_drift);`);
     else if (g === 1) S.push(`float fld2=ridged(pb*${f(bS)}-time*u_drift);`);
-    else if (g === 2) S.push(`float fld2=voronoi(pb*${f(bS)}+time*u_drift);`);
+    else if (g === 2) S.push(`float fld2=0.5+0.5*sin(pb.x*${f(bS)}+time*u_drift)*cos(pb.y*${f(bS)}-time*u_drift*0.8);`);
     else S.push(`float fld2=0.5+0.5*sin(pb.x*${f(bS)}+time*u_drift)*sin(pb.y*${f(bS)});`);
-    const bl = pick(rng, [2, 2, 2, 1]);
+    const bl = pick(rng, [3, 2, 2, 0]);
     if (bl === 0) S.push(`fld=mix(fld,fld2,u_layer);`);
     else if (bl === 1) S.push(`fld=mix(fld,fld*fld2,u_layer);`);
     else if (bl === 2) S.push(`fld=mix(fld,1.0-(1.0-clamp(fld,0.0,1.0))*(1.0-clamp(fld2,0.0,1.0)),u_layer);`);
     else S.push(`fld=mix(fld,abs(fld-fld2),u_layer);`);
   }
-  if (R.mod) { const m = pick(rng, [2, 1, 2, 1]); if (m === 0) S.push(`fld=pow(clamp(fld,0.0,1.0),u_gamma);`); else if (m === 1) S.push(`fld=fract(fld*(1.0+u_gamma*3.0));`); else if (m === 2) S.push(`fld=smoothstep(0.15,0.85,fld);`); else S.push(`fld=0.5+0.5*sin(fld*6.28318*(0.5+u_gamma));`); }
+  // modulation kept soft: gamma, or a gentle sine remap. The fract() and smoothstep()
+  // options were removed -- they posterize the field into hard-edged clustered patches.
+  if (R.mod) { const m = pick(rng, [3, 0, 0, 1]); if (m === 0) S.push(`fld=pow(clamp(fld,0.0,1.0),u_gamma);`); else S.push(`fld=0.5+0.5*sin(fld*6.28318*(0.35+u_gamma*0.4));`); }
   S.push(`vec3 col=palette(fld*u_cScale+time*u_cShift+u_hue,${PA},${PB},${PC},${PD});`);
   S.push(`col=mix(vec3(dot(col,vec3(0.299,0.587,0.114))),col,u_chroma);`);
   if (R.post) {
