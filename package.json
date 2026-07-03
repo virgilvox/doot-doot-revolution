@@ -11,11 +11,13 @@
     "apps/*"
   ],
   "scripts": {
-    "test": "node --test",
-    "build": "node tools/build-singlefile.mjs",
-    "check": "node tools/check-bundle.mjs",
-    "render-check": "node tools/check-screens.mjs",
-    "validate": "npm test && npm run build && npm run render-check"
+    "test": "node --test packages/*/test/*.test.js",
+    "test:web": "npm --workspace @doot-games/web run test",
+    "test:all": "npm test && npm run test:web",
+    "dev": "npm --workspace @doot-games/web run dev",
+    "dev:desktop": "npm --workspace @doot-games/web run dev:desktop",
+    "build": "npm --workspace @doot-games/web run build",
+    "build:desktop": "npm --workspace @doot-games/web run build:desktop"
   },
   "engines": {
     "node": ">=20"

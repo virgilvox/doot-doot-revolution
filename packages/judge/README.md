@@ -23,7 +23,7 @@ Miss break it.
 
 ## API
 
-`new Judge(chart, options?)` or `createJudge(chart, options?)`.
+`new Judge(chart, options?)`.
 
 - `hit(lane, t)` register a tap at song time `t`. Returns the judgment name or null.
 - `update(t, held)` advance to song time `t`; `held` is the per-lane key-down array, used for the freeze grace. Sweeps missed taps and finishes or drops holds.

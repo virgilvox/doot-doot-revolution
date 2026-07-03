@@ -1,6 +1,6 @@
 {
   "name": "@doot-games/charter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Two stage step charter: onset placement then foot-alternating arrow selection with difficulty scaling.",
   "type": "module",
   "sideEffects": false,

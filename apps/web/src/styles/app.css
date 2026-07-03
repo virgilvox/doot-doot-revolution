@@ -1,0 +1,39 @@
+/* App shell layout. The design tokens and component styles come from
+   @doot-games/ui; this file only locks the app to the viewport so nothing
+   scrolls off screen and gameplay can fill the available area exactly. */
+
+html, body, #app { height: 100%; }
+body { margin: 0; }
+#app { min-height: 100dvh; }
+
+.shell {
+  position: relative; z-index: 1;
+  height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.shell-main { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
+
+/* the top nav, centered to the same max width as the content */
+.webnav { max-width: var(--maxw); width: 100%; margin: 0 auto; padding: clamp(10px, 2vw, 18px) clamp(12px, 3vw, 22px) 0; }
+
+/* a scrolling menu view: the shell stays put, dense menus scroll inside */
+.view { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: auto; }
+.view-inner { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: clamp(10px, 2vw, 20px); flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+/* a fill view: content fills the shell with no scroll (gameplay) */
+.view-fill { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
+
+/* menu-screen headings render on the warm paper body, not a colored frame, so
+   the white-on-frame heading style would be near-invisible. Use ink. */
+.view .scr-head h1 { color: var(--ink); text-shadow: none; }
+
+/* visible focus ring for controller/keyboard navigation. A blue ring, not black,
+   so it reads as focus rather than a second border stacked on the ink outline
+   most controls already have. Applied to whatever the active focus scope marks as
+   current, since controller focus does not move DOM focus. */
+.kfocus { outline: 3px solid var(--blue); outline-offset: 2px; border-radius: 12px; }
+
+/* respect the OS reduced-motion setting even if the in-app toggle is untouched */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: .001s !important; }
+}

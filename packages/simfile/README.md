@@ -1,12 +1,21 @@
 # @doot-games/simfile
 
-Read and write StepMania `.sm` files and the native Doot song package. Pure string
-work, no DOM.
+Read and write StepMania `.sm` and `.ssc` files and the native Doot song package.
+Pure string work, no DOM.
 
-## StepMania .sm
+## StepMania read and write
 
-`toSM(chart, meta?)` serializes a chart. `parseSM(text)` reads the first
-dance-single chart back into `{ title, artist, bpm, offset, difficulty, notes }`.
+`toSM(chart, meta?)` serializes one chart. `songToSM(record)` serializes a whole
+song record, writing every difficulty chart under a single song header the way
+StepMania groups them.
+
+`parseSimfile(text)` reads a `.sm` or `.ssc` (auto-detected) into a song record:
+`{ title, artist, bpm, offset, bpms, stops, music, charts }`, with every
+dance-single difficulty under `charts`. It parses the full tempo map (`#BPMS` and
+`#STOPS`, and per-chart overrides in `.ssc`) and times each note through a
+`createTiming` map, so BPM changes and stops import in sync. `parseSSC(text)` is
+the `.ssc`-specific reader. `parseSM(text)` remains for the single first chart,
+returning `{ title, artist, bpm, offset, bpms, stops, difficulty, notes }`.
 
 Note characters follow the spec: `0` empty, `1` tap, `2` hold head, `3` hold or
 roll tail, `4` roll head, `M` mine. Column order is Left, Down, Up, Right.

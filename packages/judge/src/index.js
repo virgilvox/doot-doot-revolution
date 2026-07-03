@@ -111,5 +111,3 @@ export class Judge {
     };
   }
 }
-
-export function createJudge(chart, options) { return new Judge(chart, options); }

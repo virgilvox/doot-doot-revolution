@@ -1,7 +1,7 @@
 {
   "name": "@doot-games/simfile",
-  "version": "0.1.0",
-  "description": "Serialize and parse StepMania .sm files and the native Doot song package.",
+  "version": "0.1.2",
+  "description": "Serialize and parse StepMania .sm and .ssc files and the native Doot song package.",
   "type": "module",
   "sideEffects": false,
   "main": "./src/index.js",
@@ -13,6 +13,9 @@
     "src",
     "README.md"
   ],
+  "dependencies": {
+    "@doot-games/charter": "^0.1.0"
+  },
   "license": "MIT",
   "author": "Moheeb Zara"
 }

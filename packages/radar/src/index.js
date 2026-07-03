@@ -45,6 +45,3 @@ export function radarSVG(radar, opt = {}) {
   }
   return grid + spokes + '<polygon points="' + pts.join(' ') + '" fill="rgba(155,92,255,.28)" stroke="var(--purple)" stroke-width="3" stroke-linejoin="round"/>' + dots;
 }
-
-// Draw the radar into an existing <svg> element.
-export function drawRadar(svgEl, radar, opt) { svgEl.innerHTML = radarSVG(radar, opt); }

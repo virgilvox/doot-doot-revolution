@@ -1,6 +1,6 @@
 {
   "name": "@doot-games/input",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Keyboard and Web Gamepad input, rebindable per lane, emitting lane down, lane up, start, and back events.",
   "type": "module",
   "sideEffects": false,

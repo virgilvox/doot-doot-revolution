@@ -1,6 +1,6 @@
 {
   "name": "@doot-games/notefield",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "The scrolling notefield renderer on canvas: receptors, notes, holds, driven by song time.",
   "type": "module",
   "sideEffects": false,

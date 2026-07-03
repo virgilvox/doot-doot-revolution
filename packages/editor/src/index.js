@@ -136,7 +136,7 @@ export function createEditor(container, opts = {}) {
     if (drag.kind === 'new' || drag.kind === 'hold') { if (Math.abs(cell.beat - drag.startBeat) > snapStep() * 0.75) { drag.kind = 'hold'; setHold(drag.idx, cell.beat); } }
     else if (drag.kind === 'move') { const n = chart().notes[drag.idx]; if (n) { n.lane = clamp(Math.round(cell.lane), 0, 3); n.beat = snapBeat(cell.beat); n.t = beatToTime(n.beat); onChange(getCharts()); } }
   }
-  function onStripUp() { if (drag && drag.kind === 'new') { /* a plain click added a tap */ } drag = null; }
+  function onStripUp() { drag = null; }
 
   // wheel scrubs time
   function onWheel(ev) { ev.preventDefault(); if (playing) pause(); const dt = (ev.deltaY > 0 ? 1 : -1) * snapStep() * period(); playTime = clamp(playTime + dt, 0, duration); }

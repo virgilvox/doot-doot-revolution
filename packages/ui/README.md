@@ -6,12 +6,11 @@ the full component stylesheet, and small DOM helpers.
 
 ## API
 
-- `css` the complete stylesheet as a string. This is the source of truth for styling. The app injects it at boot and the bundler inlines it into the single file build.
+- `css` the complete stylesheet as a string. This is the source of truth for styling. The app injects it into the document at boot.
 - `tokens` the palette, spacing scale, radii, fonts, and easing curves as data, so canvas and logic code can read the same values the CSS uses.
 - `DIFF_VAR` maps a difficulty key to its `--d-*` CSS variable name.
 - `mountCss(doc?, id?)` injects the stylesheet into a document and returns the `<style>` element.
 - `mountFonts(doc?)` links the Baloo 2 and Outfit web fonts.
-- `escapeHtml(value)` escapes a string for safe `innerHTML` insertion.
 
 ## Tokens
 

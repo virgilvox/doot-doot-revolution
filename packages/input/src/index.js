@@ -87,7 +87,7 @@ export function createInput(options = {}) {
     cancelListen: () => { listening = null; },
     setPadEnabled: (v) => { padEnabled = !!v; },
     padEnabled: () => padEnabled,
-    describe: (lane) => binds.lanes[lane].map((b) => b.type === 'key' ? keyLabel(b.code) : ('Pad ' + b.index)).join('  +  ') || '—',
+    describe: (lane) => binds.lanes[lane].map((b) => b.type === 'key' ? keyLabel(b.code) : ('Pad ' + b.index)).join('  +  ') || 'unbound',
     reset: () => { binds = DEFAULTS(); save(); }
   };
 }

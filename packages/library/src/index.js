@@ -1,41 +1,33 @@
-// library: the song store. Songs persist in IndexedDB so the app works offline
-// with no server. A record keeps the original audio Blob (AudioBuffers are not
-// serializable, so the app re-decodes on play) plus the generated charts.
+// library: the song store. On the web, songs persist in IndexedDB so the app
+// works offline with no server. In the desktop app they persist as real files on
+// disk: the app passes a filesystem-backed store with the same interface (see
+// apps/web/src/game/fsLibrary.js). Either way a record keeps the original audio
+// Blob (AudioBuffers are not serializable, so the app re-decodes on play) plus the
+// generated charts.
 //
-// Two optional export paths sit alongside the store: a single portable .ddr
-// backup file that works everywhere, and File System Access folder sync where
-// the browser supports it.
+// The storage backend is pluggable: createLibrary({ store }) swaps IndexedDB for
+// any object exposing the same async CRUD. Two export paths sit alongside the
+// store: a single portable .ddr backup file that works everywhere, and File System
+// Access folder sync where the browser supports it.
 //
 // record = { id, title, artist, bpm, offset, source, createdAt, duration,
 //            audio: Blob, charts: { [difficulty]: chart } }
 
 export function createLibrary(options = {}) {
-  const idb = options.indexedDB || (typeof indexedDB !== 'undefined' ? indexedDB : null);
-  const DB = options.dbName || 'ddr', STORE = 'songs', VER = 1;
-  let _db = null, _dir = null;
   const canFolder = typeof window !== 'undefined' && 'showDirectoryPicker' in window;
+  let _dir = null;
   const listeners = new Set();
   const onChange = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
   const fire = () => listeners.forEach((fn) => { try { fn(); } catch (e) { console.error(e); } });
 
-  function open() {
-    return new Promise((res, rej) => {
-      if (_db) return res(_db);
-      if (!idb) return rej(new Error('IndexedDB unavailable'));
-      const r = idb.open(DB, VER);
-      r.onupgradeneeded = () => { const db = r.result; if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: 'id' }); };
-      r.onsuccess = () => { _db = r.result; res(_db); };
-      r.onerror = () => rej(r.error);
-    });
-  }
-  function tx(mode) { return open().then((db) => db.transaction(STORE, mode).objectStore(STORE)); }
-  const req = (r) => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
-
-  async function list() { return (await req((await tx('readonly')).getAll())) || []; }
-  async function get(id) { return await req((await tx('readonly')).get(id)); }
-  async function put(rec) { await req((await tx('readwrite')).put(rec)); fire(); return rec; }
-  async function remove(id) { await req((await tx('readwrite')).delete(id)); fire(); }
-  async function clear() { await req((await tx('readwrite')).clear()); fire(); }
+  // The persistence backend. Defaults to IndexedDB; the desktop app passes a
+  // filesystem store. The public writes fire onChange so views refresh.
+  const store = options.store || idbStore(options);
+  const list = () => store.list();
+  const get = (id) => store.get(id);
+  async function put(rec) { const r = await store.put(rec); fire(); return r || rec; }
+  async function remove(id) { await store.remove(id); fire(); }
+  async function clear() { await store.clear(); fire(); }
 
   const blobToDataURL = (b) => new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(b); });
   const dataURLToBlob = async (u) => await (await fetch(u)).blob();
@@ -76,5 +68,33 @@ export function createLibrary(options = {}) {
     return n;
   }
 
-  return { list, get, put, remove, clear, onChange, exportFile, importFile, chooseFolder, exportToFolder, importFromFolder, haveFolder, canFolder };
+  return { list, get, put, remove, clear, onChange, exportFile, importFile, chooseFolder, exportToFolder, importFromFolder, haveFolder, canFolder, backend: store.kind || 'indexeddb' };
+}
+
+// Default backend: IndexedDB, so the browser build persists with no server and no
+// permission prompts.
+function idbStore(options = {}) {
+  const idb = options.indexedDB || (typeof indexedDB !== 'undefined' ? indexedDB : null);
+  const DB = options.dbName || 'ddr', STORE = 'songs', VER = 1;
+  let _db = null;
+  function open() {
+    return new Promise((res, rej) => {
+      if (_db) return res(_db);
+      if (!idb) return rej(new Error('IndexedDB unavailable'));
+      const r = idb.open(DB, VER);
+      r.onupgradeneeded = () => { const db = r.result; if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: 'id' }); };
+      r.onsuccess = () => { _db = r.result; res(_db); };
+      r.onerror = () => rej(r.error);
+    });
+  }
+  function tx(mode) { return open().then((db) => db.transaction(STORE, mode).objectStore(STORE)); }
+  const req = (r) => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  return {
+    kind: 'indexeddb',
+    list: async () => (await req((await tx('readonly')).getAll())) || [],
+    get: async (id) => await req((await tx('readonly')).get(id)),
+    put: async (rec) => { await req((await tx('readwrite')).put(rec)); return rec; },
+    remove: async (id) => { await req((await tx('readwrite')).delete(id)); },
+    clear: async () => { await req((await tx('readwrite')).clear()); }
+  };
 }

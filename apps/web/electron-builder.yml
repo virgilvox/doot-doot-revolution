@@ -1,0 +1,39 @@
+appId: com.dootgames.dootdootrevolution
+productName: Doot Doot Revolution
+directories:
+  output: release/${version}
+files:
+  - dist
+  - dist-electron
+asar: true
+
+# Code signing happens automatically when the platform cert is present in the
+# environment (CSC_LINK plus CSC_KEY_PASSWORD, set as CI secrets). With no cert
+# the build still succeeds, unsigned. macOS notarization is opt in: set
+# mac.notarize below to true and provide the APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD
+# / APPLE_TEAM_ID secrets.
+mac:
+  target: [dmg]
+  category: public.app-category.games
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  notarize: false
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+
+linux:
+  target: [AppImage]
+  category: Game
+
+publish:
+  provider: github
+  owner: virgilvox
+  repo: doot-doot-revolution

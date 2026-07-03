@@ -1,6 +1,6 @@
 {
   "name": "@doot-games/ui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Arcade candy design tokens as CSS variables plus shared UI primitives.",
   "type": "module",
   "sideEffects": false,

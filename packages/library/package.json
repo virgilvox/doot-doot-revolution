@@ -1,6 +1,6 @@
 {
   "name": "@doot-games/library",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "IndexedDB song store with blob audio, plus portable backup and optional folder sync.",
   "type": "module",
   "sideEffects": false,

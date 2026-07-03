@@ -143,13 +143,16 @@ export function generate(analysis, tempo, options = {}) {
 
   return {
     bpm, offset, difficulty, foot: D.foot, meter: D.foot, duration: dur,
+    // a generated chart has one constant tempo and no stops; imported StepMania
+    // charts carry a full map. createTiming reads these either way.
+    bpms: [{ beat: 0, bpm }], stops: [],
     engine: options.engine || 'drum', engineUsed: options.engineUsed || (useBands ? 'drum-aware' : 'quick (onset+tempo)'),
     notes, count, radar
   };
 }
 
 // Count rows that carry two or more arrows (jumps).
-export function countJumps(notes) {
+function countJumps(notes) {
   let c = 0, i = 0;
   const sorted = notes.slice().sort((a, b) => a.t - b.t);
   while (i < sorted.length) { let j = i + 1; while (j < sorted.length && Math.abs(sorted[j].t - sorted[i].t) < 1e-3) j++; if (j - i >= 2) c++; i = j; }
@@ -160,4 +163,70 @@ export function countJumps(notes) {
 export function nominalRadar(difficulty) {
   const D = DIFFS[difficulty] || DIFFS.basic, f = D.foot / 15;
   return { stream: Math.min(1, f * 0.9 + 0.1), voltage: Math.min(1, f), air: Math.min(1, D.jumpProb * 3), freeze: Math.min(1, D.holdProb * 4), chaos: Math.min(1, f * 0.8) };
+}
+
+// createTiming: convert between beats and audio time given a tempo map and stops,
+// the way StepMania does. A chart is authored in beats; this maps a beat to the
+// second it sounds (and back), honoring every BPM change and stop so gimmick
+// charts stay in sync. A constant-tempo chart is just the one-segment case.
+//
+//   chart.offset  audio time (seconds) of beat 0. Negative offsets (a lead-in) are
+//                 fine; beats before 0 extrapolate on the first BPM.
+//   chart.bpms    [{ beat, bpm }] sorted; defaults to [{ beat: 0, bpm: chart.bpm }].
+//   chart.stops   [{ beat, seconds }] a pause of `seconds` when the beat is reached.
+//
+// The map is a list of (beat, time) anchors, piecewise linear between them. A stop
+// is a vertical step: the same beat at two times, so time advances while the beat
+// (and therefore every arrow on screen) holds still.
+export function createTiming(chart) {
+  const offset = chart.offset || 0;
+  const bpms = (chart.bpms && chart.bpms.length ? chart.bpms.slice() : [{ beat: 0, bpm: chart.bpm || 120 }]).sort((a, b) => a.beat - b.beat);
+  // StepMania always anchors a BPM at beat 0; guard a malformed file that does not
+  // so the anchor list stays monotonic (the first tempo applies from the start).
+  if (bpms[0].beat > 0) bpms.unshift({ beat: 0, bpm: bpms[0].bpm });
+  const stops = (chart.stops || []).slice().sort((a, b) => a.beat - b.beat);
+
+  const events = [];
+  for (let i = 1; i < bpms.length; i++) events.push({ beat: bpms[i].beat, bpm: bpms[i].bpm });
+  for (const s of stops) if (s.seconds > 0) events.push({ beat: s.beat, stop: s.seconds });
+  // at a shared beat, apply the stop before a BPM change so the pause uses the old tempo
+  events.sort((a, b) => a.beat - b.beat || ((a.stop ? 0 : 1) - (b.stop ? 0 : 1)));
+
+  const anchors = [{ beat: bpms[0].beat, time: offset }];
+  let curBeat = bpms[0].beat, curTime = offset, spb = 60 / bpms[0].bpm;
+  for (const ev of events) {
+    curTime += (ev.beat - curBeat) * spb; curBeat = ev.beat;
+    anchors.push({ beat: curBeat, time: curTime });
+    if (ev.stop) { curTime += ev.stop; anchors.push({ beat: curBeat, time: curTime }); }
+    else spb = 60 / ev.bpm;
+  }
+  const tailSpb = spb, tailBeat = curBeat, tailTime = curTime;
+
+  function beatToTime(beat) {
+    for (let i = 0; i < anchors.length - 1; i++) {
+      const a = anchors[i], b = anchors[i + 1];
+      if (b.beat === a.beat) continue; // a stop has no beat width
+      if (beat <= b.beat) return a.time + (beat - a.beat) / (b.beat - a.beat) * (b.time - a.time);
+    }
+    return tailTime + (beat - tailBeat) * tailSpb;
+  }
+  function timeToBeat(time) {
+    for (let i = 0; i < anchors.length - 1; i++) {
+      const a = anchors[i], b = anchors[i + 1];
+      if (time <= b.time) {
+        if (b.beat === a.beat || b.time === a.time) return a.beat; // frozen during a stop
+        return a.beat + (time - a.time) / (b.time - a.time) * (b.beat - a.beat);
+      }
+    }
+    return tailBeat + (time - tailTime) / tailSpb;
+  }
+  // seconds per beat at a given time, for anything that still wants a local tempo
+  function bpmAtTime(time) {
+    const b = timeToBeat(time);
+    let cur = bpms[0].bpm;
+    for (const p of bpms) { if (p.beat <= b + 1e-6) cur = p.bpm; else break; }
+    return cur;
+  }
+
+  return { beatToTime, timeToBeat, bpmAtTime, offset, firstBpm: bpms[0].bpm };
 }

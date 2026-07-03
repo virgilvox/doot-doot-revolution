@@ -1,6 +1,6 @@
 {
   "name": "@doot-games/noteskin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "StepMania arrow geometry, colored by quantization and direction, drawn to canvas or returned as SVG.",
   "type": "module",
   "sideEffects": false,

@@ -25,6 +25,7 @@ alternation and the home-side backbone only.
 - `generate(analysis, tempo, options)` returns a chart. `options`: `difficulty`, `laneBias` (`drum` or `none`), `seed`, `engine`, `engineUsed`.
 - `countJumps(notes)` count rows carrying two or more arrows.
 - `nominalRadar(difficulty)` a preview radar for a difficulty before a chart exists.
+- `createTiming(chart)` returns `{ beatToTime, timeToBeat, bpmAtTime, offset, firstBpm }` from a chart's `offset`, `bpms` (`[{ beat, bpm }]`), and `stops` (`[{ beat, seconds }]`). A generated chart has one BPM and no stops; an imported StepMania chart carries the full map. This is the single place beats and seconds convert, so BPM changes and stops stay in sync everywhere.
 
 ## Chart shape
 

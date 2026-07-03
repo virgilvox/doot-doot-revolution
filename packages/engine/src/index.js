@@ -43,15 +43,33 @@ export class AudioEngine {
   beat(bpm, offsetSec) { return (this.time() - offsetSec) / (60 / bpm); }
   onended(fn) { this._onend = fn; }
 
-  // A short hit blip on the sfx bus, optional feedback for a tap.
-  tick() {
+  // A short hit blip on the sfx bus. freq lets callers brighten the tick for a
+  // better judgment (a Marvelous rings higher than a Good).
+  tick(freq = 880) {
     if (!this.ctx) return;
     const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-    o.type = 'square'; o.frequency.value = 880;
+    o.type = 'square'; o.frequency.value = freq;
     g.gain.setValueAtTime(0.0001, this.ctx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.25, this.ctx.currentTime + 0.004);
     g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.08);
     o.connect(g); g.connect(this.sfx); o.start(); o.stop(this.ctx.currentTime + 0.09);
+  }
+
+  // A short, soft cursor blip for menu navigation (cycling the song wheel). A
+  // quick upward chirp on a triangle wave, gentler than the gameplay tick so it
+  // does not fatigue on fast scrolling. dir < 0 (moving up the list) rings higher.
+  cursor(dir = 1) {
+    this._ensure(); if (!this.ctx) return;
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    const t = this.ctx.currentTime, base = dir < 0 ? 640 : 500;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(base, t);
+    o.frequency.exponentialRampToValueAtTime(base * 1.5, t + 0.05);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.12, t + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
+    o.connect(g); g.connect(this.sfx); o.start(t); o.stop(t + 0.12);
   }
 }
 

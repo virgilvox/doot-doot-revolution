@@ -23,8 +23,7 @@ These rules apply to everything in this repository: code, documentation, UI copy
 - Small libraries, thin app. Put logic in framework agnostic packages. Keep screens limited to the DOM and to wiring packages together. Logic packages do not touch the DOM.
 - Engineered well, not over engineered. Group by cohesive responsibility. Do not split into micro packages that add ceremony without payoff. Do not add a framework where a function will do.
 - Stable interfaces. Each package has a documented public interface and a README. Changes to a public interface are deliberate and noted.
-- Validate before done. Extract the script from a single file build and run a syntax check, for example with `node --check`, before treating a change as finished.
-- Assemble in a scratch location, then copy the finished file to the output location. Do not edit read only inputs in place.
+- Validate before done. Run the test suites (`npm test` and `npm run test:web`) and a production build (`npm run build`) before treating a change as finished.
 - Accessibility is required. Every action reachable by keyboard. Respect reduced motion. Maintain contrast and visible focus.
 - Comments explain why, not what. Keep them short and honest.
 

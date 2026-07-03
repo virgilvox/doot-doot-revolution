@@ -29,8 +29,3 @@ export function mountFonts(doc = document) {
   const link = doc.createElement('link'); link.rel = 'stylesheet'; link.href = FONTS_HREF; link.setAttribute('data-ddr-fonts', '');
   doc.head.appendChild(pre1); doc.head.appendChild(pre2); doc.head.appendChild(link);
 }
-
-// Escape a string for safe insertion into innerHTML.
-export function escapeHtml(s) {
-  return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-}

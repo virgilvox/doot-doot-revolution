@@ -1,0 +1,46 @@
+name: release
+
+# Build the Electron desktop app on every version tag and publish the installers
+# to a GitHub Release. Signing and notarization are gated on repository secrets:
+# with none set, the build still succeeds and produces unsigned installers; set
+# the secrets to sign (and, for macOS, notarize) automatically.
+#
+# Secrets (set later in repo Settings -> Secrets and variables -> Actions):
+#   CSC_LINK                     base64 of the signing cert (.p12), macOS and Windows
+#   CSC_KEY_PASSWORD             password for that cert
+#   APPLE_ID                     Apple ID email          (macOS notarization)
+#   APPLE_APP_SPECIFIC_PASSWORD app-specific password    (macOS notarization)
+#   APPLE_TEAM_ID                Apple Developer team id  (macOS notarization)
+# To enable macOS notarization, also set mac.notarize to true in
+# apps/web/electron-builder.yml.
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Build and publish desktop app
+        run: npm --workspace @doot-games/web run release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}

@@ -2,9 +2,10 @@
 // or returned as an SVG string. One geometry, reused everywhere (menus, the
 // notefield, the editor) so arrows look identical across the app.
 //
-// Colors follow the StepMania convention of tinting a note by its rhythmic
-// quantization: 4th red, 8th blue, 12th purple, 16th green, 24th magenta, 32nd
-// orange. Directions are tinted per lane for menu specimens.
+// Colors follow the Dance Dance Revolution "Note" scheme of tinting a note by its
+// rhythmic quantization: 4th red, 8th blue, 12th green, 16th gold (24th and 32nd
+// kept distinct for readability). This is by beat, not by lane. Directions are
+// tinted per lane only for menu specimens.
 
 const ARO = '#101018';
 const SIL = "M 256 22 L 484 248 L 484 305 L 438 345 L 373 345 L 337 306 L 337 412 L 256 481 L 175 412 L 175 306 L 139 345 L 74 345 L 28 305 L 28 248 Z";
@@ -14,12 +15,15 @@ const DET = [
   "M 256 289 L 285 309 L 284 382 L 256 404 L 228 382 L 227 309 Z"
 ];
 
+// Note tint by rhythmic quantization, following the Dance Dance Revolution "Note"
+// scheme: 4th red, 8th blue, 12th (triplet) green, 16th gold. The finer 24th and
+// 32nd are kept distinct (purple, orange) for readability on hard charts.
 export const QUANT = {
   4: { t: '#C42133', b: '#FF7A6B' },
   8: { t: '#1E3FA8', b: '#57BDF5' },
-  12: { t: '#6A24C8', b: '#C58BFF' },
-  16: { t: '#1F9A34', b: '#86EE72' },
-  24: { t: '#B31D8F', b: '#EF6AD6' },
+  12: { t: '#1F9A34', b: '#86EE72' },
+  16: { t: '#E0A200', b: '#FFD84D' },
+  24: { t: '#6A24C8', b: '#C58BFF' },
   32: { t: '#B85E00', b: '#FFB84D' }
 };
 export const DIR = {
@@ -30,11 +34,10 @@ export const DIR = {
 };
 // Lane order is Left, Down, Up, Right. Rotation of the up-facing silhouette.
 export const LANE_ROT = [-90, 180, 0, 90];
-export const LANE_NAMES = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
 export const LANE_DIRS = ['left', 'down', 'up', 'right'];
 
 // Path2D is browser-only. Build the paths lazily so this module imports cleanly
-// in Node (for the bundler and pure tests).
+// in Node (for the pure tests and headless rendering).
 let P_SIL = null, P_DET = null;
 function paths() {
   if (P_SIL) return true;

@@ -1,0 +1,84 @@
+<template>
+  <div class="view"><div class="view-inner">
+    <div class="scr-head"><button class="btn white sm" @click="back">&larr; Back</button><h1>Settings</h1></div>
+    <div class="panel"><div class="rows">
+      <div v-for="(r, i) in rows" :key="r.key || r.t" class="row">
+        <div class="rl"><div class="t">{{ r.t }}</div><div v-if="desc(r)" class="d">{{ desc(r) }}</div></div>
+        <div class="rc" :class="{ kfocus: fi === i }">
+          <template v-if="r.kind === 'range' || r.kind === 'vol'">
+            <input type="range" :min="r.kind === 'vol' ? 0 : r.min" :max="r.kind === 'vol' ? 100 : r.max" :step="r.kind === 'vol' ? 1 : r.step" :value="rangeValue(r)" @input="onInput(r, $event)">
+            <span class="rv">{{ rangeLabel(r) }}</span>
+          </template>
+          <template v-else-if="r.kind === 'toggle'">
+            <span class="sw-toggle" :class="{ on: s.state[r.key] }" role="switch" :aria-checked="s.state[r.key]" @click="s.set(r.key, !s.state[r.key])"></span>
+          </template>
+          <template v-else>
+            <button class="btn white sm" :disabled="r.disabled && r.disabled()" @click="r.action()">{{ r.label() }}</button>
+          </template>
+        </div>
+      </div>
+    </div></div>
+  </div></div>
+</template>
+
+<script setup>
+import { reactive, onBeforeUnmount } from 'vue';
+import { useRouter } from 'vue-router';
+import { useSettingsStore } from '../stores/settings.js';
+import { useRovingFocus } from '../composables/useRovingFocus.js';
+import { engine } from '../game/singletons.js';
+
+const router = useRouter();
+const s = useSettingsStore();
+const back = () => router.push({ name: 'select' });
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+const calib = reactive({ running: false, msg: '', clicks: [], taps: [] });
+const rows = [
+  { t: 'Scroll speed', d: 'How fast arrows travel. Higher is faster.', kind: 'range', key: 'speed', min: 1, max: 5, step: 0.1, fmt: (v) => v.toFixed(1) + 'x' },
+  { t: 'Judge offset', d: 'Nudge timing if hits feel early or late.', kind: 'range', key: 'offsetMs', min: -100, max: 100, step: 2, fmt: (v) => (v > 0 ? '+' : '') + Math.round(v) + ' ms' },
+  { t: 'Calibrate', id: 'calibrate', kind: 'action', action: runCalibration, label: () => (calib.running ? 'listening…' : 'Tap calibrate'), disabled: () => calib.running },
+  { t: 'Master volume', kind: 'vol', key: 'volMaster' },
+  { t: 'Music volume', kind: 'vol', key: 'volMusic' },
+  { t: 'SFX volume', d: 'Loudness of the hit tick.', kind: 'vol', key: 'volSfx' },
+  { t: 'Reduced motion', d: 'Calmer menus. Gameplay still animates.', kind: 'toggle', key: 'reducedMotion' },
+  { t: 'Reset', d: 'Restore default settings.', kind: 'action', action: () => s.reset(), label: () => 'Reset all' }
+];
+function desc(r) { if (r.id === 'calibrate') return calib.msg || 'Play 8 clicks and tap Space in time to find your offset.'; return r.d || ''; }
+function rangeValue(r) { return r.kind === 'vol' ? Math.round(s.state[r.key] * 100) : s.state[r.key]; }
+function rangeLabel(r) { return r.kind === 'vol' ? Math.round(s.state[r.key] * 100) + '%' : r.fmt(s.state[r.key]); }
+function onInput(r, e) { const v = Number(e.target.value); s.set(r.key, r.kind === 'vol' ? v / 100 : v); }
+function adjust(i, delta) {
+  const r = rows[i]; if (!r) return;
+  if (r.kind === 'range') s.set(r.key, clamp(s.state[r.key] + delta * r.step, r.min, r.max));
+  else if (r.kind === 'vol') s.set(r.key, clamp(Math.round(s.state[r.key] * 100) + delta * 5, 0, 100) / 100);
+  else if (r.kind === 'toggle') s.set(r.key, !s.state[r.key]);
+}
+function activate(i) { const r = rows[i]; if (r.kind === 'action') r.action(); else if (r.kind === 'toggle') s.set(r.key, !s.state[r.key]); }
+const { index: fi } = useRovingFocus({ size: () => rows.length, onConfirm: activate, onAdjust: adjust, onCancel: back });
+
+// tap calibration
+function runCalibration() {
+  const ctx = engine.ensure(); if (calib.running) return;
+  calib.running = true; calib.taps = []; calib.clicks = []; calib.msg = 'Tap Space on each click…';
+  const n = 8, gap = 0.6, start = ctx.currentTime + 0.6;
+  for (let i = 0; i < n; i++) {
+    const t = start + i * gap; calib.clicks.push(t);
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = 1760; o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.4, t + 0.001); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    o.start(t); o.stop(t + 0.06);
+  }
+  setTimeout(finishCalibration, (0.6 + n * gap + 0.7) * 1000);
+}
+function onKey(e) { if (calib.running && e.code === 'Space') { e.preventDefault(); calib.taps.push(engine.ctx.currentTime); } }
+window.addEventListener('keydown', onKey);
+onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
+function finishCalibration() {
+  calib.running = false; const dts = [];
+  for (const tp of calib.taps) { let best = 1e9; for (const c of calib.clicks) { const d = tp - c; if (Math.abs(d) < Math.abs(best)) best = d; } if (Math.abs(best) < 0.4) dts.push(best); }
+  if (dts.length < 3) { calib.msg = 'Not enough taps, try again.'; return; }
+  dts.sort((a, b) => a - b); const med = dts[dts.length >> 1];
+  const off = clamp(-Math.round(med * 1000), -100, 100);
+  s.set('offsetMs', off); calib.msg = 'Offset set to ' + off + ' ms.';
+}
+</script>
