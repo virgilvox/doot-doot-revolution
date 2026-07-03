@@ -11,10 +11,10 @@ export default defineConfig(async () => {
   if (process.env.ELECTRON) {
     const electron = (await import('vite-plugin-electron/simple')).default;
     plugins.push(electron({
-      // ytdl-core is a Node runtime dep (used only by the main process for YouTube
-      // audio import); externalize it so it loads from node_modules instead of being
-      // bundled (it uses dynamic requires that do not bundle cleanly).
-      main: { entry: 'electron/main.js', vite: { build: { rollupOptions: { external: ['@distube/ytdl-core'] } } } },
+      // youtube-dl-exec (the yt-dlp wrapper, used only by the main process for YouTube
+      // audio import) is a Node runtime dep with a bundled binary; externalize it so it
+      // loads from node_modules instead of being bundled.
+      main: { entry: 'electron/main.js', vite: { build: { rollupOptions: { external: ['youtube-dl-exec'] } } } },
       // sandboxed preload must be a single CommonJS file named preload.js
       preload: { input: 'electron/preload.js', vite: { build: { rollupOptions: { output: { format: 'cjs', entryFileNames: 'preload.js', inlineDynamicImports: true } } } } }
     }));

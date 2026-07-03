@@ -76,6 +76,16 @@ function songFile(dir, id) {
   return full;
 }
 
+// Identify the audio container from its leading bytes so the stored blob carries an
+// honest type (the renderer decodes by content regardless, but a correct mime keeps
+// the .ddr export truthful). Covers the formats YouTube bestaudio yields, plus mp3.
+function sniffAudioMime(b) {
+  if (b.length > 4 && b[0] === 0x1A && b[1] === 0x45 && b[2] === 0xDF && b[3] === 0xA3) return 'audio/webm';
+  if (b.length > 8 && b.toString('ascii', 4, 8) === 'ftyp') return 'audio/mp4';
+  if (b.length > 3 && (b.toString('ascii', 0, 3) === 'ID3' || (b[0] === 0xFF && (b[1] & 0xE0) === 0xE0))) return 'audio/mpeg';
+  return 'audio/webm';
+}
+
 function registerIpc() {
   // Fetch remote audio bytes past the browser CORS wall.
   ipcMain.handle('audio:fetch', async (e, url) => {
@@ -84,28 +94,28 @@ function registerIpc() {
     const r = await net.fetch(url); if (!r.ok) throw new Error('HTTP ' + r.status); return await r.arrayBuffer();
   });
 
-  // Rip audio from a YouTube URL. Uses @distube/ytdl-core, loaded lazily so it never
-  // affects startup. Returns the best audio-only stream's bytes as-is (webm/opus or
-  // m4a, both decodable by the renderer's Web Audio) plus the video title. This
-  // downloads content subject to YouTube's terms and to copyright; it is meant for
-  // material the user is entitled to use.
+  // Rip audio from a YouTube URL with yt-dlp (via youtube-dl-exec, loaded lazily).
+  // yt-dlp reliably deciphers YouTube's signature/n-parameter where the pure-JS
+  // extractors currently do not; it needs a JavaScript runtime to run YouTube's
+  // player, so we point it at node (present when the desktop app runs from its dev
+  // shell). First a metadata pass for the title and a length cap, then the best
+  // audio-only stream to a temp file, returned as bytes (webm/opus or m4a, both
+  // decodable by the renderer's Web Audio) plus the title. This downloads content
+  // subject to YouTube's terms and to copyright; it is meant for material the user
+  // is entitled to use. --no-playlist keeps a radio/list link to its single video.
   ipcMain.handle('audio:youtube', async (e, url) => {
-    const ytdl = (await import('@distube/ytdl-core')).default;
-    if (!ytdl.validateURL(url)) throw new Error('not a YouTube URL');
-    const info = await ytdl.getInfo(url);
-    const d = info.videoDetails;
-    if ((Number(d.lengthSeconds) || 0) > 12 * 60) throw new Error('video too long (12 min max)');
-    const format = ytdl.chooseFormat(info.formats, { quality: 'highestaudio', filter: 'audioonly' });
-    if (!format) throw new Error('no audio-only stream found');
-    const chunks = [];
-    await new Promise((resolve, reject) => {
-      const stream = ytdl.downloadFromInfo(info, { format });
-      stream.on('data', (c) => chunks.push(c));
-      stream.on('end', resolve);
-      stream.on('error', reject);
-    });
-    const b = Buffer.concat(chunks);
-    return { bytes: b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength), title: d.title || 'YouTube', mime: (format.mimeType || 'audio/webm').split(';')[0].trim() };
+    let host; try { host = new URL(url).hostname.replace(/^(www|m|music)\./, ''); } catch (err) { throw new Error('bad url'); }
+    if (host !== 'youtube.com' && host !== 'youtu.be') throw new Error('not a YouTube URL');
+    const ytdlp = (await import('youtube-dl-exec')).default;
+    const base = { noPlaylist: true, noWarnings: true, jsRuntimes: 'node' };
+    const info = await ytdlp(url, { ...base, dumpSingleJson: true, format: 'bestaudio' });
+    if ((Number(info.duration) || 0) > 12 * 60) throw new Error('video is over 12 minutes');
+    const out = path.join(app.getPath('temp'), `doot-yt-${Date.now()}.audio`);
+    try {
+      await ytdlp(url, { ...base, format: 'bestaudio', output: out });
+      const b = await fs.readFile(out);
+      return { bytes: b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength), title: info.title || 'YouTube', mime: sniffAudioMime(b) };
+    } finally { fs.unlink(out).catch(() => {}); }
   });
 
   // The song library as files on disk. The renderer serializes each record to a

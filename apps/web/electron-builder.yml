@@ -6,6 +6,10 @@ files:
   - dist
   - dist-electron
 asar: true
+# the yt-dlp binary (youtube-dl-exec) must stay outside the asar archive so it can be
+# executed as a real file in a packaged build
+asarUnpack:
+  - "**/node_modules/youtube-dl-exec/bin/**"
 
 # Code signing happens automatically when the platform cert is present in the
 # environment (CSC_LINK plus CSC_KEY_PASSWORD, set as CI secrets). With no cert
