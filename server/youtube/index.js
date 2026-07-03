@@ -19,6 +19,11 @@ import ytdlp from 'youtube-dl-exec';
 const PORT = process.env.PORT || 8080;
 const ALLOW_ORIGIN = process.env.ALLOW_ORIGIN || '*';
 const MAX_SECONDS = Number(process.env.MAX_SECONDS || 12 * 60);
+// YouTube bot-checks the default web client hard from datacenter IPs. Forcing less
+// gated player clients avoids it more often (no guarantee — cloud IPs get blocked).
+// Override with YT_PLAYER_CLIENT, or set YT_COOKIES to a Netscape cookies file path.
+const PLAYER_CLIENT = process.env.YT_PLAYER_CLIENT || 'android_vr,tv,web_safari';
+const COOKIES = process.env.YT_COOKIES || '';
 
 function isYouTube(u) {
   try { const h = new URL(u).hostname.replace(/^(www|m|music)\./, ''); return h === 'youtube.com' || h === 'youtu.be'; }
@@ -44,7 +49,8 @@ const server = http.createServer(async (req, res) => {
   if (!target) { res.writeHead(200, cors); return res.end('doot yt-service ok'); }
   console.log('rip request:', target);
   if (!isYouTube(target)) { res.writeHead(400, cors); return res.end('not a YouTube url'); }
-  const base = { noPlaylist: true, noWarnings: true, jsRuntimes: 'node' };
+  const base = { noPlaylist: true, noWarnings: true, jsRuntimes: 'node', extractorArgs: 'youtube:player_client=' + PLAYER_CLIENT };
+  if (COOKIES) base.cookies = COOKIES;
   const out = path.join(tmpdir(), `yt-${Date.now()}-${Math.floor(process.hrtime()[1])}.audio`);
   try {
     const info = await ytdlp(target, { ...base, dumpSingleJson: true, format: 'bestaudio' });
