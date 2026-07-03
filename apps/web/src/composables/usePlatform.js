@@ -22,6 +22,10 @@ function download(name, blob) {
 
 const safeName = (s) => (s || 'song').replace(/[^\w.-]+/g, '_');
 
+// A YouTube watch/short/embed/youtu.be link. Extraction is desktop-only (it needs
+// the main process), so views only offer it when canImportUrl is true.
+export function isYouTubeUrl(url) { return /(?:youtube\.com\/(?:watch\?|shorts\/|embed\/|live\/)|youtu\.be\/)/i.test(String(url || '')); }
+
 let cached = null;
 export function usePlatform() {
   if (cached) return cached;
@@ -55,6 +59,13 @@ export function usePlatform() {
     async fetchAudio(url) {
       if (isDesktop) return doot.fetchAudio(url);
       const res = await fetch(url); if (!res.ok) throw new Error('HTTP ' + res.status); return res.arrayBuffer();
+    },
+    isYouTube: (url) => isYouTubeUrl(url),
+    // Rip audio from a YouTube URL via the main process. Desktop only, since the
+    // browser cannot get past YouTube's CORS wall and signature deciphering.
+    async fetchYouTube(url) {
+      if (!isDesktop) throw new Error('YouTube import is only available in the desktop app');
+      return doot.fetchYouTube(url); // { bytes, title, mime }
     },
     chooseFolder: () => library.chooseFolder(),
     exportFolder: () => library.exportToFolder(),

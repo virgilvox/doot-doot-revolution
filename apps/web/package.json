@@ -17,6 +17,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@distube/ytdl-core": "^4.16.12",
     "@doot-games/chart": "^0.1.0",
     "@doot-games/library": "^0.1.0",
     "@doot-games/play": "^0.1.0",

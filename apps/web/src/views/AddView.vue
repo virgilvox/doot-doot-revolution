@@ -9,8 +9,8 @@
             <b>Drop an audio file</b>mp3 · wav · ogg · m4a, or click to browse. Decoded locally, nothing uploaded.
             <input ref="file" type="file" accept="audio/*" hidden @change="onFile">
           </div>
-          <p v-if="plat.canImportUrl" class="hint">Desktop build: you can also import from a URL (fetched past the CORS wall).</p>
-          <div v-if="plat.canImportUrl" class="url-row"><input class="input" v-model="url" placeholder="Paste a direct audio URL"><button class="btn blue sm" @click="fromUrl">Fetch</button></div>
+          <p v-if="plat.canImportUrl" class="hint">Desktop build: paste a direct audio URL or a YouTube link — the audio is fetched (or ripped from YouTube) locally.</p>
+          <div v-if="plat.canImportUrl" class="url-row"><input class="input" v-model="url" placeholder="Paste an audio URL or a YouTube link"><button class="btn blue sm" @click="fromUrl">Import</button></div>
           <span class="eyebrow" style="margin-top:2px">Import StepMania</span>
           <div class="drop" @click="$refs.simFolder.click()">
             <b>Import a simfile or pack</b>Pick a song folder or a whole pack folder. The .sm or .ssc and its audio import together, with every difficulty and any BPM changes.
@@ -133,7 +133,23 @@ async function onSimPick(e) {
   e.target.value = '';
 }
 async function decodeFile(f) { try { await engine.resume(); const buf = await engine.decode(await f.arrayBuffer()); await loadBuffer(buf, f.name.replace(/\.[^.]+$/, '')); draft.value.file = f; } catch (err) { console.error(err); toast('Could not decode this file'); } }
-async function fromUrl() { if (!url.value) return; try { const ab = await plat.fetchAudio(url.value); const buf = await engine.decode(ab.slice(0)); await loadBuffer(buf, url.value.split('/').pop() || 'Track'); draft.value.file = new Blob([ab], { type: 'audio/mpeg' }); } catch (err) { toast('Fetch failed: ' + err.message); } }
+async function fromUrl() {
+  if (!url.value) return;
+  try {
+    if (plat.isYouTube(url.value)) {
+      toast('Ripping audio from YouTube…');
+      const { bytes, title, mime } = await plat.fetchYouTube(url.value);
+      const buf = await engine.decode(bytes.slice(0));
+      await loadBuffer(buf, title || 'YouTube track');
+      draft.value.file = new Blob([bytes], { type: mime || 'audio/webm' });
+    } else {
+      const ab = await plat.fetchAudio(url.value);
+      const buf = await engine.decode(ab.slice(0));
+      await loadBuffer(buf, url.value.split('/').pop() || 'Track');
+      draft.value.file = new Blob([ab], { type: 'audio/mpeg' });
+    }
+  } catch (err) { toast('Import failed: ' + err.message); }
+}
 
 function setStage(i, state, tick, label) { const s = stages.value[i]; if (!s) return; s.state = state; if (tick) s.tick = tick; if (label) s.label = label; }
 async function generate() {

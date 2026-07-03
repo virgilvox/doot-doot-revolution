@@ -9,6 +9,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('doot', {
   isDesktop: true,
   fetchAudio: (url) => ipcRenderer.invoke('audio:fetch', url),
+  fetchYouTube: (url) => ipcRenderer.invoke('audio:youtube', url),
   lib: {
     dir: () => ipcRenderer.invoke('lib:dir'),
     choose: () => ipcRenderer.invoke('lib:choose'),

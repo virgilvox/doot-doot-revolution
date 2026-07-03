@@ -84,6 +84,30 @@ function registerIpc() {
     const r = await net.fetch(url); if (!r.ok) throw new Error('HTTP ' + r.status); return await r.arrayBuffer();
   });
 
+  // Rip audio from a YouTube URL. Uses @distube/ytdl-core, loaded lazily so it never
+  // affects startup. Returns the best audio-only stream's bytes as-is (webm/opus or
+  // m4a, both decodable by the renderer's Web Audio) plus the video title. This
+  // downloads content subject to YouTube's terms and to copyright; it is meant for
+  // material the user is entitled to use.
+  ipcMain.handle('audio:youtube', async (e, url) => {
+    const ytdl = (await import('@distube/ytdl-core')).default;
+    if (!ytdl.validateURL(url)) throw new Error('not a YouTube URL');
+    const info = await ytdl.getInfo(url);
+    const d = info.videoDetails;
+    if ((Number(d.lengthSeconds) || 0) > 12 * 60) throw new Error('video too long (12 min max)');
+    const format = ytdl.chooseFormat(info.formats, { quality: 'highestaudio', filter: 'audioonly' });
+    if (!format) throw new Error('no audio-only stream found');
+    const chunks = [];
+    await new Promise((resolve, reject) => {
+      const stream = ytdl.downloadFromInfo(info, { format });
+      stream.on('data', (c) => chunks.push(c));
+      stream.on('end', resolve);
+      stream.on('error', reject);
+    });
+    const b = Buffer.concat(chunks);
+    return { bytes: b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength), title: d.title || 'YouTube', mime: (format.mimeType || 'audio/webm').split(';')[0].trim() };
+  });
+
   // The song library as files on disk. The renderer serializes each record to a
   // .ddr JSON string (audio included), so the main process only moves strings
   // keyed by id and never touches audio decoding.
