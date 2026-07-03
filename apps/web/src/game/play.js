@@ -4,6 +4,10 @@ import { ref } from 'vue';
 // game view across the route change.
 export const pendingPlay = ref(null);
 export function setPlay(song, chart) { pendingPlay.value = { song, chart }; }
+// The song + chosen difficulty handed from the difficulty modal to the player-setup
+// screen, which then picks the player count and input devices before starting.
+export const pendingSetup = ref(null);
+export function setSetup(song, difficulty) { pendingSetup.value = { song, difficulty }; }
 // Perpetual (endless) mode: carry the run config instead of a fixed song/chart.
 export function setEndless(config) { pendingPlay.value = { endless: true, config }; }
 // Local multiplayer: one song, several players, each with a device, difficulty, and chart.

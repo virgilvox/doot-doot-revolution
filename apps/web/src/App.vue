@@ -28,6 +28,7 @@ import AddView from './views/AddView.vue';
 import LibraryView from './views/LibraryView.vue';
 import SettingsView from './views/SettingsView.vue';
 import PadsView from './views/PadsView.vue';
+import PlayerSetup from './views/PlayerSetup.vue';
 import { useInput } from './composables/useInput.js';
 import { bus } from './game/bus.js';
 import { navFocus } from './game/navFocus.js';
@@ -35,7 +36,7 @@ import { screen, go } from './game/screen.js';
 
 // Screens are swapped by state, not routed by URL. Imported directly (the app is
 // small) so a switch is instant, which matters for starting a game.
-const VIEWS = { title: TitleView, select: SelectView, game: GameView, results: ResultsView, add: AddView, library: LibraryView, settings: SettingsView, pads: PadsView };
+const VIEWS = { title: TitleView, select: SelectView, players: PlayerSetup, game: GameView, results: ResultsView, add: AddView, library: LibraryView, settings: SettingsView, pads: PadsView };
 const view = computed(() => VIEWS[screen.value] || TitleView);
 
 onMounted(() => {
