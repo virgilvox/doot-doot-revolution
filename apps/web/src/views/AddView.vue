@@ -21,6 +21,7 @@
           <div v-show="srcTab === 'url' && plat.canImportUrl" class="src-pane">
             <p class="hint">{{ plat.urlImportHint }}</p>
             <div class="url-row"><input class="input" v-model="url" placeholder="Paste an audio URL or a YouTube link"><button class="btn blue sm" @click="fromUrl">Import</button></div>
+            <p v-if="!plat.isDesktop" class="hint">YouTube import only works in the <b>desktop app</b>. In a browser, grab an MP3 with a downloader like <a :href="plat.ytHelpUrl" target="_blank" rel="noopener noreferrer">{{ ytHelpHost }}</a>, then add the file in the Audio file tab.</p>
           </div>
 
           <div v-show="srcTab === 'sim'" class="src-pane">
@@ -115,6 +116,7 @@ const engineSel = ref('drum');
 const diffSet = reactive(new Set(['basic', 'difficult', 'expert']));
 const url = ref('');
 const srcTab = ref('file');
+const ytHelpHost = computed(() => { try { return new URL(plat.ytHelpUrl).hostname; } catch (e) { return 'a downloader'; } });
 const running = ref(false);
 const done = ref(false);
 const bar = ref(0);

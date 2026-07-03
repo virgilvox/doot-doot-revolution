@@ -38,6 +38,10 @@ export function usePlatform() {
   // YouTube itself. Desktop ignores both and fetches/rips in the main process.
   const CORS_PROXY = (import.meta.env && import.meta.env.VITE_CORS_PROXY) || '';
   const YT_ENDPOINT = (import.meta.env && import.meta.env.VITE_YT_ENDPOINT) || '';
+  // On web, YouTube import needs the desktop app; point users at a reputable
+  // third-party downloader instead. cobalt.tools is open source and ad-free; override
+  // with VITE_YT_HELP_URL. It is not affiliated with this app.
+  const YT_HELP_URL = (import.meta.env && import.meta.env.VITE_YT_HELP_URL) || 'https://cobalt.tools';
   // The URL import row shows everywhere now; the fetch behavior adapts per platform.
   const canImportUrl = true;
   // On desktop the library IS a folder of files, so the File System Access sync
@@ -72,6 +76,7 @@ export function usePlatform() {
       if (!res.ok) throw new Error('HTTP ' + res.status); return res.arrayBuffer();
     },
     isYouTube: (url) => isYouTubeUrl(url),
+    ytHelpUrl: YT_HELP_URL,
     // Rip audio from a YouTube URL. Desktop rips locally with yt-dlp. The browser
     // cannot (CORS + signature deciphering), so on web it hands the link to a
     // configured yt-dlp backend (VITE_YT_ENDPOINT, e.g. a DigitalOcean function)
