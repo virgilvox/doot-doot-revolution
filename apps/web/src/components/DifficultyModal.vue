@@ -28,13 +28,13 @@
 <script setup>
 import { ref, computed, onBeforeUnmount } from 'vue';
 import { go } from '../game/screen.js';
-import { DIFFS, nominalRadar } from '@doot-games/chart';
+import { DIFFS, nominalRadar, MOOD_ORDER } from '@doot-games/chart';
 import { DIFF_VAR } from '../styles/tokens.js';
 import { AXES } from '@doot-games/chart';
 import GrooveRadar from './GrooveRadar.vue';
 import { useChart } from '../composables/useChart.js';
 import { useScope } from '../composables/useNavigation.js';
-import { setPlay } from '../game/play.js';
+import { setPlay, setEndless } from '../game/play.js';
 
 const props = defineProps({ song: Object });
 const emit = defineEmits(['close']);
@@ -57,6 +57,13 @@ async function confirm() {
   if (busy.value) return; busy.value = true;
   try {
     const df = diffs[idx.value];
+    if (props.song.endless) {
+      // start an endless run: a random dance mood + tempo, evolving forever
+      const mood = MOOD_ORDER[Math.floor(Math.random() * MOOD_ORDER.length)];
+      const bpm = 128 + Math.floor(Math.random() * 5) * 8; // 128..160
+      setEndless({ mood, seed: Math.floor(Math.random() * 1e6), bpm, difficulty: df });
+      emit('close'); go('game'); return;
+    }
     const chart = await ensureChart(props.song, df);
     if (aborted) return; // player pressed Back while the chart was generating
     setPlay(props.song, chart);

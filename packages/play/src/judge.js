@@ -14,6 +14,9 @@ export const HOLD_GRACE = 0.25;
 const ACC = { marvelous: 1, perfect: 0.9, great: 0.6, good: 0.3, boo: 0.1, miss: 0 };
 // Life delta per judgment on the dance gauge (0..100).
 const LIFE = { marvelous: 1, perfect: 1, great: 0.5, good: 0, boo: -2, miss: -4 };
+// Endless score points per judgment (a monotonic accumulator, since the normalized
+// accuracy score converges rather than climbs over an unbounded note total).
+const POINTS = { marvelous: 100, perfect: 80, great: 50, good: 20, boo: 5, miss: 0 };
 const ORDER = ['marvelous', 'perfect', 'great', 'good', 'boo', 'miss'];
 
 // DDR-flavored grade from accuracy percent. Full combo is reported separately.
@@ -39,6 +42,7 @@ export class Judge {
     this.combo = 0; this.maxCombo = 0; this.score = 0; this.holdBonus = 0; this.life = 50; this.lastJudge = null;
     this.total = this.notes.length || 1; this._accSum = 0; this._judgedCount = 0;
     this.holdActive = [null, null, null, null];
+    this.endless = !!options.endless; this._points = 0; this._nextI = this.notes.length;
     this.onJudge = options.onJudge || null;
     this._now = options.now || (() => (typeof performance !== 'undefined' ? performance.now() : Date.now()));
   }
@@ -91,6 +95,7 @@ export class Judge {
     else { this.combo++; this.maxCombo = Math.max(this.maxCombo, this.combo); }
     this.life = Math.max(0, Math.min(100, this.life + LIFE[type]));
     this._accSum += ACC[type];
+    if (this.endless) this._points += Math.round(POINTS[type] * (1 + Math.min(this.combo, 100) * 0.02));
     this._rescore();
     this.lastJudge = { type, at: this._now(), dt: dt || 0 };
     if (this.onJudge) this.onJudge({ type, combo: this.combo });
@@ -98,9 +103,31 @@ export class Judge {
 
   // Score is accuracy over the note total plus a flat bonus for freezes fully
   // held. Kept in one place so a completed hold and a judged tap agree.
-  _rescore() { this.score = Math.round(this.maxScore * (this._accSum / this.total)) + this.holdBonus; }
+  _rescore() { this.score = this.endless ? (this._points + this.holdBonus) : Math.round(this.maxScore * (this._accSum / this.total)) + this.holdBonus; }
 
   accuracy() { return this._accSum / this.total * 100; }
+
+  // Streaming support for the endless mode: append freshly composed notes (already
+  // absolute-time offset) and prune old ones so the arrays stay bounded. The caller
+  // must splice chart.notes by the same count pruneBefore returns, keeping the
+  // notefield's positional index into judge.notes aligned.
+  appendNotes(notes) {
+    for (let j = 0; j < notes.length; j++) {
+      const n = notes[j];
+      this.notes.push({ t: n.t, lane: n.lane, dur: n.dur || 0, quant: n.quant, i: this._nextI++, judged: false, holding: false, dropped: false, done: false, releaseAt: null });
+    }
+    this.total += notes.length;
+  }
+  pruneBefore(tCut) {
+    let n = 0;
+    while (n < this.notes.length) {
+      const note = this.notes[n];
+      if (!((note.done || (note.judged && !note.holding)) && (note.t + note.dur) < tCut)) break;
+      n++;
+    }
+    if (n > 0) this.notes.splice(0, n);
+    return n;
+  }
 
   results() {
     const acc = this.accuracy();

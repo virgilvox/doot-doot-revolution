@@ -62,7 +62,9 @@ function countUp() {
   requestAnimationFrame(step);
 }
 
-function retry() { if (state.song && state.chart) { setPlay(state.song, state.chart); go('game'); } }
+// for an endless run, pendingPlay still holds the run config, so replaying it just
+// re-enters the game; a fixed song replays its own chart
+function retry() { if (state.song?.endless) { go('game'); return; } if (state.song && state.chart) { setPlay(state.song, state.chart); go('game'); } }
 function toSelect() { go('select'); }
 const { index } = useRovingFocus({ size: () => 2, onConfirm: (i) => (i === 0 ? retry() : toSelect()), onCancel: toSelect });
 

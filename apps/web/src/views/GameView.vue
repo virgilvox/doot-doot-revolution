@@ -6,7 +6,7 @@
         <div class="song"><div class="t">{{ song?.title || '-' }}</div><div class="s">{{ sub }}</div></div>
         <div class="acts"><button class="btn white sm" @click="restart">Restart</button><button class="btn white sm" @click="quit">Quit</button></div>
       </div>
-      <div class="gp-prog"><i :style="{ width: (state.progress * 100) + '%' }"></i></div>
+      <div class="gp-prog" v-if="!state.endless"><i :style="{ width: (state.progress * 100) + '%' }"></i></div>
       <GameHud :score="state.score" :life="state.life" :count="state.count" />
     </div>
   </div>
@@ -24,9 +24,13 @@ import { pendingPlay } from '../game/play.js';
 const field = ref(null);
 const state = session.state;
 const song = computed(() => state.song);
-const sub = computed(() => state.chart ? `${state.song?.artist || ''} · ${Math.round(state.chart.bpm)} BPM · ${state.chart.difficulty}` : '');
+const fmtT = (s) => { s = Math.max(0, s | 0); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+const sub = computed(() => {
+  if (state.endless) return `${state.song?.artist || ''} · ${Math.round(state.chart?.bpm || 0)} BPM · ${state.song?.difficulty} · ${fmtT(state.elapsed)}`;
+  return state.chart ? `${state.song?.artist || ''} · ${Math.round(state.chart.bpm)} BPM · ${state.chart.difficulty}` : '';
+});
 
-function quit() { session.stop(); go('select'); }
+function quit() { if (state.endless) session.quit(); else { session.stop(); go('select'); } }
 function restart() { session.restart(); }
 
 useScope({ cancel: quit });
@@ -34,7 +38,8 @@ useScope({ cancel: quit });
 onMounted(() => {
   session.attachField(field.value);
   const p = pendingPlay.value;
-  if (p) session.start(p.song, p.chart);
+  if (p && p.endless) session.startEndless(p.config);
+  else if (p) session.start(p.song, p.chart);
   else go('select');
 });
 

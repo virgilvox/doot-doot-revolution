@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { composePiece, chartFromPiece, DIFFS } from '@doot-games/chart';
+import { composePiece, chartFromPiece, mixSeed, DIFFS } from '@doot-games/chart';
 
 test('composePiece is deterministic for a seed', () => {
   const a = composePiece('pulse', 12345, { bpm: 130, targetSeconds: 40 });
@@ -45,6 +45,19 @@ test('chartFromPiece scales with difficulty and yields valid, sorted notes', () 
   const nps = expert.count / expert.duration;
   assert.ok(nps <= DIFFS.expert.maxNps + 0.5, 'respects maxNps, got ' + nps.toFixed(2));
   assert.ok(expert.radar && expert.radar.stream >= 0, 'has a radar');
+});
+
+test('composePiece builds fixed-length evolving chunks (the perpetual stream)', () => {
+  let prev = null;
+  for (let i = 0; i < 6; i++) {
+    const p = composePiece('pulse', mixSeed(1234, i), { bpm: 140, bars: 8, rootPc: 2, intensity: 0.72, sectionIndex: (i % 3) + 1, evolveFrom: prev });
+    assert.equal(p.totalBars, 8, 'chunk is exactly the requested bar count');
+    assert.ok(p.events.kick && Object.keys(p.events.kick).length > 0, 'chunk has drums (not treated as an intro)');
+    const ch = chartFromPiece(p, 'expert');
+    assert.ok(ch.notes.length > 0, 'chunk charts to steps');
+    for (const n of ch.notes) assert.ok(n.lane >= 0 && n.lane <= 3);
+    prev = p.summary;
+  }
 });
 
 test('chartFromPiece is deterministic', () => {

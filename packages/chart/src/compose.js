@@ -150,31 +150,35 @@ function buildArcSections(rng, totalBarsTarget, M) {
     let bars = (i === nSec - 1) ? Math.max(4, totalBarsTarget - used) : per + 4 * rInt(rng, -1, 1);
     bars = Math.max(4, bars);
     used += bars;
-    sections.push(makeSection(rng, i, nSec, intensity, bars, M));
+    sections.push(makeSection(rng, i, i, nSec, intensity, bars, M));
   }
   return sections;
 }
 
-// A short fixed-length block for the perpetual stream (one evolving phrase).
+// A short fixed-length block for the perpetual stream (one evolving phrase). Its
+// array index is 0 (it is the only section), but its musical position drives the
+// naming and the intro-sparseness rule, so a chunk is never treated as an intro.
 function buildFixedSections(rng, bars, M, opts) {
   const base = opts.intensity != null ? opts.intensity : 0.72;
   const intensity = Math.max(0.3, Math.min(1, base + rFloat(rng, -0.08, 0.08)));
-  return [makeSection(rng, opts.sectionIndex || 1, 3, intensity, bars, M)];
+  return [makeSection(rng, 0, opts.sectionIndex || 1, 3, intensity, bars, M)];
 }
 
-function makeSection(rng, i, nSec, intensity, bars, M) {
+// arrayIndex is the section's position in the sections array (what bars point at via
+// sectionIndex); musicalPos is its place in the arc (naming + whether it is the intro).
+function makeSection(rng, arrayIndex, musicalPos, nSec, intensity, bars, M) {
   const active = new Set(M.voicesActiveBase);
   if (intensity > 0.45 && rChance(rng, M.arpUse)) active.add('arp');
   if (intensity > 0.55) active.add('lead');
   if (intensity > 0.7 && M.counterPeak) active.add('counter');
-  if (i === 0) { active.delete('counter'); if (!M.voicesActiveBase.includes('arp')) active.delete('arp'); }
+  if (musicalPos === 0) { active.delete('counter'); if (!M.voicesActiveBase.includes('arp')) active.delete('arp'); }
   if (M.drums) {
     if (intensity > 0.3) active.add('kick');
     if (intensity > 0.45) active.add('hat');
     if (intensity > 0.55) active.add('snare');
     if (intensity > 0.75) active.add('perc');
   }
-  return { index: i, bars, intensity, active, name: pickSectionName(i, nSec, intensity, rng) };
+  return { index: arrayIndex, bars, intensity, active, name: pickSectionName(musicalPos, nSec, intensity, rng) };
 }
 function pickSectionName(i, n, intensity, rng) {
   if (i === 0) return 'INTRO';
