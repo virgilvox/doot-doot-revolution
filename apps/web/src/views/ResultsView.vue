@@ -4,11 +4,12 @@
       <!-- local multiplayer: a versus scorecard per player, ranked -->
       <template v-if="isMulti">
         <h1 class="res-title">{{ state.song?.title }} &middot; Versus</h1>
+        <div class="vs-verdict" :style="{ color: verdictColor }">{{ verdict }}</div>
         <div class="vs-cards">
-          <div v-for="p in results.players" :key="p.index" class="vs-card" :class="{ win: p.winner }" :style="{ '--pc': p.color }">
+          <div v-for="(p, i) in results.players" :key="p.index" class="vs-card" :class="{ win: p.winner }" :style="{ '--pc': p.color, animationDelay: (0.15 + i * 0.1) + 's' }">
             <div class="vs-rank">{{ p.winner ? '★ WINNER' : '#' + p.rank }}</div>
             <div class="vs-tag">{{ p.label }}</div>
-            <div class="vs-score">{{ pad(p.score) }}</div>
+            <div class="vs-score">{{ pad(vsScore(p)) }}</div>
             <div class="vs-sub">{{ (p.accuracy || 0).toFixed(1) }}% &middot; {{ p.grade || '-' }}</div>
             <div class="vs-sub">{{ (DIFFS[p.difficulty] || {}).name }}</div>
           </div>
@@ -46,10 +47,14 @@ import { DIFFS } from '@doot-games/chart';
 import { session } from '../composables/useSession.js';
 import { useRovingFocus } from '../composables/useRovingFocus.js';
 import { setPlay } from '../game/play.js';
+import { engine } from '../game/singletons.js';
 
 const state = session.state;
 const results = computed(() => state.results);
 const isMulti = computed(() => !!(results.value && results.value.multi));
+const winner = computed(() => (isMulti.value ? results.value.players.find((p) => p.winner) : null));
+const verdict = computed(() => (isMulti.value ? (winner.value ? winner.value.label + ' WINS!' : "IT'S A TIE!") : ''));
+const verdictColor = computed(() => (winner.value ? winner.value.color : 'var(--ink)'));
 const title = computed(() => state.song ? `${state.song.title} · ${(DIFFS[state.chart?.difficulty] || {}).name || ''}` : 'Results');
 const comboText = computed(() => results.value ? (results.value.fullCombo ? 'FULL COMBO' : results.value.maxCombo + ' MAX COMBO') : '');
 const gradeColor = computed(() => { const a = results.value?.accuracy || 0; return a >= 93 ? 'var(--teal)' : a >= 80 ? 'var(--blue)' : a >= 45 ? 'var(--purple)' : 'var(--pink)'; });
@@ -78,6 +83,10 @@ function countUp() {
   const step = (t) => { const p = Math.min(1, (t - start) / dur), e = 1 - Math.pow(1 - p, 3); shownAcc.value = acc * e; shownScore.value = Math.round(sc * e); if (p < 1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }
+// versus: count every player's score up together
+const prog = ref(0);
+function countUpMulti() { const dur = 850, start = performance.now(); const step = (t) => { const p = Math.min(1, (t - start) / dur), e = 1 - Math.pow(1 - p, 3); prog.value = e; if (p < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
+const vsScore = (p) => Math.round((p.score || 0) * prog.value);
 
 // for an endless run, pendingPlay still holds the run config, so replaying it just
 // re-enters the game; a fixed song replays its own chart
@@ -88,7 +97,8 @@ const { index } = useRovingFocus({ size: () => 2, onConfirm: (i) => (i === 0 ? r
 onMounted(() => {
   if (!results.value) { go('select'); return; }
   requestAnimationFrame(() => { revealed.value = true; });
-  if (isMulti.value) return; // versus screen has no grade count-up
+  if (isMulti.value) { engine.fanfare(true); countUpMulti(); return; }
+  engine.fanfare((results.value.accuracy || 0) >= 65); // triumphant for a good run, gentle otherwise
   countUp();
   // slam the grade in after the tallies and numbers have counted up: the payoff
   setTimeout(() => { showGrade.value = true; }, 820);
@@ -110,9 +120,12 @@ onMounted(() => {
 @keyframes fc-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 .res-cta { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
 .jbar > i { transition: width .6s var(--ease); }
+.vs-verdict { font-family: var(--fd); font-weight: 800; font-size: clamp(30px, 6vw, 46px); text-shadow: 0 4px 0 var(--ink-2); animation: verdict-pop .5s var(--sp) both; }
+@keyframes verdict-pop { 0% { transform: scale(.35); opacity: 0; } 60% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 .vs-cards { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
-.vs-card { min-width: 150px; padding: 14px 18px; border: 3px solid var(--ink); border-radius: var(--r3); background: #fff; border-top: 8px solid var(--pc); display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.vs-card.win { box-shadow: 0 8px 0 var(--pc); transform: translateY(-4px); }
+.vs-card { min-width: 150px; padding: 14px 18px; border: 3px solid var(--ink); border-radius: var(--r3); background: #fff; border-top: 8px solid var(--pc); display: flex; flex-direction: column; align-items: center; gap: 4px; animation: card-fade .45s ease both; }
+@keyframes card-fade { from { opacity: 0; } to { opacity: 1; } }
+.vs-card.win { box-shadow: 0 11px 0 var(--pc); transform: translateY(-6px) scale(1.05); z-index: 1; }
 .vs-rank { font-family: var(--fu); font-weight: 800; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--pc); }
 .vs-tag { font-family: var(--fd); font-weight: 800; font-size: 20px; color: var(--pc); }
 .vs-score { font-family: var(--fd); font-weight: 800; font-size: 24px; }

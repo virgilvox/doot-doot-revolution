@@ -165,6 +165,31 @@ export class AudioEngine {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
     o.connect(g); g.connect(this.sfx); o.start(t); o.stop(t + 0.12);
   }
+
+  // a short shaped note on the sfx bus
+  _note(freq, at, dur, type = 'triangle', peak = 0.16) {
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(peak, at + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    o.connect(g); g.connect(this.sfx); o.start(at); o.stop(at + dur + 0.05);
+  }
+
+  // results sting: a bright ascending major arpeggio with a shimmer for a win/good run,
+  // or a soft two-note resolve otherwise. Plays on the sfx bus.
+  fanfare(win = true) {
+    this._ensure(); if (!this.ctx) return;
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    const t = this.ctx.currentTime + 0.02;
+    if (win) {
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this._note(f, t + i * 0.085, 0.55, 'triangle', 0.16)); // C E G C
+      this._note(1567.98, t + 0.34, 0.7, 'sine', 0.07); // G6 shimmer
+    } else {
+      this._note(523.25, t, 0.4, 'triangle', 0.13);       // C5
+      this._note(392.0, t + 0.15, 0.6, 'triangle', 0.13); // G4
+    }
+  }
 }
 
 export function createEngine() { return new AudioEngine(); }
