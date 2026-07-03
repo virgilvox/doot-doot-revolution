@@ -9,7 +9,7 @@
             <b>Drop an audio file</b>mp3 · wav · ogg · m4a, or click to browse. Decoded locally, nothing uploaded.
             <input ref="file" type="file" accept="audio/*" hidden @change="onFile">
           </div>
-          <p v-if="plat.canImportUrl" class="hint">Desktop build: paste a direct audio URL or a YouTube link — the audio is fetched (or ripped from YouTube) locally.</p>
+          <p v-if="plat.canImportUrl" class="hint">{{ plat.urlImportHint }}</p>
           <div v-if="plat.canImportUrl" class="url-row"><input class="input" v-model="url" placeholder="Paste an audio URL or a YouTube link"><button class="btn blue sm" @click="fromUrl">Import</button></div>
           <span class="eyebrow" style="margin-top:2px">Import StepMania</span>
           <div class="drop" @click="$refs.simFolder.click()">

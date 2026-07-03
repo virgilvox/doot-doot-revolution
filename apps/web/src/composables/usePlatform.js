@@ -31,7 +31,15 @@ export function usePlatform() {
   if (cached) return cached;
   const doot = (typeof window !== 'undefined') ? window.doot : null;
   const isDesktop = !!(doot && doot.isDesktop);
-  const canImportUrl = isDesktop;
+  // Web import routing, baked at build time so a deploy can point at its own
+  // infrastructure. CORS_PROXY lets the browser fetch a direct audio URL past the
+  // CORS wall (a plain forwarder; it cannot rip YouTube). YT_ENDPOINT is a yt-dlp
+  // backend the browser hands YouTube links to, since a browser cannot decipher
+  // YouTube itself. Desktop ignores both and fetches/rips in the main process.
+  const CORS_PROXY = (import.meta.env && import.meta.env.VITE_CORS_PROXY) || '';
+  const YT_ENDPOINT = (import.meta.env && import.meta.env.VITE_YT_ENDPOINT) || '';
+  // The URL import row shows everywhere now; the fetch behavior adapts per platform.
+  const canImportUrl = true;
   // On desktop the library IS a folder of files, so the File System Access sync
   // (a web-only convenience) is hidden to avoid two competing folder concepts.
   const canFolderSync = !isDesktop && library.canFolder;
@@ -58,15 +66,33 @@ export function usePlatform() {
     // bypasses the browser CORS wall; on web it is a normal fetch (CORS applies).
     async fetchAudio(url) {
       if (isDesktop) return doot.fetchAudio(url);
-      const res = await fetch(url); if (!res.ok) throw new Error('HTTP ' + res.status); return res.arrayBuffer();
+      // web: route through the configured CORS proxy when set, else a plain fetch
+      // (which only succeeds for CORS-permissive hosts)
+      const res = await fetch(CORS_PROXY ? CORS_PROXY + url : url);
+      if (!res.ok) throw new Error('HTTP ' + res.status); return res.arrayBuffer();
     },
     isYouTube: (url) => isYouTubeUrl(url),
-    // Rip audio from a YouTube URL via the main process. Desktop only, since the
-    // browser cannot get past YouTube's CORS wall and signature deciphering.
+    // Rip audio from a YouTube URL. Desktop rips locally with yt-dlp. The browser
+    // cannot (CORS + signature deciphering), so on web it hands the link to a
+    // configured yt-dlp backend (VITE_YT_ENDPOINT, e.g. a DigitalOcean function)
+    // that returns the audio bytes with the title in an X-Video-Title header; with
+    // none set it explains the two ways to enable it.
     async fetchYouTube(url) {
-      if (!isDesktop) throw new Error('YouTube import is only available in the desktop app');
-      return doot.fetchYouTube(url); // { bytes, title, mime }
+      if (isDesktop) return doot.fetchYouTube(url); // { bytes, title, mime }
+      if (!YT_ENDPOINT) throw new Error('YouTube import needs the desktop app, or set VITE_YT_ENDPOINT to your own yt-dlp backend');
+      const res = await fetch(YT_ENDPOINT + (YT_ENDPOINT.includes('?') ? '&' : '?') + 'url=' + encodeURIComponent(url));
+      if (!res.ok) throw new Error('backend HTTP ' + res.status);
+      const bytes = await res.arrayBuffer();
+      let title = res.headers.get('X-Video-Title') || 'YouTube';
+      try { title = decodeURIComponent(title); } catch (err) { /* header was plain */ }
+      return { bytes, title, mime: (res.headers.get('Content-Type') || 'audio/webm').split(';')[0].trim() };
     },
+    // adaptive one-line hint for the import row
+    urlImportHint: isDesktop
+      ? 'Paste a direct audio URL or a YouTube link, fetched and ripped locally.'
+      : (YT_ENDPOINT
+        ? 'Paste a direct audio URL or a YouTube link.'
+        : 'Paste a direct audio URL' + (CORS_PROXY ? '' : ' (CORS-friendly hosts only)') + '. YouTube links need the desktop app or a configured backend.'),
     chooseFolder: () => library.chooseFolder(),
     exportFolder: () => library.exportToFolder(),
     importFolder: () => library.importFromFolder()

@@ -1,0 +1,16 @@
+{
+  "name": "doot-yt-service",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "yt-dlp audio backend for Doot Doot Revolution web import",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "youtube-dl-exec": "^3.1.8"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
