@@ -7,7 +7,7 @@
 // (localStorage by default). Call attach(window) once to bind DOM listeners and
 // poll() every frame to sample gamepads.
 
-export const LANE_NAMES = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
+import { LANE_NAMES } from './bindings.js';
 
 const DEFAULTS = () => ({
   lanes: [

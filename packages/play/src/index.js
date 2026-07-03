@@ -3,6 +3,7 @@
 // timing windows, scoring, combo, life, and hold logic (judge, pure).
 
 export * from './engine.js';
+export * from './bindings.js';
 export * from './input.js';
 export * from './judge.js';
 export * from './synth.js';
