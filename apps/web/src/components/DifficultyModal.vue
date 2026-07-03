@@ -41,7 +41,7 @@ const emit = defineEmits(['close']);
 const { ensureChart } = useChart();
 
 const diffs = Object.keys(DIFFS);
-const idx = ref(Math.max(0, diffs.indexOf('expert')));
+const idx = ref(Math.max(0, diffs.indexOf('basic')));
 const busy = ref(false);
 
 const D = (df) => DIFFS[df];

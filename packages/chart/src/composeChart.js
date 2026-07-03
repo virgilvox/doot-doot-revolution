@@ -11,7 +11,7 @@ import { computeRadar } from './radar.js';
 
 // which voices feed arrows at each difficulty (denser tiers add melodic layers)
 const LAYERS = {
-  beginner: ['kick', 'snare'],
+  beginner: ['kick', 'snare', 'bass'],
   basic: ['kick', 'snare', 'bass'],
   difficult: ['kick', 'snare', 'bass', 'arp'],
   expert: ['kick', 'snare', 'bass', 'arp', 'lead'],
@@ -53,13 +53,17 @@ export function chartFromPiece(piece, difficulty) {
     }
   }
 
-  // 2) cap density to the tier's notes-per-second, keeping the strongest/most
-  //    on-beat candidates
-  const maxNotes = Math.max(1, Math.floor(D.maxNps * dur));
-  let kept = cands;
-  if (cands.length > maxNotes) {
-    const pri = (c) => c.strength + (c.strong ? 2 : c.med ? 1 : 0);
-    kept = cands.slice().sort((a, b) => pri(b) - pri(a)).slice(0, maxNotes).sort((a, b) => a.step - b.step);
+  // 2) thin to the tier's density with a minimum spacing, keeping the stronger /
+  //    more on-beat of two candidates that fall too close together. Spacing (rather
+  //    than a global top-N) keeps low tiers steady instead of clumping notes where
+  //    the music happens to be loudest.
+  const minDt = 1 / D.maxNps;
+  const pri = (c) => c.strength + (c.strong ? 2 : c.med ? 1 : 0);
+  const kept = [];
+  for (const c of cands) {
+    const prev = kept[kept.length - 1];
+    if (!prev || (c.beat - prev.beat) * spb >= minDt) kept.push(c);
+    else if (pri(c) > pri(prev)) kept[kept.length - 1] = c;
   }
 
   // 3) assign lanes (strict foot alternation) with jumps on strong kick+snare
@@ -69,7 +73,11 @@ export function chartFromPiece(piece, difficulty) {
   const pick = (arr) => arr[Math.floor(rng() * arr.length)];
   for (const c of kept) {
     const t = c.beat * spb, quant = stepQuant(c.s);
-    if (c.hasKick && c.hasSnare && c.strong && rng() < D.jumpProb) {
+    // a jump (two arrows at once) on a beat carrying a kick or snare, at the tier's
+    // rate. Kick is four-on-the-floor and snare is on 2 & 4, so this actually fires
+    // (the old kick-AND-snare-on-a-strong-beat test never coincided) and the higher
+    // tiers' larger jumpProb makes them denser and more technical than the lower ones.
+    if (c.med && (c.hasKick || c.hasSnare) && rng() < D.jumpProb) {
       notes.push(mkNote(t, c.beat, pick([0, 1]), quant), mkNote(t, c.beat, pick([2, 3]), quant));
       side = 0; lastLane = -1;
       continue;

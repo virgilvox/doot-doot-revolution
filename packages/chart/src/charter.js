@@ -18,12 +18,20 @@
 // Difficulty table. foot is the StepMania-style meter shown in menus. subs are
 // the allowed beat subdivisions. crossover and footswitch are probabilities,
 // zero at the low tiers so those patterns never appear there.
+// Foot meters follow DDR convention (Beginner very sparse, Basic a step-on-the-beat
+// chart, up to a dense Challenge) and the notes-per-second caps scale with them:
+// Basic sits near quarter-note density so it reads as genuinely easy, not a
+// mislabeled Standard chart.
+// Only 1/2/4 (quarter/eighth/sixteenth) ever occur on the 16-step grid, so the tiers
+// step up by subdivision: Beginner quarters, Basic/Difficult eighths, Expert/Challenge
+// sixteenths, with the notes-per-second cap and layers separating the pairs. Foot
+// meters follow DDR convention so Basic reads as genuinely easy.
 export const DIFFS = {
-  beginner:  { name: 'Beginner',  foot: 3,  subs: [1],              minStrength: 0.50, maxNps: 2.5,  jumpProb: 0.00, jumpMin: 9,    crossover: 0.00, footswitch: 0.00, holdProb: 0.25 },
-  basic:     { name: 'Basic',     foot: 6,  subs: [1, 2],           minStrength: 0.32, maxNps: 3.6,  jumpProb: 0.04, jumpMin: 0.80, crossover: 0.00, footswitch: 0.00, holdProb: 0.18 },
-  difficult: { name: 'Difficult', foot: 9,  subs: [1, 2, 4],        minStrength: 0.18, maxNps: 5.6,  jumpProb: 0.12, jumpMin: 0.74, crossover: 0.03, footswitch: 0.03, holdProb: 0.12 },
-  expert:    { name: 'Expert',    foot: 12, subs: [1, 2, 3, 4],     minStrength: 0.10, maxNps: 8.5,  jumpProb: 0.20, jumpMin: 0.66, crossover: 0.08, footswitch: 0.08, holdProb: 0.10 },
-  challenge: { name: 'Challenge', foot: 15, subs: [1, 2, 3, 4, 6, 8], minStrength: 0.05, maxNps: 12.0, jumpProb: 0.28, jumpMin: 0.58, crossover: 0.12, footswitch: 0.14, holdProb: 0.08 }
+  beginner:  { name: 'Beginner',  foot: 2,  subs: [1],       minStrength: 0.50, maxNps: 2.0,  jumpProb: 0.00, jumpMin: 9,    crossover: 0.00, footswitch: 0.00, holdProb: 0.22 },
+  basic:     { name: 'Basic',     foot: 4,  subs: [1, 2],    minStrength: 0.32, maxNps: 2.7,  jumpProb: 0.02, jumpMin: 0.80, crossover: 0.00, footswitch: 0.00, holdProb: 0.15 },
+  difficult: { name: 'Difficult', foot: 7,  subs: [1, 2],    minStrength: 0.18, maxNps: 4.3,  jumpProb: 0.10, jumpMin: 0.74, crossover: 0.03, footswitch: 0.03, holdProb: 0.12 },
+  expert:    { name: 'Expert',    foot: 11, subs: [1, 2, 4], minStrength: 0.10, maxNps: 6.5,  jumpProb: 0.18, jumpMin: 0.66, crossover: 0.08, footswitch: 0.08, holdProb: 0.10 },
+  challenge: { name: 'Challenge', foot: 15, subs: [1, 2, 4], minStrength: 0.05, maxNps: 9.0,  jumpProb: 0.34, jumpMin: 0.58, crossover: 0.12, footswitch: 0.14, holdProb: 0.08 }
 };
 
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
