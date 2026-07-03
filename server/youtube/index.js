@@ -52,4 +52,4 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(502, cors); res.end('rip failed: ' + String((e && e.message) || e).slice(0, 200));
   } finally { unlink(out).catch(() => {}); }
 });
-server.listen(PORT, () => console.log('doot yt-service listening on ' + PORT));
+server.listen(PORT, '0.0.0.0', () => console.log('doot yt-service listening on ' + PORT));
