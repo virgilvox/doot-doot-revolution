@@ -16,12 +16,37 @@ opens on the Title attract screen.
 The earlier vanilla single-file app (`apps/ddr`) was retired; the packages remain
 the proof the logic is framework-free.
 
-Current status: builds clean, 61 tests pass (53 package, 8 Vue), deployed live at
+Current status: builds clean, 70 tests pass (62 package, 8 Vue), deployed live at
 https://dance.doot.games, verified end to end in the browser (controller-only play,
 difficulty modal, viewport-fit gameplay with the game-feel pass, StepMania import,
-add/review/save, all menus, and a looping song preview on the select wheel).
-Navigation is state-driven (no router). No console errors. CI is green (it installs
-with `npm install` after clearing the lockfile, working around npm/cli#4828).
+add/review/save, all menus, a looping song preview on the select wheel, full-length
+composed built-in songs, and the endless perpetual mode). Navigation is state-driven
+(no router). No console errors. CI is green (it installs with `npm install` after
+clearing the lockfile, working around npm/cli#4828).
+
+## Generative music and perpetual mode
+
+The built-in songs are no longer short drum loops; they are full-length dance tracks
+composed deterministically from a seed (ported from the ferrule engine into
+`@doot-games/chart`): `composePiece` builds functional-harmony Markov chord
+progressions, a build-to-peak intensity arc, Euclidean-rhythm bass/arp/drums, and a
+chord-tone-snapped Markov lead on a 16-step grid; `chartFromPiece` maps those events
+straight to a step chart (foot-alternated lanes, quant coloring, jumps, holds),
+reusing the `DIFFS` tuning. Both are pure and Node-tested. Songs play through a live
+subtractive synth in `@doot-games/play` (`synth.js` + `engine.playPiece`) scheduled a
+little ahead of the audio clock — only the sounding voices cost anything, so playback
+starts instantly (a full offline render of a 96s song froze the tab for 45s). Composed
+songs carry a `_piece` and no buffer; `game/audio.js` `ensureBuffer` only decodes
+imported blobs.
+
+The `∞ Perpetual` tile in the song wheel launches an endless, evolving stream. A
+conductor (`game/conductor.js`) grows one piece in place: each phrase is composed
+(re-rolling melodies against a fixed key/tempo/mood, ferrule's evolve) and appended to
+the piece the live scheduler is playing, while its chart notes append to the growing
+chart and Judge in lockstep; old events/notes prune behind the playhead so any run
+stays bounded. The engine scheduler gained a `source.extend()` hook, the Judge gained
+`appendNotes`/`pruneBefore` and a monotonic endless score, and `useSession.startEndless`
+runs the normal loop with no end and quit-to-summary. No buffers, no seams.
 
 ## Run, build, test
 
@@ -31,7 +56,7 @@ npm run dev            # web dev server at http://localhost:4318
 npm run build          # web build (apps/web/dist)
 npm run dev:desktop    # Vite inside an Electron window
 npm run build:desktop  # electron-builder installers (needs a desktop OS; dmg needs macOS)
-npm test               # 53 package unit tests (node --test)
+npm test               # 62 package unit tests (node --test)
 npm run test:web       # 8 Vue component/nav/settings/preview tests (Vitest)
 npm run test:all       # both
 ```

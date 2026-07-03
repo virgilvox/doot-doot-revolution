@@ -8,7 +8,7 @@ Doot Doot Revolution is a rhythm game in the DDR and StepMania tradition. It loa
 
 ## Layout
 
-- `packages/*` are four framework-agnostic, private (unpublished) packages: `chart` (dsp, analysis, charter, pipeline, simfile, radar, stems), `render` (noteskin, notefield, editor), `play` (engine, input, judge), and `library`. Each holds its members as files under `src/` behind a barrel `index.js`, plus a `README.md` and tests under `test/`. They are side-effect-free ES modules and hold all game logic and rendering.
+- `packages/*` are four framework-agnostic, private (unpublished) packages: `chart` (dsp, analysis, charter, pipeline, simfile, radar, stems, and the generative composer compose + composeChart), `render` (noteskin, notefield, editor), `play` (engine, input, judge, and the live synth), and `library`. Each holds its members as files under `src/` behind a barrel `index.js`, plus a `README.md` and tests under `test/`. They are side-effect-free ES modules and hold all game logic and rendering.
 - `apps/web` is the Vue 3 app: component views and wiring only, plus the Electron target (`apps/web/electron`). It depends on the four packages and adds no game logic. Composables (`useInput`, `useNavigation`, `useSession`) are the seam to the imperative singletons. The design system is a real stylesheet (`styles/design.css` + `styles/tokens.js`), settings are a reactive module (`game/settings.js`), and the event bus is `game/bus.js`.
 - `tools/` holds shared test helpers (`testutil.mjs`, `fakecanvas.mjs`).
 

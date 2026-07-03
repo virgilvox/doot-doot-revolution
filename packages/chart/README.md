@@ -17,3 +17,8 @@ Members, each a file under `src/` re-exported from `index.js`:
 - **simfile** read and write StepMania `.sm`/`.ssc` and the native `.ddr` package.
 - **radar** the five-axis groove radar (`computeRadar`, `radarSVG`, `AXES`).
 - **stems** optional WebGPU drum isolation, feature-detected.
+- **compose** a deterministic seeded generative composer (functional-harmony Markov
+  chords, an intensity arc, Euclidean-rhythm bass/arp/drums, a chord-tone Markov lead):
+  `composePiece(mood, seed, opts)` builds a full song or a fixed chunk.
+- **composeChart** `chartFromPiece(piece, difficulty)` maps a composed piece's events
+  straight to a step chart (lanes, quant, jumps, holds), reusing the `DIFFS` tuning.
