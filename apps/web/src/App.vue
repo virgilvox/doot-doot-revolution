@@ -17,7 +17,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import { arrowSVG } from '@doot-games/noteskin';
+import { arrowSVG } from '@doot-games/render';
 import Toast from './components/Toast.vue';
 import GithubLink from './components/GithubLink.vue';
 import TitleView from './views/TitleView.vue';

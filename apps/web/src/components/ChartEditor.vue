@@ -4,7 +4,7 @@
 
 <script setup>
 import { onMounted, onBeforeUnmount, ref } from 'vue';
-import { createEditor } from '@doot-games/editor';
+import { createEditor } from '@doot-games/render';
 
 const props = defineProps({ charts: Object, difficulty: String, audioBuffer: Object, audioContext: Object });
 const emit = defineEmits(['change']);

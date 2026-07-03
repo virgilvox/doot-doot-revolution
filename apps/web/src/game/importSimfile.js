@@ -5,8 +5,8 @@
 // library song, with every dance-single difficulty and the full tempo map, so
 // BPM-change and stop charts play in sync.
 
-import { parseSimfile } from '@doot-games/simfile';
-import { computeRadar } from '@doot-games/radar';
+import { parseSimfile } from '@doot-games/chart';
+import { computeRadar } from '@doot-games/chart';
 import { engine, library } from './singletons.js';
 
 const AUDIO_RE = /\.(ogg|mp3|wav|m4a|aac|flac)$/i;

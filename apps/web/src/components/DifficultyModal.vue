@@ -28,9 +28,9 @@
 <script setup>
 import { ref, computed, onBeforeUnmount } from 'vue';
 import { go } from '../game/screen.js';
-import { DIFFS, nominalRadar } from '@doot-games/charter';
+import { DIFFS, nominalRadar } from '@doot-games/chart';
 import { DIFF_VAR } from '../styles/tokens.js';
-import { AXES } from '@doot-games/radar';
+import { AXES } from '@doot-games/chart';
 import GrooveRadar from './GrooveRadar.vue';
 import { useChart } from '../composables/useChart.js';
 import { useScope } from '../composables/useNavigation.js';

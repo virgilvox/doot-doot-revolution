@@ -11,7 +11,7 @@
 // Views read this and adapt their copy and controls; nothing branches on the
 // environment ad hoc.
 
-import { songToSM } from '@doot-games/simfile';
+import { songToSM } from '@doot-games/chart';
 import { library } from '../game/singletons.js';
 
 function download(name, blob) {

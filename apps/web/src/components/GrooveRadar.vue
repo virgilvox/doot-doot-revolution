@@ -4,7 +4,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { radarSVG } from '@doot-games/radar';
+import { radarSVG } from '@doot-games/chart';
 const props = defineProps({ radar: Object });
 const markup = computed(() => radarSVG(props.radar || {}));
 </script>

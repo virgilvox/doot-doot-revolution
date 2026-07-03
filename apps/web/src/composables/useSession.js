@@ -4,8 +4,8 @@
 // never plays onto a screen the player already left. One session at a time.
 
 import { reactive, markRaw } from 'vue';
-import { Judge } from '@doot-games/judge';
-import { createTiming } from '@doot-games/charter';
+import { Judge } from '@doot-games/play';
+import { createTiming } from '@doot-games/chart';
 import { engine, input } from '../game/singletons.js';
 import { settings } from '../game/settings.js';
 import { bus } from '../game/bus.js';

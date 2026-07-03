@@ -16,7 +16,7 @@
 
 <script setup>
 import { go } from '../game/screen.js';
-import { arrowSVG, LANE_DIRS } from '@doot-games/noteskin';
+import { arrowSVG, LANE_DIRS } from '@doot-games/render';
 import { useScope } from '../composables/useNavigation.js';
 import GithubLink from '../components/GithubLink.vue';
 

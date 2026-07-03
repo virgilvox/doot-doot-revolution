@@ -26,7 +26,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { go } from '../game/screen.js';
-import { DIFFS } from '@doot-games/charter';
+import { DIFFS } from '@doot-games/chart';
 import { session } from '../composables/useSession.js';
 import { useRovingFocus } from '../composables/useRovingFocus.js';
 import { setPlay } from '../game/play.js';

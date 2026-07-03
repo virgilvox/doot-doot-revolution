@@ -64,9 +64,9 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { go } from '../game/screen.js';
-import { DIFFS, nominalRadar } from '@doot-games/charter';
+import { DIFFS, nominalRadar } from '@doot-games/chart';
 import { DIFF_VAR } from '../styles/tokens.js';
-import { AXES } from '@doot-games/radar';
+import { AXES } from '@doot-games/chart';
 import { covGrad, fmtTime } from '../game/covers.js';
 import GrooveRadar from '../components/GrooveRadar.vue';
 import SongWheel from '../components/SongWheel.vue';

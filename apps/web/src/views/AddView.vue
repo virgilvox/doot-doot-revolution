@@ -72,10 +72,7 @@
 <script setup>
 import { reactive, ref, computed } from 'vue';
 import { go } from '../game/screen.js';
-import { analyze, estimateTempo } from '@doot-games/analysis';
-import { DIFFS } from '@doot-games/charter';
-import { ENGINES, generate as pipelineGenerate } from '@doot-games/pipeline';
-import { computeRadar } from '@doot-games/radar';
+import { analyze, estimateTempo, DIFFS, ENGINES, computeRadar, generateFromAudio as pipelineGenerate } from '@doot-games/chart';
 import { DIFF_VAR } from '../styles/tokens.js';
 import ChartEditor from '../components/ChartEditor.vue';
 import { engine } from '../game/singletons.js';

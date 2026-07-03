@@ -20,6 +20,6 @@ export default defineConfig(async () => {
   // so exclude them from dep pre-bundling: Vite serves them as live source with
   // HMR instead of caching a stale optimized snapshot (which otherwise drops newly
   // added exports until the cache is force-cleared).
-  const workspace = ['analysis', 'charter', 'core', 'dsp', 'editor', 'engine', 'input', 'judge', 'library', 'notefield', 'noteskin', 'pipeline', 'radar', 'simfile', 'stems', 'ui'].map((n) => '@doot-games/' + n);
+  const workspace = ['chart', 'render', 'play', 'library'].map((n) => '@doot-games/' + n);
   return { plugins, base: './', server: { port: 4318 }, optimizeDeps: { exclude: workspace }, test: { environment: 'jsdom', globals: true, setupFiles: ['./test/setup.js'] } };
 });

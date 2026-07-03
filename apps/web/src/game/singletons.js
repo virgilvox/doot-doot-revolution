@@ -1,8 +1,8 @@
 // The imperative platform singletons, created once and shared across the app. The
 // event bus lives in game/bus.js and the reactive settings in game/settings.js.
 
-import { createEngine } from '@doot-games/engine';
-import { createInput } from '@doot-games/input';
+import { createEngine } from '@doot-games/play';
+import { createInput } from '@doot-games/play';
 import { createLibrary } from '@doot-games/library';
 import { createFsLibrary } from './fsLibrary.js';
 

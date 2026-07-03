@@ -23,7 +23,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { go } from '../game/screen.js';
-import { arrowSVG, LANE_DIRS } from '@doot-games/noteskin';
+import { arrowSVG, LANE_DIRS } from '@doot-games/render';
 import { input } from '../game/singletons.js';
 import { useRovingFocus } from '../composables/useRovingFocus.js';
 

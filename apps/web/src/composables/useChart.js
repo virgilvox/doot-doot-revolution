@@ -2,8 +2,8 @@
 // add. Mirrors the vanilla app helpers, persisting generated charts for library
 // songs so they are not recomputed next time.
 
-import { analyze, estimateTempo } from '@doot-games/analysis';
-import { generate as charterGenerate } from '@doot-games/charter';
+import { analyze, estimateTempo } from '@doot-games/chart';
+import { generate as charterGenerate } from '@doot-games/chart';
 import { engine, library } from '../game/singletons.js';
 
 export function useChart() {

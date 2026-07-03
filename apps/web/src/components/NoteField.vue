@@ -4,7 +4,7 @@
 
 <script setup>
 import { onMounted, onBeforeUnmount, ref } from 'vue';
-import { createNotefield } from '@doot-games/notefield';
+import { createNotefield } from '@doot-games/render';
 
 const props = defineProps({ recFrac: { type: Number, default: 0.16 } });
 const cv = ref(null);
