@@ -1,7 +1,8 @@
 <template>
   <div class="view-fill game-view">
     <div class="stage game-stage">
-      <NoteField ref="field" :rec-frac="0.16" />
+      <ShaderBackground v-if="settings.background" :mood="bgMood" :seed="bgSeed" />
+      <NoteField ref="field" :rec-frac="0.16" :lane-bg="laneBg" />
       <div class="gp-top">
         <div class="song"><div class="t">{{ song?.title || '-' }}</div><div class="s">{{ sub }}</div></div>
         <div class="acts"><button class="btn white sm" @click="restart">Restart</button><button class="btn white sm" @click="quit">Quit</button></div>
@@ -16,13 +17,24 @@
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { go } from '../game/screen.js';
 import NoteField from '../components/NoteField.vue';
+import ShaderBackground from '../components/ShaderBackground.vue';
 import GameHud from '../components/GameHud.vue';
 import { session } from '../composables/useSession.js';
 import { useScope } from '../composables/useNavigation.js';
 import { pendingPlay } from '../game/play.js';
+import { settings } from '../game/settings.js';
 
 const field = ref(null);
 const state = session.state;
+
+// The generative background's look tracks the song: composed songs carry a music
+// mood, the endless run carries its mood, and the seed comes from the title so each
+// track has its own evolving vibe. When the background is on, the lanes darken so
+// arrows stay readable over the visuals.
+const MOOD_MAP = { pulse: 'AURORA', neon: 'ACID', glass: 'GLASS', circuit: 'CIRCUIT' };
+const bgMood = computed(() => { const m = state.song?._mood || (state.song?.endless ? (state.song?.artist || '').toLowerCase() : ''); return MOOD_MAP[m] || undefined; });
+const bgSeed = computed(() => state.song?.title || state.song?.id || 'doot');
+const laneBg = computed(() => (settings.background ? 'rgba(9,8,24,0.58)' : 'rgba(255,255,255,0.05)'));
 const song = computed(() => state.song);
 const fmtT = (s) => { s = Math.max(0, s | 0); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 const sub = computed(() => {

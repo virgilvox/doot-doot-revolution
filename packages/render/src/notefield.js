@@ -34,6 +34,10 @@ export function createNotefield(canvas, config = {}) {
   const rnd = () => Math.random();
   const now = config.now || (() => (typeof performance !== 'undefined' ? performance.now() : Date.now()));
   const cols = 4;
+  // per-lane backing. Over a generative shader background the play strip needs a
+  // semi-opaque dark backing so arrows stay readable while the visuals still show
+  // through and around it; callers pass their own (gameplay darkens it).
+  const laneBg = config.laneBg || 'rgba(255,255,255,0.05)';
 
   function resize() {
     const r = canvas.getBoundingClientRect();
@@ -119,7 +123,7 @@ export function createNotefield(canvas, config = {}) {
     // lane guides and press glow
     for (let i = 0; i < cols; i++) {
       const x = startX + gap * i;
-      ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fillRect(x - laneW * 0.62, 0, laneW * 1.24, h);
+      ctx.fillStyle = laneBg; ctx.fillRect(x - laneW * 0.62, 0, laneW * 1.24, h);
       const on = held ? held[i] : (judge && judge.holdActive[i]);
       if (on) { const grad = ctx.createLinearGradient(0, h, 0, recY); grad.addColorStop(0, 'rgba(137,240,216,0)'); grad.addColorStop(1, 'rgba(137,240,216,.16)'); ctx.fillStyle = grad; ctx.fillRect(x - laneW * 0.62, recY, laneW * 1.24, h - recY); }
     }

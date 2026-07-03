@@ -6,11 +6,11 @@
 import { onMounted, onBeforeUnmount, ref } from 'vue';
 import { createNotefield } from '@doot-games/render';
 
-const props = defineProps({ recFrac: { type: Number, default: 0.16 } });
+const props = defineProps({ recFrac: { type: Number, default: 0.16 }, laneBg: { type: String, default: 'rgba(255,255,255,0.05)' } });
 const cv = ref(null);
 let nf = null;
 
-onMounted(() => { nf = createNotefield(cv.value, { recFrac: props.recFrac }); nf.observe(); });
+onMounted(() => { nf = createNotefield(cv.value, { recFrac: props.recFrac, laneBg: props.laneBg }); nf.observe(); });
 onBeforeUnmount(() => { if (nf) nf.disconnect(); });
 
 // expose the imperative surface the session drives each frame

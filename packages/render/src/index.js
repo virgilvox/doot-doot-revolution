@@ -5,3 +5,4 @@
 export * from './noteskin.js';
 export * from './notefield.js';
 export * from './editor.js';
+export * from './background.js';

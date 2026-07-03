@@ -12,3 +12,7 @@ Members, each a file under `src/` re-exported from `index.js`:
   BPM changes and stops read correctly. Wrapped by `NoteField.vue`.
 - **editor** the embeddable chart review and edit strip (minimap, playhead, undo).
   Wrapped by `ChartEditor.vue`.
+- **background** a seeded generative fragment-shader backdrop (ported from the spline
+  engine): a grammar assembles a GLSL shader from noise fields, domain warp, IQ
+  palettes and post; it bakes once and evolves via animated uniforms. `createBackground(canvas)`
+  drives it; the app runs it behind the notefield during play.

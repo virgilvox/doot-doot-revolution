@@ -44,6 +44,7 @@ const rows = [
   { t: 'Music volume', kind: 'vol', key: 'volMusic' },
   { t: 'SFX volume', d: 'Loudness of the hit tick.', kind: 'vol', key: 'volSfx' },
   { t: 'Reduced motion', d: 'Calmer menus. Gameplay still animates.', kind: 'toggle', key: 'reducedMotion' },
+  { t: 'Background visuals', d: 'Generative shader behind the lanes during play. Off for a plain field.', kind: 'toggle', key: 'background' },
   { t: 'Reset', d: 'Restore default settings.', kind: 'action', action: () => s.reset(), label: () => 'Reset all' }
 ];
 function desc(r) { if (r.id === 'calibrate') return calib.msg || 'Play 8 clicks and tap Space in time to find your offset.'; return r.d || ''; }

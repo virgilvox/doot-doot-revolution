@@ -39,6 +39,13 @@ starts instantly (a full offline render of a 96s song froze the tab for 45s). Co
 songs carry a `_piece` and no buffer; `game/audio.js` `ensureBuffer` only decodes
 imported blobs.
 
+Gameplay has an optional generative shader background (ported from the spline engine
+into `@doot-games/render` `background.js`): a seeded grammar bakes a GLSL fragment
+shader once and evolves it via animated uniforms, the same generative concept as the
+music. `ShaderBackground.vue` runs it behind the notefield in `GameView` with the
+look derived from the song's mood; the lanes darken (`NoteField` `laneBg`) so arrows
+stay readable over it, and a `settings.background` toggle turns it off.
+
 The `∞ Perpetual` tile in the song wheel launches an endless, evolving stream. A
 conductor (`game/conductor.js`) grows one piece in place: each phrase is composed
 (re-rolling melodies against a fixed key/tempo/mood, ferrule's evolve) and appended to
