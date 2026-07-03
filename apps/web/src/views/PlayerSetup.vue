@@ -5,19 +5,21 @@
     <div class="panel ps-panel">
       <div class="ps-song"><span class="ps-title">{{ song?.title }}</span><span class="ps-diff" :style="{ background: diffColor }">{{ diffName }}</span></div>
 
-      <div class="ps-prompt">How many players?</div>
-      <div class="ps-stepper">
-        <button class="ps-arrow" :disabled="count <= 1" @click="dec" aria-label="fewer players">&#9664;</button>
-        <div class="ps-num" :key="count" :style="{ color: color(0) }">{{ count }}</div>
-        <button class="ps-arrow" :disabled="count >= maxPlayers" @click="inc" aria-label="more players">&#9654;</button>
+      <div class="ps-choose">
+        <div class="ps-prompt">How many players?</div>
+        <div class="ps-stepper">
+          <button class="ps-arrow" :disabled="count <= 1" @click="dec" aria-label="fewer players">&#9664;</button>
+          <div class="ps-num" :key="count" :style="{ color: color(0) }">{{ count }}</div>
+          <button class="ps-arrow" :disabled="count >= maxPlayers" @click="inc" aria-label="more players">&#9654;</button>
+        </div>
+        <div class="ps-mode" :style="{ color: count > 1 ? color(0) : '' }">{{ count === 1 ? 'Solo' : 'Versus' }}</div>
       </div>
-      <div class="ps-mode" :style="{ color: count > 1 ? color(0) : '' }">{{ count === 1 ? 'Solo' : 'Versus' }}</div>
 
       <div class="ps-players">
         <div v-for="i in count" :key="i" class="ps-card" :style="{ '--pc': color(i - 1) }">
           <span class="ps-badge">P{{ i }}</span>
           <span class="ps-dev">{{ dev(i - 1).label }}</span>
-          <span class="ps-keys">{{ dev(i - 1).keys }}</span>
+          <span class="ps-keys" :style="{ color: color(i - 1) }">{{ dev(i - 1).keys }}</span>
         </div>
       </div>
 
@@ -105,29 +107,31 @@ onBeforeUnmount(() => { aborted = true; clearInterval(timer); });
 
 <style scoped>
 .player-setup :deep(.view-inner) { align-items: center; justify-content: center; }
-.ps-panel { align-items: center; text-align: center; gap: 18px; width: min(470px, 94vw); padding: clamp(22px, 4vw, 34px); }
+.ps-panel { align-items: center; text-align: center; gap: 22px; width: min(440px, 94vw); padding: clamp(26px, 4vw, 36px); }
 
 .ps-song { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
-.ps-title { font-family: var(--fd); font-weight: 800; font-size: clamp(20px, 4vw, 26px); }
-.ps-diff { font-family: var(--fd); font-weight: 800; font-size: 12px; color: #fff; text-transform: uppercase; letter-spacing: .5px; padding: 3px 11px; border-radius: 999px; border: 2px solid var(--ink); }
+.ps-title { font-family: var(--fd); font-weight: 800; font-size: clamp(21px, 4vw, 27px); }
+.ps-diff { font-family: var(--fd); font-weight: 800; font-size: 12px; color: #fff; text-transform: uppercase; letter-spacing: .5px; padding: 3px 12px; border-radius: 999px; border: 2px solid var(--ink); }
 
-.ps-prompt { font-family: var(--fu); font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 1.6px; color: #7d7aa0; margin-top: -4px; }
-.ps-stepper { display: flex; align-items: center; gap: clamp(18px, 5vw, 32px); }
-.ps-arrow { width: 56px; height: 56px; border: 3px solid var(--ink); border-radius: var(--r2); background: #fff; color: var(--ink); font-size: 20px; cursor: pointer; box-shadow: 0 5px 0 var(--ink-2); transition: transform .1s, box-shadow .1s; }
+/* the count picker as one balanced, centered unit */
+.ps-choose { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.ps-prompt { font-family: var(--fu); font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 1.6px; color: #7d7aa0; }
+.ps-stepper { display: flex; align-items: center; justify-content: center; gap: 20px; }
+.ps-arrow { flex: none; width: 54px; height: 54px; display: grid; place-items: center; border: 3px solid var(--ink); border-radius: var(--r2); background: #fff; color: var(--ink); font-size: 18px; cursor: pointer; box-shadow: 0 4px 0 var(--ink-2); transition: transform .1s, box-shadow .1s; }
 .ps-arrow:hover:not(:disabled) { transform: translateY(-1px); }
-.ps-arrow:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 0 0 var(--ink-2); }
-.ps-arrow:disabled { opacity: .28; box-shadow: none; cursor: default; }
-.ps-num { font-family: var(--fd); font-weight: 800; font-size: clamp(76px, 16vw, 96px); line-height: 1; min-width: 74px; text-shadow: 0 4px 0 var(--ink-2); animation: numpop .26s var(--sp); }
-@keyframes numpop { 0% { transform: scale(1.35); } 60% { transform: scale(.94); } 100% { transform: scale(1); } }
-.ps-mode { font-family: var(--fd); font-weight: 800; font-size: 15px; text-transform: uppercase; letter-spacing: 2px; color: #7d7aa0; margin-top: -8px; }
+.ps-arrow:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 var(--ink-2); }
+.ps-arrow:disabled { opacity: .3; box-shadow: none; cursor: default; }
+.ps-num { width: 66px; text-align: center; font-family: var(--fd); font-weight: 800; font-size: clamp(70px, 15vw, 84px); line-height: 1; text-shadow: 0 4px 0 var(--ink-2); animation: numpop .26s var(--sp); }
+@keyframes numpop { 0% { transform: scale(1.3); } 60% { transform: scale(.95); } 100% { transform: scale(1); } }
+.ps-mode { font-family: var(--fd); font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #7d7aa0; }
 
-.ps-players { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-.ps-card { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 108px; padding: 12px 12px 10px; background: #fff; border: 3px solid var(--ink); border-top: 8px solid var(--pc); border-radius: var(--r2); box-shadow: 0 4px 0 var(--ink-2); }
-.ps-badge { font-family: var(--fd); font-weight: 800; color: #fff; background: var(--pc); border: 2px solid var(--ink); border-radius: 999px; padding: 1px 13px; font-size: 14px; }
+.ps-players { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.ps-card { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 108px; padding: 12px 16px; background: #fff; border: 3px solid var(--ink); border-radius: var(--r2); box-shadow: 0 4px 0 var(--ink-2); }
+.ps-badge { font-family: var(--fd); font-weight: 800; color: #fff; background: var(--pc); border: 2px solid var(--ink); border-radius: 999px; padding: 1px 14px; font-size: 14px; }
 .ps-dev { font-family: var(--fu); font-weight: 800; font-size: 12px; color: var(--ink); }
-.ps-keys { font-family: var(--fd); font-weight: 800; font-size: 12px; letter-spacing: 2px; color: #9a97bd; }
+.ps-keys { font-family: var(--fd); font-weight: 800; font-size: 13px; letter-spacing: 2px; }
 
-.ps-note { font-family: var(--fu); font-weight: 600; font-size: 12px; line-height: 1.45; color: #7d5a2e; background: var(--cream); border: 2px solid var(--ink); border-radius: var(--r2); padding: 9px 14px; max-width: 380px; margin-top: 2px; }
-.ps-dance { font-size: 18px; padding: 12px 44px; margin-top: 2px; }
+.ps-note { font-family: var(--fu); font-weight: 600; font-size: 12px; line-height: 1.45; color: #7d5a2e; background: var(--cream); border: 2px solid var(--ink); border-radius: var(--r2); padding: 10px 14px; max-width: 360px; }
+.ps-dance { font-size: 18px; padding: 12px 46px; }
 .ps-hint { text-align: center; letter-spacing: 1px; }
 </style>
