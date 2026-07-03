@@ -31,24 +31,32 @@ function sniffMime(b) {
   return 'audio/webm';
 }
 
+process.on('uncaughtException', (e) => console.error('uncaughtException:', (e && e.stack) || e));
+process.on('unhandledRejection', (e) => console.error('unhandledRejection:', (e && e.stack) || e));
+
 const server = http.createServer(async (req, res) => {
+  const t0 = Date.now();
   const cors = { 'Access-Control-Allow-Origin': ALLOW_ORIGIN, 'Access-Control-Expose-Headers': 'X-Video-Title' };
   if (req.method === 'OPTIONS') { res.writeHead(204, cors); return res.end(); }
   const target = new URL(req.url, 'http://x').searchParams.get('url');
   // no url is the health/root probe (App Platform checks the container root); 200 keeps
   // the component healthy. a present-but-non-YouTube url is a real bad request.
   if (!target) { res.writeHead(200, cors); return res.end('doot yt-service ok'); }
+  console.log('rip request:', target);
   if (!isYouTube(target)) { res.writeHead(400, cors); return res.end('not a YouTube url'); }
   const base = { noPlaylist: true, noWarnings: true, jsRuntimes: 'node' };
   const out = path.join(tmpdir(), `yt-${Date.now()}-${Math.floor(process.hrtime()[1])}.audio`);
   try {
     const info = await ytdlp(target, { ...base, dumpSingleJson: true, format: 'bestaudio' });
+    console.log('meta ok:', info.title, info.duration + 's', 'in', Date.now() - t0 + 'ms');
     if ((Number(info.duration) || 0) > MAX_SECONDS) { res.writeHead(413, cors); return res.end('video too long'); }
     await ytdlp(target, { ...base, format: 'bestaudio', output: out });
     const buf = await readFile(out);
+    console.log('download ok:', buf.length, 'bytes in', Date.now() - t0 + 'ms');
     res.writeHead(200, { ...cors, 'Content-Type': sniffMime(buf), 'X-Video-Title': encodeURIComponent(info.title || 'YouTube'), 'Cache-Control': 'no-store' });
     res.end(buf);
   } catch (e) {
+    console.error('rip failed in', Date.now() - t0 + 'ms:', String((e && e.stack) || e).slice(0, 500));
     res.writeHead(502, cors); res.end('rip failed: ' + String((e && e.message) || e).slice(0, 200));
   } finally { unlink(out).catch(() => {}); }
 });
