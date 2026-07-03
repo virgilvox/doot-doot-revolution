@@ -76,7 +76,7 @@ import { analyze, estimateTempo } from '@doot-games/analysis';
 import { DIFFS } from '@doot-games/charter';
 import { ENGINES, generate as pipelineGenerate } from '@doot-games/pipeline';
 import { computeRadar } from '@doot-games/radar';
-import { DIFF_VAR } from '@doot-games/ui';
+import { DIFF_VAR } from '../styles/tokens.js';
 import ChartEditor from '../components/ChartEditor.vue';
 import { engine } from '../game/singletons.js';
 import { importSimfiles } from '../game/importSimfile.js';

@@ -1,5 +1,5 @@
 /* App shell layout. The design tokens and component styles come from
-   @doot-games/ui; this file only locks the app to the viewport so nothing
+   design.css; this file only locks the app to the viewport so nothing
    scrolls off screen and gameplay can fill the available area exactly. */
 
 html, body, #app { height: 100%; }

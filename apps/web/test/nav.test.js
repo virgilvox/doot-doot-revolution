@@ -1,6 +1,6 @@
 import { test, expect } from 'vitest';
 import { useNavigation } from '../src/composables/useNavigation.js';
-import { bus } from '../src/game/singletons.js';
+import { bus } from '../src/game/bus.js';
 
 test('only the top focus scope receives nav events, and pop restores the previous', () => {
   const nav = useNavigation();

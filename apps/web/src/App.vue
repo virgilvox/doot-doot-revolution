@@ -29,7 +29,7 @@ import LibraryView from './views/LibraryView.vue';
 import SettingsView from './views/SettingsView.vue';
 import PadsView from './views/PadsView.vue';
 import { useInput } from './composables/useInput.js';
-import { bus } from './game/singletons.js';
+import { bus } from './game/bus.js';
 import { navFocus } from './game/navFocus.js';
 import { screen, go } from './game/screen.js';
 

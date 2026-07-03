@@ -65,7 +65,7 @@
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { go } from '../game/screen.js';
 import { DIFFS, nominalRadar } from '@doot-games/charter';
-import { DIFF_VAR } from '@doot-games/ui';
+import { DIFF_VAR } from '../styles/tokens.js';
 import { AXES } from '@doot-games/radar';
 import { covGrad, fmtTime } from '../game/covers.js';
 import GrooveRadar from '../components/GrooveRadar.vue';

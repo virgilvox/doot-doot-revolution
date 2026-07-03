@@ -7,7 +7,8 @@
 // and cancel come from Enter/Escape and from the first two gamepad face buttons,
 // so the whole app is playable with no mouse.
 
-import { engine, input, bus } from '../game/singletons.js';
+import { engine, input } from '../game/singletons.js';
+import { bus } from '../game/bus.js';
 
 const DIR = ['left', 'down', 'up', 'right'];
 let started = false;

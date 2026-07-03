@@ -5,7 +5,7 @@
 // generic focusable registry to maintain.
 
 import { onMounted, onUnmounted } from 'vue';
-import { bus } from '../game/singletons.js';
+import { bus } from '../game/bus.js';
 
 const stack = [];
 let wired = false;

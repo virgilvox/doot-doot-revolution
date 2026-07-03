@@ -29,7 +29,7 @@
 import { ref, computed, onBeforeUnmount } from 'vue';
 import { go } from '../game/screen.js';
 import { DIFFS, nominalRadar } from '@doot-games/charter';
-import { DIFF_VAR } from '@doot-games/ui';
+import { DIFF_VAR } from '../styles/tokens.js';
 import { AXES } from '@doot-games/radar';
 import GrooveRadar from './GrooveRadar.vue';
 import { useChart } from '../composables/useChart.js';

@@ -18,9 +18,11 @@ opens on the Title attract screen.
 The earlier vanilla single-file app (`apps/ddr`) was retired; the packages remain
 the proof the logic is framework-free.
 
-Current status: builds clean, 49 tests pass (44 package, 5 Vue), verified end to
-end in the browser (controller-only play, difficulty modal, viewport-fit gameplay
-with the game-feel pass, add/review/save, all menus). No console errors.
+Current status: builds clean, 62 tests pass (57 package, 5 Vue), deployed live at
+https://dance.doot.games, verified end to end in the browser (controller-only play,
+difficulty modal, viewport-fit gameplay with the game-feel pass, StepMania import,
+add/review/save, all menus). Navigation is state-driven (no router). No console
+errors.
 
 ## Run, build, test
 
@@ -177,9 +179,19 @@ O(events) on a heavy gimmick chart; a cached cursor would make it O(1).
   `CSC_LINK`/`CSC_KEY_PASSWORD` to sign, and the `APPLE_*` secrets plus
   `mac.notarize: true` to notarize. macOS entitlements live at
   `apps/web/build/entitlements.mac.plist`.
-- `.do/app.yaml` is a DigitalOcean App Platform static-site spec: it builds at the
-  repo root and serves `apps/web/dist`. Any static host works the same; hash
-  routing needs no rewrites.
+- The web app is LIVE at https://dance.doot.games as a DigitalOcean App Platform
+  Static Site (the free tier: no server, no container), app name `dance-doot-games`.
+  `doot.games` is a DO-managed zone, so App Platform created the `dance` CNAME and
+  the TLS cert automatically. `.do/app.yaml` is the spec; `deploy_on_push: true`
+  redeploys `main`. There is no routing, so no rewrites are needed. Build gotcha,
+  encoded in the spec: the build runs
+  `rm -rf node_modules package-lock.json && npm install --include=dev && npm run build`.
+  The committed lockfile is generated on macOS and omits the Linux-only
+  `@rollup/rollup-linux-x64-gnu` that Vite needs; both `npm ci` and `npm install`
+  honor that tree (npm/cli#4828), so the lockfile is reset to resolve it fresh on
+  the Linux builder. A GitHub source link (`components/GithubLink.vue`) sits in the
+  nav and the title footer; the Electron window-open handler routes external https
+  through `shell.openExternal` so it works in the desktop app too.
 - Storage adapts by platform through one pluggable backend in `@doot-games/library`.
   The web deploy persists in IndexedDB (self contained, no server). The desktop app
   saves one `.ddr` file per song into a folder the user picks on first use, over a

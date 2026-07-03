@@ -24,11 +24,14 @@
 <script setup>
 import { reactive, onBeforeUnmount } from 'vue';
 import { go } from '../game/screen.js';
-import { useSettingsStore } from '../stores/settings.js';
+import { settings, resetSettings } from '../game/settings.js';
 import { useRovingFocus } from '../composables/useRovingFocus.js';
 import { engine } from '../game/singletons.js';
 
-const s = useSettingsStore();
+// settings is one reactive object; assigning to it triggers the persistence and
+// side-effect watchers in game/settings.js. This adapter keeps the template's
+// s.state / s.set / s.reset shape.
+const s = { state: settings, set: (k, v) => { settings[k] = v; }, reset: resetSettings };
 const back = () => go('select');
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 

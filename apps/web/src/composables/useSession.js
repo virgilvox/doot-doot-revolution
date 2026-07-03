@@ -6,7 +6,9 @@
 import { reactive, markRaw } from 'vue';
 import { Judge } from '@doot-games/judge';
 import { createTiming } from '@doot-games/charter';
-import { engine, input, settings, bus } from '../game/singletons.js';
+import { engine, input } from '../game/singletons.js';
+import { settings } from '../game/settings.js';
+import { bus } from '../game/bus.js';
 
 // hit tick pitch per judgment: brighter for a better hit
 const TICK_FREQ = { marvelous: 1245, perfect: 1046, great: 880, good: 740, boo: 620 };
@@ -14,7 +16,7 @@ const TICK_FREQ = { marvelous: 1245, perfect: 1046, great: 880, good: 740, boo: 
 function createSession() {
   const state = reactive({ playing: false, score: 0, combo: 0, life: 50, count: '', progress: 0, judge: null, chart: null, song: null, results: null });
   let raf = 0, active = false, epoch = 0, subs = [], field = null, timing = null;
-  const off = () => settings.get('offsetMs') / 1000;
+  const off = () => settings.offsetMs / 1000;
 
   function attachField(f) { field = f; }
 
@@ -34,7 +36,7 @@ function createSession() {
       if (type) engine.tick(TICK_FREQ[type] || 880); // sound only on a real note, brighter for a better hit
     }));
     await engine.resume(); if (mine !== epoch) return;
-    if (field) { field.resize(); field.setReducedMotion(settings.get('reducedMotion')); }
+    if (field) { field.resize(); field.setReducedMotion(settings.reducedMotion); }
     await countdown(() => mine === epoch); if (mine !== epoch) return;
     engine.play(0); active = true; state.playing = true; loop();
   }
@@ -52,7 +54,7 @@ function createSession() {
     if (!active) return;
     const t = engine.time(), held = input.laneDown();
     state.judge.update(t, held);
-    if (field) field.render(t, state.chart, { speed: settings.get('speed'), judge: state.judge, held, beat: timing ? timing.timeToBeat(t) : undefined });
+    if (field) field.render(t, state.chart, { speed: settings.speed, judge: state.judge, held, beat: timing ? timing.timeToBeat(t) : undefined });
     state.score = state.judge.score; state.combo = state.judge.combo; state.life = state.judge.life;
     const dur = engine.duration(); state.progress = dur ? Math.min(1, t / dur) : 0;
     if (t >= dur + 0.6) end();
