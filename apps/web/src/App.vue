@@ -5,6 +5,7 @@
       <div class="brand" @click="go('title')"><span class="mk" v-html="brandMark"></span>DOOT DOOT REVOLUTION<span class="dot">.</span></div>
       <div class="tabs">
         <button v-for="(t, i) in tabs" :key="t.name" class="tab" :class="{ on: screen === t.name, kfocus: navFocus === i }" @click="go(t.name)">{{ t.label }}</button>
+        <GithubLink />
       </div>
     </nav>
     <main class="shell-main">
@@ -18,6 +19,7 @@
 import { computed, onMounted } from 'vue';
 import { arrowSVG } from '@doot-games/noteskin';
 import Toast from './components/Toast.vue';
+import GithubLink from './components/GithubLink.vue';
 import TitleView from './views/TitleView.vue';
 import SelectView from './views/SelectView.vue';
 import GameView from './views/GameView.vue';

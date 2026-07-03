@@ -43,8 +43,12 @@ function createWindow() {
     width: 1280, height: 800, backgroundColor: '#EEF1FF',
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true }
   });
-  // do not let a renderer navigate away or open external windows
-  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  // open external https links (such as the GitHub link) in the system browser, and
+  // deny any attempt to open a window inside the app
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https:\/\//i.test(url)) shell.openExternal(url);
+    return { action: 'deny' };
+  });
   win.webContents.on('will-navigate', (e, u) => {
     const ok = (isDev && u.startsWith(process.env.VITE_DEV_SERVER_URL)) || u.startsWith('app://');
     if (!ok) e.preventDefault();

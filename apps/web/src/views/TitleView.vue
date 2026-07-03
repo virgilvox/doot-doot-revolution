@@ -8,7 +8,7 @@
           <div class="t-arrows" aria-hidden="true"><div class="a" v-for="(a, i) in arrows" :key="i" v-html="a"></div></div>
           <button class="press" @click="start">PRESS START</button>
         </div>
-        <div class="t-foot"><span>v2.0 &middot; open source</span><span>{{ foot }}</span></div>
+        <div class="t-foot"><span class="tf-src">v2.0 &middot; open source <GithubLink :size="28" /></span><span>{{ foot }}</span></div>
       </div>
     </div>
   </div>
@@ -18,6 +18,7 @@
 import { go } from '../game/screen.js';
 import { arrowSVG, LANE_DIRS } from '@doot-games/noteskin';
 import { useScope } from '../composables/useNavigation.js';
+import GithubLink from '../components/GithubLink.vue';
 
 const arrows = LANE_DIRS.map((d) => arrowSVG(d));
 const foot = '/songs · ready';
@@ -31,4 +32,5 @@ useScope({ confirm: start, cancel: () => {} });
 .title-wrap { display: grid; place-items: center; padding: clamp(10px, 2vw, 22px); }
 /* keep the 16:9 attract frame inside the viewport on any aspect ratio */
 .title-frame { width: min(100%, calc((100dvh - 44px) * 1.777)); max-height: 100%; }
+.tf-src { display: inline-flex; align-items: center; gap: 7px; }
 </style>
