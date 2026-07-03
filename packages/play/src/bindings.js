@@ -14,11 +14,16 @@ const V1_KEY = 'ddr.binds.v1';
 export function defaultKeyboard() {
   return { lanes: [['ArrowLeft'], ['ArrowDown'], ['ArrowUp'], ['ArrowRight']], start: ['Enter'], back: ['Escape'] };
 }
+// a second keyboard player on the same keyboard: WASD. No menu keys (player one drives
+// the menus); it only exists to give a two-player-on-one-keyboard game a second device.
+export function defaultKeyboard2() {
+  return { lanes: [['KeyA'], ['KeyS'], ['KeyW'], ['KeyD']], start: [], back: [] };
+}
 export function defaultPad() {
   // standard-gamepad d-pad: 12 up, 13 down, 14 left, 15 right; 9 start, 8 select/back
   return { lanes: [[14], [13], [12], [15]], start: [9], back: [8] };
 }
-export function defaultBindings() { return { keyboard: defaultKeyboard(), pads: {} }; }
+export function defaultBindings() { return { keyboard: defaultKeyboard(), keyboard2: defaultKeyboard2(), pads: {} }; }
 
 // A stable key for a gamepad across reconnects and index changes: the USB vendor:product
 // when the browser exposes it, else the id with volatile parentheticals stripped, so the
@@ -64,6 +69,7 @@ function fillMap(m, def) {
 function normalize(b) {
   const out = defaultBindings();
   if (b && b.keyboard && Array.isArray(b.keyboard.lanes)) out.keyboard = fillMap(b.keyboard, defaultKeyboard());
+  if (b && b.keyboard2 && Array.isArray(b.keyboard2.lanes)) out.keyboard2 = fillMap(b.keyboard2, defaultKeyboard2());
   if (b && b.pads && typeof b.pads === 'object') for (const k of Object.keys(b.pads)) out.pads[k] = fillMap(b.pads[k], defaultPad());
   return out;
 }
@@ -77,7 +83,7 @@ export function migrateV1(v1) {
     const st = (v1.start || []).filter((x) => x && x.type === 'key').map((x) => x.code); if (st.length) kb.start = st;
     const bk = (v1.back || []).filter((x) => x && x.type === 'key').map((x) => x.code); if (bk.length) kb.back = bk;
   }
-  return { keyboard: kb, pads: {} };
+  return { keyboard: kb, keyboard2: defaultKeyboard2(), pads: {} };
 }
 
 export function loadBindings(store, key = V2_KEY) {

@@ -74,3 +74,22 @@ test('reset restores keyboard defaults', () => {
   input.reset();
   assert.equal(input.describe('keyboard', 0), 'Left');
 });
+
+test('WASD drives the second keyboard, arrows the first', () => {
+  const input = createInput({ storage: fakeStorage() });
+  const target = fakeTarget(); input.attach(target);
+  const downs = []; input.on('down', (e) => downs.push(e));
+  target.fire('keydown', { code: 'KeyA', preventDefault() {} });
+  assert.deepEqual(downs[0], { lane: 0, device: 'keyboard2' });
+  target.fire('keydown', { code: 'ArrowUp', preventDefault() {} });
+  assert.deepEqual(downs[1], { lane: 2, device: 'keyboard' });
+  assert.equal(input.heldFor('keyboard2')[0], true);
+  assert.equal(input.heldFor('keyboard')[2], true);
+});
+
+test('devices lists both keyboards', () => {
+  const input = createInput({ storage: fakeStorage() });
+  const devs = input.devices().map((d) => d.device);
+  assert.ok(devs.includes('keyboard'));
+  assert.ok(devs.includes('keyboard2'));
+});

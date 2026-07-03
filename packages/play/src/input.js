@@ -15,6 +15,8 @@ import {
 } from './bindings.js';
 
 const KB = 'keyboard';
+const KEYBOARDS = ['keyboard', 'keyboard2']; // player 1 (arrows) and player 2 (WASD)
+const isPadDevice = (d) => d.slice(0, 4) === 'pad:';
 const padDevice = (key) => 'pad:' + key;
 
 function pickStorage(storage) {
@@ -40,19 +42,23 @@ export function createInput(options = {}) {
   function down(device, lane) { const h = heldOf(device); if (h[lane]) return; h[lane] = true; emit('down', { lane, device }); }
   function up(device, lane) { const h = heldOf(device); if (!h[lane]) return; h[lane] = false; emit('up', { lane, device }); }
   function combinedHeld() { const out = [false, false, false, false]; for (const d in heldMap) for (let l = 0; l < 4; l++) if (heldMap[d][l]) out[l] = true; return out; }
-  // 'pad:'.length === 4
-  function mapFor(device) { return device === KB ? binds.keyboard : ensurePad(binds, device.slice(4)); }
+  // resolve a device string to its map: keyboard, keyboard2, or pad:<key>
+  function mapFor(device) { return device === 'keyboard' ? binds.keyboard : device === 'keyboard2' ? binds.keyboard2 : ensurePad(binds, device.slice(4)); }
   function bindNow(device, slot, raw, map) { setBinding(map, slot, raw); save(); listening = null; emit('bound', { device, slot }); }
 
   function onKeyDown(e) {
     if (e.repeat) return;
-    if (listening && listening.device === KB) { bindNow(KB, listening.slot, e.code, binds.keyboard); if (e.preventDefault) e.preventDefault(); return; }
+    if (listening && (listening.device === 'keyboard' || listening.device === 'keyboard2')) { bindNow(listening.device, listening.slot, e.code, mapFor(listening.device)); if (e.preventDefault) e.preventDefault(); return; }
     if (/^(input|textarea|select)$/i.test((e.target && e.target.tagName) || '')) return;
-    if (inSlot(binds.keyboard, 'start', e.code)) emit('start', { device: KB });
-    if (inSlot(binds.keyboard, 'back', e.code)) emit('back', { device: KB });
-    const l = laneFor(binds.keyboard, e.code); if (l >= 0) { down(KB, l); if (e.preventDefault) e.preventDefault(); }
+    // resolve against both keyboards; the first match owns the key (arrows -> p1, WASD -> p2)
+    for (const dev of KEYBOARDS) {
+      const m = mapFor(dev);
+      if (inSlot(m, 'start', e.code)) emit('start', { device: dev });
+      if (inSlot(m, 'back', e.code)) emit('back', { device: dev });
+      const l = laneFor(m, e.code); if (l >= 0) { down(dev, l); if (e.preventDefault) e.preventDefault(); return; }
+    }
   }
-  function onKeyUp(e) { const l = laneFor(binds.keyboard, e.code); if (l >= 0) up(KB, l); }
+  function onKeyUp(e) { for (const dev of KEYBOARDS) { const l = laneFor(mapFor(dev), e.code); if (l >= 0) { up(dev, l); return; } } }
 
   function poll() {
     if (!padEnabled || typeof navigator === 'undefined' || !navigator.getGamepads) return;
@@ -82,6 +88,14 @@ export function createInput(options = {}) {
     return out;
   }
 
+  // every assignable input device (both keyboards plus any connected pads), for the Pads
+  // screen and the multiplayer roster's device pickers
+  function devices() {
+    const out = [{ device: 'keyboard', label: 'Keyboard (arrows)', kind: 'keyboard' }, { device: 'keyboard2', label: 'Keyboard (WASD)', kind: 'keyboard' }];
+    for (const p of pads()) out.push({ device: p.device, label: p.id, kind: 'controller' });
+    return out;
+  }
+
   let _kd = null, _ku = null, _target = null;
   function attach(target) {
     _target = target || (typeof window !== 'undefined' ? window : null); if (!_target) return;
@@ -90,7 +104,7 @@ export function createInput(options = {}) {
   function detach() { if (_target) { _target.removeEventListener('keydown', _kd); _target.removeEventListener('keyup', _ku); _target = null; } }
 
   return {
-    LANE_NAMES, on, poll, attach, detach, pads,
+    LANE_NAMES, on, poll, attach, detach, pads, devices,
     held: combinedHeld,
     heldFor: (device) => heldOf(device).slice(),
     isDown: (lane) => combinedHeld()[lane],
@@ -100,7 +114,7 @@ export function createInput(options = {}) {
     cancelListen: () => { listening = null; },
     setPadEnabled: (v) => { padEnabled = !!v; },
     padEnabled: () => padEnabled,
-    describe: (device, slot) => describeSlot(mapFor(device), slot, device !== KB),
+    describe: (device, slot) => describeSlot(mapFor(device), slot, isPadDevice(device)),
     reset: () => { binds = defaultBindings(); save(); }
   };
 }

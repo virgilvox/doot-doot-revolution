@@ -109,3 +109,12 @@ test('describeSlot renders human labels', () => {
   assert.equal(describeSlot(defaultKeyboard(), 0, false), 'Left');
   assert.equal(describeSlot(defaultPad(), 0, true), 'Btn 14');
 });
+
+test('a second keyboard defaults to WASD for a two-on-one-keyboard game', () => {
+  const b = defaultBindings();
+  assert.ok(b.keyboard2);
+  assert.equal(laneFor(b.keyboard2, 'KeyA'), 0); // left
+  assert.equal(laneFor(b.keyboard2, 'KeyS'), 1); // down
+  assert.equal(laneFor(b.keyboard2, 'KeyW'), 2); // up
+  assert.equal(laneFor(b.keyboard2, 'KeyD'), 3); // right
+});
