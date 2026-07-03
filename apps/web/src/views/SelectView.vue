@@ -73,12 +73,17 @@ import SongWheel from '../components/SongWheel.vue';
 import DifficultyModal from '../components/DifficultyModal.vue';
 import { useSongsStore } from '../stores/songs.js';
 import { useScope } from '../composables/useNavigation.js';
+import { useSongPreview } from '../composables/useSongPreview.js';
 import { navFocus } from '../game/navFocus.js';
 import { engine } from '../game/singletons.js';
 
 const songs = useSongsStore();
 const modalOpen = ref(false);
 const cur = computed(() => songs.current);
+
+// Preview the highlighted song so the wheel is not silent (fades in on settle,
+// crossfades between songs, stops when a song starts or the screen changes).
+useSongPreview(cur);
 const diffs = Object.keys(DIFFS);
 const radar = computed(() => { const s = cur.value; if (!s) return {}; const m = s.charts && s.charts.expert; return (m && m.radar) || nominalRadar('expert'); });
 const engineLabel = computed(() => { const s = cur.value; const m = s && s.charts && s.charts.expert; const L = { quick: 'Quick', drum: 'Drum-Aware', stem: 'Stem-Split' }; return m ? (L[m.engine] || 'Drum-Aware') : (L[s?._engine] || '-'); });

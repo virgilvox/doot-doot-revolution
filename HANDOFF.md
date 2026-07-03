@@ -126,7 +126,11 @@ Arrow color follows the Dance Dance Revolution "Note" scheme, by beat not by lan
 `@doot-games/render`). The notefield draws each note with `colorFor(n.quant)` and
 uses the lane only for rotation, so a jump is one color. The per-direction palette
 is decoration for menu specimens only. Cycling the song wheel plays a soft
-`engine.cursor` blip (SelectView watches `songs.sel`).
+`engine.cursor` blip (SelectView watches `songs.sel`), and the highlighted song
+plays a looping, faded preview so the screen is not silent
+(`composables/useSongPreview.js` over `engine.preview`/`stopPreview`): debounced so
+scrolling stays quiet, crossfaded between songs on the music bus, and stopped the
+moment a song starts (`engine.play` stops it) or the screen changes.
 
 Next feel ideas (not done): an osu-style hit-error bar with running deviation, a
 combo-to-score multiplier, escalating milestone tiers, and pitch-rising ticks per

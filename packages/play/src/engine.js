@@ -7,6 +7,7 @@ export class AudioEngine {
     this.ctx = null; this.buffer = null; this.src = null;
     this.master = null; this.music = null; this.sfx = null;
     this.startAt = 0; this.pauseAt = 0; this.playing = false; this._onend = null;
+    this.previewSrc = null; this.previewGain = null;
     this.volumes = { master: 0.9, music: 0.85, sfx: 0.7 };
   }
   _ensure() {
@@ -28,13 +29,47 @@ export class AudioEngine {
   load(buffer) { this.buffer = buffer; }
 
   play(fromSec = 0) {
-    this._ensure(); this.stop();
+    this._ensure(); this.stop(); this.stopPreview(0.1);
     const s = this.ctx.createBufferSource(); s.buffer = this.buffer; s.connect(this.music);
     s.onended = () => { if (this.playing && this._onend) this._onend(); };
     this.startAt = this.ctx.currentTime - fromSec; s.start(0, Math.max(0, fromSec));
     this.src = s; this.playing = true;
   }
   stop() { if (this.src) { try { this.src.onended = null; this.src.stop(); } catch (e) {} this.src = null; } this.playing = false; }
+
+  // A looping, faded song preview on the music bus for the select wheel. It is
+  // fully independent of the game buffer and the master clock, so previewing a
+  // track never disturbs a session's timing. Starting a new preview crossfades out
+  // the previous one; real playback (play) stops it. loopLen, when the buffer is
+  // longer, loops a window from start rather than the whole track.
+  preview(buffer, { start = 0, loopLen = 0, fadeIn = 0.35, gain = 1 } = {}) {
+    if (!buffer) return;
+    this._ensure();
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    this.stopPreview(0.25);
+    const g = this.ctx.createGain(); g.gain.value = 0.0001; g.connect(this.music);
+    const s = this.ctx.createBufferSource(); s.buffer = buffer; s.loop = true;
+    if (loopLen > 0 && buffer.duration > loopLen) { s.loopStart = Math.max(0, start); s.loopEnd = Math.min(buffer.duration, start + loopLen); }
+    s.connect(g);
+    s.onended = () => { try { g.disconnect(); } catch (e) {} };
+    const t = this.ctx.currentTime, at = Math.max(0, Math.min(start, buffer.duration - 0.05));
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0001, gain), t + fadeIn);
+    s.start(0, at);
+    this.previewSrc = s; this.previewGain = g;
+  }
+
+  // Fade out and stop the current preview, if any. Safe to call when none is set.
+  stopPreview(fade = 0.28) {
+    const s = this.previewSrc, g = this.previewGain;
+    this.previewSrc = null; this.previewGain = null;
+    if (!s || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    try {
+      if (g) { g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(Math.max(0.0001, g.gain.value), t); g.gain.exponentialRampToValueAtTime(0.0001, t + fade); }
+      s.stop(t + fade + 0.05);
+    } catch (e) {}
+  }
 
   // Current song time in seconds, read from the audio clock.
   time() { if (!this.ctx || !this.playing) return this.pauseAt; return this.ctx.currentTime - this.startAt; }
