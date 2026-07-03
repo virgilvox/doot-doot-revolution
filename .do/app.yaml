@@ -15,9 +15,12 @@ static_sites:
       repo: virgilvox/doot-doot-revolution
       branch: main
       deploy_on_push: true
-    # --include=dev so the build tools (vite, the Vue plugin) install even if the
-    # buildpack sets NODE_ENV=production, which would otherwise skip devDependencies.
-    build_command: npm ci --include=dev && npm run build
+    # npm install, not npm ci: the committed lockfile is generated on macOS, and
+    # npm ci would skip the Linux-only Rollup native binary that Vite needs on the
+    # builder (the well-known optional-dependency bug). npm install re-resolves the
+    # platform optionals. --include=dev keeps the build tools when the buildpack
+    # sets NODE_ENV=production.
+    build_command: npm install --include=dev && npm run build
     output_dir: apps/web/dist
     index_document: index.html
     catchall_document: index.html
