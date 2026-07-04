@@ -33,15 +33,20 @@ const letter = (s) => (s.title || '?')[0].toUpperCase();
 <style scoped>
 /* The Endless tile reads as a special mode, not just another song: a spectrum cover
    with an infinity mark, an outline glow that breathes, and a sheen that sweeps across. */
+/* Always on, selected or not, so the tile visibly stands apart in the wheel: a breathing
+   outline glow and a slow rotating sparkle across the spectrum cover. */
 .card.endless { position: relative; overflow: hidden; border-color: #6b4cff; animation: endless-glow 2.4s ease-in-out infinite; }
-.card.endless .cv { background: conic-gradient(from 210deg, #7c5cff, #ff5ab0, #ffd23f, #22d3c5, #7c5cff); color: #fff; text-shadow: 0 2px 6px rgba(0, 0, 0, .45); }
+.card.endless .cv { position: relative; overflow: hidden; background: conic-gradient(from 210deg, #7c5cff, #ff5ab0, #ffd23f, #22d3c5, #7c5cff); color: #fff; text-shadow: 0 2px 6px rgba(0, 0, 0, .45); }
+.card.endless .cv::after { content: ''; position: absolute; inset: -45%; background: conic-gradient(from 0deg, transparent 0deg, rgba(255, 255, 255, .5) 26deg, transparent 62deg, transparent 360deg); animation: endless-spin 3.4s linear infinite; pointer-events: none; }
 .card.endless .t { display: inline-flex; align-items: center; }
 .card.endless .t .inf { margin-left: 6px; font-weight: 800; color: #7c5cff; }
 .card.endless .cb { color: #7c5cff; }
-.card.endless::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, .55) 50%, transparent 62%); transform: translateX(-130%); animation: endless-sheen 3s ease-in-out infinite; pointer-events: none; }
+/* the sweeping sheen fires only when the endless tile is the selected card */
+.card.endless.sel::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(115deg, transparent 36%, rgba(255, 255, 255, .62) 50%, transparent 64%); transform: translateX(-130%); animation: endless-sheen 2.4s ease-in-out infinite; pointer-events: none; z-index: 2; }
 @keyframes endless-glow {
   0%, 100% { box-shadow: 0 6px 0 var(--ink-2), 0 0 15px rgba(124, 92, 255, .5); }
   50% { box-shadow: 0 6px 0 var(--ink-2), 0 0 28px rgba(255, 90, 176, .75); }
 }
+@keyframes endless-spin { to { transform: rotate(360deg); } }
 @keyframes endless-sheen { 0% { transform: translateX(-130%); } 55%, 100% { transform: translateX(130%); } }
 </style>

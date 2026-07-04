@@ -128,7 +128,8 @@ const PRESETS = {
 const GENRE_MAP = {
   'Synthcore': 'synthcore', 'Disco House': 'house', 'Happy Hardcore': 'breakcore',
   'City Pop': 'citypop', 'Eurobeat': 'eurobeat', 'Synthwave': 'synthwave',
-  'Breakcore': 'breakcore', 'Test Pattern': 'chiptune'
+  'Breakcore': 'breakcore', 'Test Pattern': 'chiptune',
+  'Melodic Trance': 'synthwave', 'Future Bass': 'eurobeat'
 };
 
 export function presetForGenre(genre) { return GENRE_MAP[genre] || 'synthwave'; }

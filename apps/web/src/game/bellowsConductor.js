@@ -82,12 +82,12 @@ export async function playPieceLive(piece, genre) {
 }
 
 // Faded, looping preview of a PIECE for the select wheel, same rack as playback.
-export async function previewPieceLive(piece, genre, { fromStep = 0, fadeIn = 0.4, level = 0.9 } = {}) {
+export async function previewPieceLive(piece, genre, { fromStep = 0, fadeIn = 0.4, level = 0.9, preset = null } = {}) {
   const b = await bootBellows();
   stopLive();
   if (b.ctx.state === 'suspended') b.ctx.resume();
   b.panic();
-  const rack = buildRack(b, presetForGenre(genre));
+  const rack = buildRack(b, preset || presetForGenre(genre));
   const dsec = durSecs(piece), ev = piece.events, total = piece.totalSteps;
   const span = Math.max(16, total - fromStep); // loop the hook-to-end window
   const unsub = b.clock.at('16n', (t, step) => { scheduleStep(rack, ev, fromStep + (step % span), t, dsec); });

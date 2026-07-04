@@ -24,13 +24,16 @@ const DIFF_ORDER = ['beginner', 'basic', 'difficult', 'expert', 'challenge'];
 function stepSub(s) { return s % 4 === 0 ? 1 : s % 2 === 0 ? 2 : 4; }
 function stepQuant(s) { return s % 4 === 0 ? 4 : s % 2 === 0 ? 8 : 16; }
 
-export function chartFromPiece(piece, difficulty) {
+export function chartFromPiece(piece, difficulty, opts = {}) {
   const D = DIFFS[difficulty] || DIFFS.basic;
   const layers = LAYERS[difficulty] || LAYERS.basic;
   const rng = makeRng(mixSeed(piece.seed, DIFF_ORDER.indexOf(difficulty) + 1));
   const SPB = piece.STEPS_PER_BAR, ev = piece.events;
   const bpm = piece.tempo, spb = 60 / bpm;               // seconds per beat
   const dur = piece.totalBars * 4 * spb;
+  // lead-in: no arrow before this many seconds, so the first steps are visible scrolling
+  // in rather than sitting on the receptor at t=0 where they can never be hit
+  const leadInBeat = (opts.leadIn || 0) / spb;
 
   // 1) gather candidate onsets (a step allowed by this tier's subdivisions that
   //    carries at least one onset from an active layer)
@@ -38,6 +41,7 @@ export function chartFromPiece(piece, difficulty) {
   for (let bar = 0; bar < piece.totalBars; bar++) {
     for (let s = 0; s < SPB; s++) {
       if (!D.subs.includes(stepSub(s))) continue;
+      if (bar * 4 + s / 4 < leadInBeat) continue;        // hold arrows until the lead-in passes
       const step = bar * SPB + s;
       let strength = 0, hit = false, hasKick = false, hasSnare = false;
       for (const v of layers) {

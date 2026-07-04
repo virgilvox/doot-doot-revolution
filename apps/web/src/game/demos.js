@@ -14,7 +14,7 @@ function buildSong(piece, meta) {
     offset: 0, source: 'demo', duration, createdAt: 0,
     _piece: piece, _mood: meta.mood, _engine: 'composed', _bellows: true, charts: {}
   };
-  ['basic', 'difficult', 'expert'].forEach((df) => { song.charts[df] = chartFromPiece(piece, df); });
+  ['basic', 'difficult', 'expert'].forEach((df) => { song.charts[df] = chartFromPiece(piece, df, { leadIn: 2.2 }); });
   return song;
 }
 

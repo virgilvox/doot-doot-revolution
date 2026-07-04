@@ -6,9 +6,19 @@
 // engine stops it on its own when real playback starts, so entering a song is clean.
 
 import { watch, onBeforeUnmount } from 'vue';
+import { composePiece } from '@doot-games/chart';
 import { engine } from '../game/singletons.js';
 import { ensureBuffer } from '../game/audio.js';
 import { previewPieceLive, stopLive, bootBellows } from '../game/bellowsConductor.js';
+import { presetForMood } from '../game/bellowsRacks.js';
+
+// a short generative piece to preview the endless tile, composed once and cached
+const ENDLESS_PREVIEW_MOOD = 'pulse';
+let endlessPreview = null;
+function endlessPreviewPiece() {
+  if (!endlessPreview) endlessPreview = composePiece(ENDLESS_PREVIEW_MOOD, 20260704, { targetSeconds: 24 });
+  return endlessPreview;
+}
 
 const SETTLE_MS = 350; // let the wheel settle before a preview fades in
 const LOOP_LEN = 26;   // seconds of the looped window for full-length songs
@@ -26,8 +36,15 @@ export function useSongPreview(currentSong) {
   let timer = 0, token = 0;
 
   async function playFor(song) {
-    if (!song || song.endless) return; // the endless tile has nothing to preview
+    if (!song) return;
     const mine = ++token;
+    // the endless tile previews a short generative piece through a danceable rack
+    if (song.endless) {
+      engine.stopPreview();
+      await bootBellows(); if (mine !== token) return;
+      await previewPieceLive(endlessPreviewPiece(), null, { fromStep: 0, preset: presetForMood(ENDLESS_PREVIEW_MOOD), fadeIn: 0.5 });
+      return;
+    }
     // composed songs preview live through bellows with the same genre rack as playback,
     // looping from a hook a third in, so a song sounds the same before and after picking it
     if (song._piece) {

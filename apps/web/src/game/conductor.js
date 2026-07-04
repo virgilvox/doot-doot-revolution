@@ -22,7 +22,8 @@ export function createConductor({ mood, seed, bpm, difficulty }) {
   let chart = null, judge = null;
 
   function initialChart() {
-    const ch = chartFromPiece(piece, difficulty);
+    // lead-in only on the opening chunk so the first endless steps are visible
+    const ch = chartFromPiece(piece, difficulty, { leadIn: 2.2 });
     chart = { bpm: tempo, offset: 0, bpms: [{ beat: 0, bpm: tempo }], stops: [], difficulty, notes: ch.notes.slice(), duration: 0 };
     return chart;
   }

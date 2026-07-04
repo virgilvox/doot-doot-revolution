@@ -157,4 +157,42 @@ const metronomicon = {
   ]
 };
 
-export const SONGBOOK = [plasticSunrise, midnightVending, neonTiger, glowWormDisco, bubblegumRiot, arcadeHeart, sugarStatic, metronomicon];
+/* ---- Aurora Drift: melodic trance in E minor, 136 bpm, i-VI-III-VII ---- */
+const AD_VERSE = 'B4:4 E5:2 G5:2 B5:4 A5:4 | C5:4 E5:2 G5:2 E5:4 C5:4 | B4:4 D5:2 G5:2 B5:4 D6:4 | A5:4 F#5:4 D5:8 | B4:4 E5:2 G5:2 B5:4 A5:4 | C5:4 E5:2 G5:2 E5:4 C5:4 | D5:4 F#5:2 A5:2 B5:4 C6:4 | B5:4 G5:4 E5:8';
+const AD_HOOK = 'E5:2 G5:2 B5:4 A5:2 G5:2 E5:4 | D5:2 G5:2 B5:4 A5:2 G5:2 D5:4 | E5:2 A5:2 C6:4 B5:2 A5:2 F#5:2 | G5:4 B5:4 D6:8 | E5:2 G5:2 B5:4 A5:2 G5:2 E5:4 | D5:2 G5:2 B5:4 D6:2 B5:2 G5:2 | A5:2 B5:2 C6:4 B5:2 A5:2 G5:2 | B5:8 E5:8';
+const AD_BRIDGE = 'A4:4 C5:4 E5:6 D5:2 | B4:4 D5:4 G5:8 | C5:4 E5:4 G5:6 F#5:2 | B4:4 D#5:4 F#5:8 | A4:4 C5:4 E5:6 D5:2 | B4:4 D5:2 F#5:2 A5:4 G5:4 | E5:4 B4:4 E5:8 | -:16';
+const auroraDrift = {
+  id: 'aurora-drift', title: 'Aurora Drift', artist: 'Lumen', genre: 'Melodic Trance', genreKey: 'synthwave', mood: 'neon', bpm: 136,
+  reg: { bass: [35, 49], pad: [54, 73], arp: [59, 78], lead: [64, 84] },
+  form: [
+    { tag: 'INTRO', chords: ['Em', 'C', 'G', 'D'], layers: ['pad', 'arp'] },
+    { tag: 'VERSE', chords: ['Em', 'C', 'G', 'D', 'Em', 'C', 'G', 'D'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: AD_VERSE },
+    { tag: 'CHORUS', chords: ['C', 'G', 'D', 'Em', 'C', 'G', 'D', 'D'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: AD_HOOK },
+    { tag: 'VERSE', chords: ['Em', 'C', 'G', 'D', 'Em', 'C', 'G', 'D'], layers: ['bass', 'kick', 'snare', 'hat', 'pad', 'arp', 'lead'], lead: AD_VERSE },
+    { tag: 'CHORUS', chords: ['C', 'G', 'D', 'Em', 'C', 'G', 'D', 'D'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: AD_HOOK },
+    { tag: 'BRIDGE', chords: ['Am', 'C', 'G', 'B', 'Am', 'C', 'B', 'B'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: AD_BRIDGE },
+    { tag: 'CHORUS', chords: ['C', 'G', 'D', 'Em', 'C', 'G', 'D', 'D'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: AD_HOOK },
+    { tag: 'OUTRO', chords: ['Em', 'C', 'G', 'D'], layers: ['pad', 'arp'] }
+  ]
+};
+
+/* ---- Candy Circuit: future bass in C major, 148 bpm, I-V-vi-IV ---- */
+const CC_VERSE = 'C5:4 E5:2 G5:2 C6:4 B5:4 | B4:4 D5:2 G5:2 B5:4 D5:4 | A4:4 C5:2 E5:2 A5:4 G5:4 | F5:4 A5:4 C6:8 | C5:4 E5:2 G5:2 C6:4 B5:4 | B4:4 D5:2 G5:2 B5:4 D5:4 | A4:4 C5:2 E5:2 A5:4 C6:4 | G5:4 E5:4 C5:8';
+const CC_HOOK = 'A5:2 C6:2 C6:2 B5:2 A5:4 G5:2 | G5:2 E5:2 G5:4 C6:2 G5:2 E5:2 | D5:2 G5:2 B5:4 D6:2 B5:2 G5:2 | A5:2 C6:2 D6:4 C6:2 A5:2 F5:2 | A5:2 C6:2 C6:2 B5:2 A5:4 G5:2 | G5:2 E5:2 G5:4 C6:2 G5:2 E5:2 | D5:2 G5:2 B5:4 A5:2 G5:2 E5:2 | C6:8 G5:8';
+const CC_BRIDGE = 'A5:4 G5:2 E5:2 C5:4 E5:4 | F5:4 A5:2 C6:2 A5:4 F5:4 | G5:4 E5:2 C5:2 E5:4 G5:4 | D5:4 G5:4 B5:8 | A5:4 G5:2 E5:2 C5:4 E5:4 | F5:4 A5:2 C6:2 D6:4 C6:4 | B5:4 A5:4 G5:4 E5:4 | C6:8 -:8';
+const candyCircuit = {
+  id: 'candy-circuit', title: 'Candy Circuit', artist: 'Miku Modem', genre: 'Future Bass', genreKey: 'eurobeat', mood: 'circuit', bpm: 148,
+  reg: { bass: [36, 50], pad: [55, 74], arp: [60, 79], lead: [62, 86] },
+  form: [
+    { tag: 'INTRO', chords: ['C', 'G', 'Am', 'F'], layers: ['pad', 'arp'] },
+    { tag: 'VERSE', chords: ['C', 'G', 'Am', 'F', 'C', 'G', 'Am', 'F'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: CC_VERSE },
+    { tag: 'DROP', chords: ['F', 'C', 'G', 'Am', 'F', 'C', 'G', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: CC_HOOK },
+    { tag: 'VERSE', chords: ['C', 'G', 'Am', 'F', 'C', 'G', 'Am', 'F'], layers: ['bass', 'kick', 'snare', 'hat', 'pad', 'arp', 'lead'], lead: CC_VERSE },
+    { tag: 'DROP', chords: ['F', 'C', 'G', 'Am', 'F', 'C', 'G', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: CC_HOOK },
+    { tag: 'BRIDGE', chords: ['Am', 'F', 'C', 'G', 'Am', 'F', 'G', 'G'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: CC_BRIDGE },
+    { tag: 'DROP', chords: ['F', 'C', 'G', 'Am', 'F', 'C', 'G', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: CC_HOOK },
+    { tag: 'OUTRO', chords: ['C', 'G', 'Am', 'F'], layers: ['pad', 'arp'] }
+  ]
+};
+
+export const SONGBOOK = [plasticSunrise, midnightVending, neonTiger, glowWormDisco, bubblegumRiot, arcadeHeart, sugarStatic, metronomicon, auroraDrift, candyCircuit];
