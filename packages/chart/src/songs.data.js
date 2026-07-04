@@ -29,7 +29,8 @@ const MV_BRIDGE = 'D5:2 F5:2 Bb5:4 A5:4 F5:4 | C5:2 E5:2 A5:4 G5:6 E5:2 | D5:2 F
 
 const midnightVending = {
   id: 'midnight-vending', title: 'Midnight Vending', artist: 'Tako Tako', genre: 'City Pop', genreKey: 'citypop', mood: 'glass', bpm: 110,
-  reg: { bass: [38, 52], pad: [55, 74], arp: [67, 84], lead: [67, 88] },
+  // warm, mid-register arp and a lead that tops out at C6 so nothing reads as piercing
+  reg: { bass: [38, 52], pad: [53, 72], arp: [53, 72], lead: [65, 84] },
   form: [
     { tag: 'INTRO', chords: ['Fmaj7', 'Am7', 'Gm7', 'C7'], layers: ['pad', 'arp'] },
     { tag: 'VERSE', chords: ['Fmaj7', 'Am7', 'Gm7', 'C7', 'Fmaj7', 'Dm7', 'Gm7', 'C7'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: MV_VERSE },
@@ -42,4 +43,118 @@ const midnightVending = {
   ]
 };
 
-export const SONGBOOK = [plasticSunrise, midnightVending];
+/* ---- Neon Tiger: synthcore in A minor, 158 bpm, driving i-VII-VI ---- */
+const NT_VERSE = 'A5:4 E5:2 F5:2 E5:4 C5:4 | D5:4 B4:2 D5:2 G5:4 B4:4 | C5:4 A4:2 C5:2 F5:4 A4:4 | B4:4 D5:4 G5:8 | A5:4 E5:2 F5:2 E5:4 C5:4 | D5:4 B4:2 D5:2 G5:4 B4:4 | C5:4 E5:2 G5:2 A5:4 B5:4 | C6:4 B5:4 A5:8';
+const NT_HOOK = 'E5:2 A5:2 C6:4 B5:4 A5:4 | F5:2 A5:2 C6:4 A5:4 F5:4 | E5:2 G5:2 C6:4 B5:4 G5:4 | D5:2 G5:2 B5:4 C6:2 B5:2 A5:2 | E5:2 A5:2 C6:4 B5:4 A5:4 | F5:2 A5:2 C6:4 A5:4 F5:4 | G5:2 B5:2 C6:4 B5:4 G5:4 | G5:4 B5:4 A5:8';
+const NT_BRIDGE = 'D5:4 F5:4 A5:6 G5:2 | E5:4 A5:4 C6:8 | E5:4 G#5:4 B5:6 A5:2 | E5:4 G#5:4 A5:8 | D5:4 F5:4 A5:6 G5:2 | E5:4 G#5:4 B5:6 C6:2 | B5:4 A5:4 E5:4 A5:4 | A5:8 -:8';
+const neonTiger = {
+  id: 'neon-tiger', title: 'Neon Tiger', artist: 'VOLTKID', genre: 'Synthcore', genreKey: 'synthcore', mood: 'circuit', bpm: 158,
+  reg: { bass: [33, 47], pad: [52, 71], arp: [55, 74], lead: [64, 84] },
+  form: [
+    { tag: 'INTRO', chords: ['Am', 'G', 'F', 'G'], layers: ['pad', 'arp'] },
+    { tag: 'VERSE', chords: ['Am', 'G', 'F', 'G', 'Am', 'G', 'F', 'G'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: NT_VERSE },
+    { tag: 'DROP', chords: ['Am', 'F', 'C', 'G', 'Am', 'F', 'G', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: NT_HOOK },
+    { tag: 'VERSE', chords: ['Am', 'G', 'F', 'G', 'Am', 'G', 'F', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'pad', 'arp', 'lead'], lead: NT_VERSE },
+    { tag: 'DROP', chords: ['Am', 'F', 'C', 'G', 'Am', 'F', 'G', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: NT_HOOK },
+    { tag: 'BRIDGE', chords: ['Dm', 'Am', 'E', 'Am', 'Dm', 'E', 'Am', 'Am'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: NT_BRIDGE },
+    { tag: 'DROP', chords: ['Am', 'F', 'C', 'G', 'Am', 'F', 'G', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: NT_HOOK },
+    { tag: 'OUTRO', chords: ['Am', 'G', 'F', 'G'], layers: ['pad', 'arp'] }
+  ]
+};
+
+/* ---- Glow Worm Disco: disco house in A minor, 124 bpm, ii-V sevenths ---- */
+const GW_VERSE = 'A4:2 C5:2 E5:4 D5:2 C5:2 A4:4 | B4:2 D5:2 G5:4 F5:2 D5:2 B4:4 | C5:2 E5:2 G5:4 E5:2 C5:2 G4:4 | A4:2 C5:2 E5:6 -:2 | A4:2 C5:2 E5:4 D5:2 C5:2 A4:4 | B4:2 D5:2 G5:4 F5:2 D5:2 B4:4 | C5:2 E5:2 A5:4 G5:2 E5:2 C5:4 | A4:4 E5:4 A5:8';
+const GW_HOOK = 'E5:2 A5:2 A5:2 G5:2 E5:4 C5:2 | D5:2 G5:2 G5:2 F5:2 D5:4 B4:2 | C5:2 E5:2 G5:4 E5:2 D5:2 C5:2 | A4:2 C5:2 E5:6 A5:2 | E5:2 A5:2 A5:2 G5:2 E5:4 C5:2 | D5:2 G5:2 B5:2 A5:2 G5:4 E5:2 | F5:2 A5:2 C6:4 A5:2 G5:2 E5:2 | A5:8 -:8';
+const GW_BRIDGE = 'D5:2 F5:2 A5:4 C6:2 A5:2 F5:4 | C5:2 E5:2 G5:4 B5:2 G5:2 E5:4 | B4:2 D5:2 F5:4 A5:2 F5:2 D5:4 | E5:4 G5:4 B5:4 A5:4 | A5:2 C6:2 A5:4 G5:2 E5:4 C5:2 | D5:2 F5:2 A5:6 G5:2 | E5:4 C5:4 A4:8 | -:16';
+const glowWormDisco = {
+  id: 'glow-worm-disco', title: 'Glow Worm Disco', artist: 'Pixel Mori', genre: 'Disco House', genreKey: 'house', mood: 'pulse', bpm: 124,
+  reg: { bass: [36, 50], pad: [55, 72], arp: [60, 79], lead: [64, 84] },
+  form: [
+    { tag: 'INTRO', chords: ['Am7', 'Dm7', 'G7', 'Cmaj7'], layers: ['pad', 'arp'] },
+    { tag: 'VERSE', chords: ['Am7', 'Dm7', 'G7', 'Cmaj7', 'Fmaj7', 'Dm7', 'E7', 'Am7'], layers: ['bass', 'kick', 'hat', 'pad', 'arp', 'lead'], lead: GW_VERSE },
+    { tag: 'CHORUS', chords: ['Fmaj7', 'G7', 'Cmaj7', 'Am7', 'Fmaj7', 'G7', 'E7', 'Am7'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: GW_HOOK },
+    { tag: 'VERSE', chords: ['Am7', 'Dm7', 'G7', 'Cmaj7', 'Fmaj7', 'Dm7', 'E7', 'Am7'], layers: ['bass', 'kick', 'snare', 'hat', 'pad', 'arp', 'lead'], lead: GW_VERSE },
+    { tag: 'CHORUS', chords: ['Fmaj7', 'G7', 'Cmaj7', 'Am7', 'Fmaj7', 'G7', 'E7', 'Am7'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: GW_HOOK },
+    { tag: 'BRIDGE', chords: ['Dm7', 'G7', 'Cmaj7', 'Fmaj7', 'Bm7b5', 'E7', 'Am7', 'Am7'], layers: ['bass', 'kick', 'hat', 'pad', 'arp', 'lead'], lead: GW_BRIDGE },
+    { tag: 'CHORUS', chords: ['Fmaj7', 'G7', 'Cmaj7', 'Am7', 'Fmaj7', 'G7', 'E7', 'Am7'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: GW_HOOK },
+    { tag: 'OUTRO', chords: ['Am7', 'Dm7', 'G7', 'Cmaj7'], layers: ['pad', 'arp'] }
+  ]
+};
+
+/* ---- Bubblegum Riot: happy hardcore in C major, 160 bpm, I-V-vi-IV ---- */
+const BR_VERSE = 'C5:4 E5:2 G5:2 E5:4 C5:4 | D5:4 G5:2 B5:2 G5:4 D5:4 | E5:4 A5:2 C6:2 A5:4 E5:4 | F5:4 A5:4 G5:8 | C5:4 E5:2 G5:2 E5:4 C5:4 | D5:4 G5:2 B5:2 G5:4 D5:4 | E5:4 G5:2 A5:2 C6:4 B5:4 | C6:4 G5:4 E5:8';
+const BR_HOOK = 'G5:2 C6:2 C6:2 B5:2 G5:4 E5:2 | D5:2 G5:2 B5:4 G5:2 D5:2 B4:2 | C5:2 E5:2 A5:4 G5:2 E5:2 C5:2 | F5:2 A5:2 C6:6 G5:2 | G5:2 C6:2 C6:2 B5:2 G5:4 E5:2 | D5:2 G5:2 B5:4 D6:2 B5:2 G5:2 | A5:2 C6:2 B5:4 A5:2 G5:2 E5:2 | C6:8 G5:8';
+const BR_BRIDGE = 'A5:4 G5:2 E5:2 D5:4 C5:4 | F5:4 E5:2 C5:2 A4:4 F5:4 | G5:4 A5:2 B5:2 C6:4 B5:4 | G5:4 E5:4 C5:8 | A5:4 G5:2 E5:2 D5:4 C5:4 | F5:4 A5:2 C6:2 B5:4 G5:4 | A5:4 B5:4 C6:8 | -:16';
+const bubblegumRiot = {
+  id: 'bubblegum-riot', title: 'Bubblegum Riot', artist: 'FizzPop', genre: 'Happy Hardcore', genreKey: 'eurobeat', mood: 'circuit', bpm: 160,
+  reg: { bass: [36, 50], pad: [55, 74], arp: [67, 84], lead: [64, 86] },
+  form: [
+    { tag: 'INTRO', chords: ['C', 'G', 'Am', 'F'], layers: ['pad', 'arp'] },
+    { tag: 'VERSE', chords: ['C', 'G', 'Am', 'F', 'C', 'G', 'Am', 'F'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: BR_VERSE },
+    { tag: 'DROP', chords: ['F', 'C', 'G', 'Am', 'F', 'C', 'G', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: BR_HOOK },
+    { tag: 'VERSE', chords: ['C', 'G', 'Am', 'F', 'C', 'G', 'Am', 'F'], layers: ['bass', 'kick', 'snare', 'hat', 'pad', 'arp', 'lead'], lead: BR_VERSE },
+    { tag: 'DROP', chords: ['F', 'C', 'G', 'Am', 'F', 'C', 'G', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: BR_HOOK },
+    { tag: 'BRIDGE', chords: ['Am', 'F', 'C', 'G', 'Am', 'F', 'G', 'G'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: BR_BRIDGE },
+    { tag: 'DROP', chords: ['F', 'C', 'G', 'Am', 'F', 'C', 'G', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: BR_HOOK },
+    { tag: 'OUTRO', chords: ['C', 'G', 'Am', 'F'], layers: ['pad', 'arp'] }
+  ]
+};
+
+/* ---- Arcade Heart: eurobeat in D minor, 152 bpm, i-VI-III-VII ---- */
+const AH_VERSE = 'D5:4 A4:2 D5:2 F5:4 E5:4 | Bb4:4 D5:2 F5:2 A5:4 G5:4 | F5:4 A5:2 C6:2 A5:4 F5:4 | E5:4 A5:4 D5:8 | D5:4 A4:2 D5:2 F5:4 E5:4 | Bb4:4 D5:2 F5:2 A5:4 G5:4 | F5:4 A5:2 C6:2 D6:4 C6:4 | A5:4 F5:4 D5:8';
+const AH_HOOK = 'A5:2 D6:2 C6:2 A5:2 F5:4 A5:2 | G5:2 Bb5:2 A5:2 G5:2 F5:4 D5:2 | E5:2 G5:2 A5:4 C6:2 A5:2 G5:2 | F5:2 A5:2 D6:6 C6:2 | A5:2 D6:2 C6:2 A5:2 F5:4 A5:2 | G5:2 Bb5:2 A5:2 G5:2 F5:4 A5:2 | Bb5:2 C6:2 D6:4 C6:2 A5:2 G5:2 | A5:8 D5:8';
+const AH_BRIDGE = 'D5:4 F5:4 A5:6 G5:2 | Bb5:4 A5:2 G5:2 F5:4 D5:4 | C5:4 E5:4 G5:6 F5:2 | A5:4 C6:4 A5:8 | D5:4 F5:4 A5:6 G5:2 | Bb5:4 C6:2 D6:2 C6:4 A5:4 | G5:4 A5:4 D5:8 | -:16';
+const arcadeHeart = {
+  id: 'arcade-heart', title: 'Arcade Heart', artist: 'DJ Spritz', genre: 'Eurobeat', genreKey: 'eurobeat', mood: 'neon', bpm: 152,
+  reg: { bass: [36, 50], pad: [53, 72], arp: [60, 79], lead: [62, 86] },
+  form: [
+    { tag: 'INTRO', chords: ['Dm', 'Bb', 'F', 'C'], layers: ['pad', 'arp'] },
+    { tag: 'VERSE', chords: ['Dm', 'Bb', 'F', 'C', 'Dm', 'Bb', 'F', 'A'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: AH_VERSE },
+    { tag: 'CHORUS', chords: ['Bb', 'F', 'C', 'Dm', 'Bb', 'F', 'A', 'A'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: AH_HOOK },
+    { tag: 'VERSE', chords: ['Dm', 'Bb', 'F', 'C', 'Dm', 'Bb', 'F', 'A'], layers: ['bass', 'kick', 'snare', 'hat', 'pad', 'arp', 'lead'], lead: AH_VERSE },
+    { tag: 'CHORUS', chords: ['Bb', 'F', 'C', 'Dm', 'Bb', 'F', 'A', 'A'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: AH_HOOK },
+    { tag: 'BRIDGE', chords: ['Gm', 'Dm', 'Bb', 'F', 'Gm', 'A', 'Dm', 'Dm'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: AH_BRIDGE },
+    { tag: 'CHORUS', chords: ['Bb', 'F', 'C', 'Dm', 'Bb', 'F', 'A', 'A'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: AH_HOOK },
+    { tag: 'OUTRO', chords: ['Dm', 'Bb', 'F', 'C'], layers: ['pad', 'arp'] }
+  ]
+};
+
+/* ---- Sugar Static: hard dance in A minor, 150 bpm, driving minor ---- */
+const SS_VERSE = 'A4:2 A4:2 E5:4 A4:2 C5:2 A4:4 | F4:2 F4:2 C5:4 F4:2 A4:2 F4:4 | D5:2 D5:2 A5:4 F5:2 D5:2 A4:4 | E5:4 G5:4 A5:8 | A4:2 A4:2 E5:4 A4:2 C5:2 A4:4 | F4:2 F4:2 C5:4 F4:2 A4:2 F4:4 | D5:2 F5:2 A5:4 C6:2 A5:2 G5:2 | E5:4 A5:4 A4:8';
+const SS_HOOK = 'A5:2 A5:2 G5:2 E5:2 A5:4 C6:2 | A5:2 F5:2 E5:2 C5:2 F5:4 A5:2 | G5:2 E5:2 D5:2 E5:2 G5:4 B5:2 | A5:2 E5:2 A5:6 C6:2 | A5:2 A5:2 G5:2 E5:2 A5:4 C6:2 | A5:2 F5:2 E5:2 C5:2 F5:4 A5:2 | B5:2 A5:2 G5:2 E5:2 A5:4 B5:2 | C6:4 B5:4 A5:8';
+const SS_BRIDGE = 'A4:4 C5:4 E5:6 D5:2 | F4:4 A4:4 C5:8 | D5:4 F5:4 A5:6 G5:2 | E5:4 G#5:4 A5:8 | A4:4 C5:4 E5:6 D5:2 | F5:4 E5:2 D5:2 C5:4 A4:4 | E5:4 G#5:4 A5:8 | -:16';
+const sugarStatic = {
+  id: 'sugar-static', title: 'Sugar Static', artist: 'Maho', genre: 'Breakcore', genreKey: 'breakcore', mood: 'circuit', bpm: 150,
+  reg: { bass: [33, 47], pad: [52, 71], arp: [55, 74], lead: [64, 84] },
+  form: [
+    { tag: 'INTRO', chords: ['Am', 'F', 'Dm', 'E'], layers: ['pad', 'arp'] },
+    { tag: 'VERSE', chords: ['Am', 'F', 'Dm', 'E', 'Am', 'F', 'Dm', 'E'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: SS_VERSE },
+    { tag: 'DROP', chords: ['Am', 'F', 'C', 'E', 'Am', 'F', 'Dm', 'E'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: SS_HOOK },
+    { tag: 'VERSE', chords: ['Am', 'F', 'Dm', 'E', 'Am', 'F', 'Dm', 'E'], layers: ['bass', 'kick', 'snare', 'hat', 'pad', 'arp', 'lead'], lead: SS_VERSE },
+    { tag: 'DROP', chords: ['Am', 'F', 'C', 'E', 'Am', 'F', 'Dm', 'E'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: SS_HOOK },
+    { tag: 'BRIDGE', chords: ['Am', 'F', 'Dm', 'E', 'Am', 'E', 'Am', 'Am'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: SS_BRIDGE },
+    { tag: 'DROP', chords: ['Am', 'F', 'C', 'E', 'Am', 'F', 'Dm', 'E'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: SS_HOOK },
+    { tag: 'OUTRO', chords: ['Am', 'F', 'Dm', 'E'], layers: ['pad', 'arp'] }
+  ]
+};
+
+/* ---- Metronomicon: chiptune in C major, 140 bpm, I-vi-IV-V ---- */
+const MT_VERSE = 'C5:4 E5:4 G5:4 E5:4 | A4:4 C5:4 E5:4 C5:4 | F4:4 A4:4 C5:4 A4:4 | G4:4 B4:4 D5:8 | C5:4 E5:4 G5:4 E5:4 | A4:4 C5:4 E5:4 G5:4 | F5:4 E5:4 D5:4 C5:4 | G4:4 B4:4 C5:8';
+const MT_HOOK = 'G5:2 E5:2 C5:2 E5:2 G5:4 A5:2 | E5:2 C5:2 A4:2 C5:2 E5:4 G5:2 | F5:2 A5:2 C6:2 A5:2 F5:4 A5:2 | G5:2 B5:2 D6:2 B5:2 G5:4 D5:2 | G5:2 E5:2 C5:2 E5:2 G5:4 A5:2 | E5:2 C5:2 A4:2 C5:2 E5:4 G5:2 | F5:2 E5:2 D5:2 C5:2 D5:4 B4:2 | C5:8 G5:8';
+const MT_BRIDGE = 'A4:4 B4:4 C5:4 D5:4 | E5:4 D5:4 C5:4 B4:4 | A4:4 G4:4 F4:6 E4:2 | D4:4 G4:4 C5:8 | A4:4 B4:4 C5:4 D5:4 | E5:4 F5:4 G5:6 A5:2 | G5:4 F5:4 E5:4 D5:4 | C5:8 -:8';
+const metronomicon = {
+  id: 'metronomicon', title: 'Metronomicon', artist: 'DDR Engine', genre: 'Test Pattern', genreKey: 'chiptune', mood: 'neon', bpm: 140,
+  reg: { bass: [36, 50], pad: [55, 74], arp: [60, 79], lead: [60, 86] },
+  form: [
+    { tag: 'INTRO', chords: ['C', 'Am', 'F', 'G'], layers: ['pad', 'arp'] },
+    { tag: 'VERSE', chords: ['C', 'Am', 'F', 'G', 'C', 'Am', 'F', 'G'], layers: ['bass', 'kick', 'hat', 'lead'], lead: MT_VERSE },
+    { tag: 'CHORUS', chords: ['C', 'Am', 'F', 'G', 'C', 'Am', 'F', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: MT_HOOK },
+    { tag: 'VERSE', chords: ['C', 'Am', 'F', 'G', 'C', 'Am', 'F', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'arp', 'lead'], lead: MT_VERSE },
+    { tag: 'CHORUS', chords: ['C', 'Am', 'F', 'G', 'C', 'Am', 'F', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: MT_HOOK },
+    { tag: 'BRIDGE', chords: ['Am', 'Em', 'F', 'C', 'Dm', 'G', 'C', 'C'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: MT_BRIDGE },
+    { tag: 'CHORUS', chords: ['C', 'Am', 'F', 'G', 'C', 'Am', 'F', 'G'], layers: ['bass', 'kick', 'snare', 'hat', 'perc', 'pad', 'arp', 'lead'], lead: MT_HOOK },
+    { tag: 'OUTRO', chords: ['C', 'Am', 'F', 'G'], layers: ['pad', 'arp'] }
+  ]
+};
+
+export const SONGBOOK = [plasticSunrise, midnightVending, neonTiger, glowWormDisco, bubblegumRiot, arcadeHeart, sugarStatic, metronomicon];
