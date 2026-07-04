@@ -57,10 +57,10 @@ const mb = (n) => (n ? Math.round(n / 1048576) + ' MB' : '');
 function classify(assets) {
   const pick = (re) => assets.find((a) => re.test(a.name));
   const rows = [
-    ['macOS &middot; Apple Silicon', /mac-arm64\.dmg$/i, APPLE],
-    ['macOS &middot; Intel', /mac-x64\.dmg$/i, APPLE],
+    ['macOS · Apple Silicon', /mac-arm64\.dmg$/i, APPLE],
+    ['macOS · Intel', /mac-x64\.dmg$/i, APPLE],
     ['Windows', /win-.*\.exe$/i, WIN],
-    ['Linux &middot; AppImage', /linux-.*\.AppImage$/i, LINUX]
+    ['Linux · AppImage', /linux-.*\.AppImage$/i, LINUX]
   ];
   const out = [];
   for (const [label, re, icon] of rows) { const a = pick(re); if (a) out.push({ label, sub: mb(a.size), url: a.browser_download_url, icon }); }
