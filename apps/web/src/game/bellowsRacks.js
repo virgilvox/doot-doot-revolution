@@ -133,6 +133,10 @@ const GENRE_MAP = {
 
 export function presetForGenre(genre) { return GENRE_MAP[genre] || 'synthwave'; }
 
+// endless mood -> preset (the perpetual stream picks a mood; give each a danceable rack)
+const MOOD_PRESET = { pulse: 'house', neon: 'synthwave', glass: 'citypop', circuit: 'synthcore' };
+export function presetForMood(mood) { return MOOD_PRESET[mood] || 'house'; }
+
 // nominal drum pitches (the engines are pitched; keep them low and fixed)
 export const DRUM_PITCH = { kick: 36, snare: 38, hat: 42, perc: 39 };
 

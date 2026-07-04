@@ -8,7 +8,7 @@
 
 import { Bellows } from 'bellowsjs';
 import { engine } from './singletons.js';
-import { buildRack, presetForGenre, DRUM_PITCH } from './bellowsRacks.js';
+import { buildRack, presetForGenre, presetForMood, DRUM_PITCH } from './bellowsRacks.js';
 
 let _boot = null;   // cached boot promise (worklet loads once)
 let _gain = null;   // fade node between bellows and the engine music bus
@@ -111,6 +111,27 @@ export function stopLive(fade = 0) {
   } else {
     fin();
   }
+}
+
+// Play the endless conductor's growing piece live. The conductor keeps composing and
+// charting bars ahead; the clock callback schedules whatever events exist at each step as
+// the transport reaches them. Returns { startAt } for the engine clock and stepOf() so the
+// caller can prune events behind the transport.
+export async function playEndlessLive(cond, mood) {
+  const b = await bootBellows();
+  stopLive();
+  b.panic();
+  setGain(1, 0, b.ctx);
+  const rack = buildRack(b, presetForMood(mood));
+  const piece = cond.piece;
+  const dsec = durSecs(piece);
+  let cur = 0;
+  const unsub = b.clock.at('16n', (t, step) => { cur = step; scheduleStep(rack, piece.events, step, t, dsec); });
+  b.bpm(cond.tempo);
+  const t0 = b.ctx.currentTime;
+  b.start();
+  _current = { unsub, b };
+  return { startAt: t0 + 0.05, stepOf: () => cur };
 }
 
 export function isLive() { return !!_current; }

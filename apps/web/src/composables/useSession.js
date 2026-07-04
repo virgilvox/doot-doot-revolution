@@ -14,7 +14,7 @@ import { settings } from '../game/settings.js';
 import { bus } from '../game/bus.js';
 import { ensureBuffer } from '../game/audio.js';
 import { createConductor } from '../game/conductor.js';
-import { playPieceLive, stopLive, bootBellows } from '../game/bellowsConductor.js';
+import { playPieceLive, playEndlessLive, stopLive, bootBellows } from '../game/bellowsConductor.js';
 import { makePlayers, playerForDevice, standings } from '../game/roster.js';
 
 // hit tick pitch per judgment: brighter for a better hit
@@ -28,7 +28,7 @@ function createSession() {
     score: 0, combo: 0, life: 50, judge: null, chart: null
   });
   let raf = 0, active = false, epoch = 0, subs = [], fields = [], timing = null;
-  let endless = false, conductor = null, replay = null;
+  let endless = false, conductor = null, replay = null, endlessStep = null;
   const off = () => settings.offsetMs / 1000;
 
   function setFields(fs) { fields = (fs || []).filter(Boolean); }
@@ -124,13 +124,18 @@ function createSession() {
     syncAliases();
     replay = null; // endless does not restart
     timing = createTiming(chart);
+    const warm = bootBellows(); // warm the worklet during the countdown
     engine.applyVolumes();
     wireInput();
     await engine.resume(); if (mine !== epoch) return;
     resizeFields();
     conductor.pump(0, 8);
     await countdown(() => mine === epoch); if (mine !== epoch) return;
-    engine.playPiece(conductor.piece, { source: { extend: conductor.extendOne } });
+    await warm; if (mine !== epoch) { stopLive(); return; }
+    // bellows plays the growing composed piece live through a danceable genre rack
+    const c = await playEndlessLive(conductor, cfg.mood);
+    engine.adoptClock(c.startAt, 1e7); // endless: no real end
+    endlessStep = c.stepOf;
     active = true; state.playing = true; loop();
   }
 
@@ -151,7 +156,7 @@ function createSession() {
       const p0 = state.players[0];
       const cut = p0.judge.pruneBefore(t - 2);            // drop notes behind the playhead
       if (cut) p0.chart.notes.splice(0, cut);             // in lockstep with judge.notes
-      conductor.pruneEvents(engine.schedStep);
+      conductor.pruneEvents(endlessStep ? endlessStep() : 0);
     }
     const beat = timing ? timing.timeToBeat(t) : undefined;
     for (let i = 0; i < state.players.length; i++) {
@@ -166,7 +171,7 @@ function createSession() {
     else { const dur = engine.duration(); state.progress = dur ? Math.min(1, t / dur) : 0; if (dur > 0 && t >= dur + 0.6) end(); else if (dur <= 0) console.warn('[END-GUARD] loop active but engine.duration()=0 at t=', t.toFixed(2)); }
   }
 
-  function stop() { epoch++; active = false; state.playing = false; if (raf) cancelAnimationFrame(raf); raf = 0; subs.forEach((u) => u && u()); subs = []; endless = false; conductor = null; stopLive(); engine.stop(); }
+  function stop() { epoch++; active = false; state.playing = false; if (raf) cancelAnimationFrame(raf); raf = 0; subs.forEach((u) => u && u()); subs = []; endless = false; conductor = null; endlessStep = null; stopLive(); engine.stop(); }
   function restart() { if (replay && !state.endless) replay(); }
   function quit() { if (state.playing) end(); }
   function end() {

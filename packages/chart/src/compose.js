@@ -366,25 +366,35 @@ function genLead(events, M, rng, bars, sections, melInt, rootPc, dmul) {
     }
   }
 }
+// A danceable dance kit, every hit on the grid so the pulse is unambiguous and the
+// charter places on-beat steps. Four-on-the-floor kick (half-time when sparse), backbeat
+// snare on 2 and 4, steady hats (8ths, 16ths at peak) with an offbeat open hat, and
+// offbeat perc for lift. No euclidean/rotated kicks: syncopated kicks read as discordant
+// and throw a player off their steps.
 function genDrums(events, M, rng, bars, sections, dmul) {
   const SPB = 16;
   for (const sec of sections) {
     const its = sec.intensity;
-    const kPat = euclid(its > 0.75 ? rInt(rng, 4, 6) : its > 0.5 ? rInt(rng, 3, 4) : 2, SPB, 0);
-    const snPat = new Array(SPB).fill(0); snPat[4] = 1; snPat[12] = 1;
-    if (its > 0.7) { const g = euclid(rInt(rng, 2, 3), SPB, 3); for (let i = 0; i < SPB; i++) if (g[i] && snPat[i] === 0 && rChance(rng, 0.5)) snPat[i] = 0.5; }
-    let hHits = its > 0.6 ? rInt(rng, 8, 12) : rInt(rng, 4, 8);
-    const hPat = euclid(Math.min(15, Math.round(hHits * Math.min(1.3, dmul))), SPB, 1);
-    const pPat = euclid(rInt(rng, 3, 5), SPB, rInt(rng, 2, 5));
+    const fourOnFloor = its > 0.4;                 // else a half-time kick (beats 1 and 3)
+    const hatStep = its > 0.7 ? 1 : 2;             // 16th hats when energetic, else 8ths
+    const perc = its > 0.55;
     const startBar = cumulativeBars(sections, sec.index) - sec.bars;
     for (let bb = 0; bb < sec.bars; bb++) {
       const bar = startBar + bb;
+      const lastBar = bb === sec.bars - 1;
       for (let s = 0; s < SPB; s++) {
         const step = bar * SPB + s;
-        if (sec.active.has('kick') && kPat[s]) addEv(events.kick, step, { vel: 0.85 + 0.15 * its });
-        if (sec.active.has('snare') && snPat[s]) addEv(events.snare, step, { vel: (snPat[s] === 0.5 ? 0.4 : 0.8) });
-        if (sec.active.has('hat') && hPat[s]) addEv(events.hat, step, { vel: 0.35 + 0.25 * its, open: (s % 8 === 6 && rChance(rng, 0.4)) });
-        if (sec.active.has('perc') && pPat[s]) addEv(events.perc, step, { vel: 0.4 + 0.3 * its });
+        // kick: on every beat (or 1 and 3 when sparse); a lone pickup into the next phrase
+        let kick = fourOnFloor ? (s % 4 === 0) : (s === 0 || s === 8);
+        if (its > 0.7 && lastBar && s === 14 && rChance(rng, 0.5)) kick = true;
+        if (sec.active.has('kick') && kick) addEv(events.kick, step, { vel: 0.86 + 0.14 * its });
+        // snare/clap: backbeat on 2 and 4, with a simple on-grid end-of-phrase fill
+        if (sec.active.has('snare') && (s === 4 || s === 12)) addEv(events.snare, step, { vel: 0.8 });
+        if (sec.active.has('snare') && lastBar && its > 0.6 && (s === 14 || s === 15)) addEv(events.snare, step, { vel: 0.45 });
+        // hats: steady, offbeat open hat for lift
+        if (sec.active.has('hat') && s % hatStep === 0) addEv(events.hat, step, { vel: 0.3 + 0.22 * its, open: (s % 4 === 2 && rChance(rng, 0.2)) });
+        // perc: offbeat eighths only, on the "and" of each beat
+        if (sec.active.has('perc') && perc && s % 4 === 2) addEv(events.perc, step, { vel: 0.34 + 0.24 * its });
       }
     }
   }
