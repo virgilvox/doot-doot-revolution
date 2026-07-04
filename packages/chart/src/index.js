@@ -12,5 +12,7 @@ export * from './radar.js';
 export * from './stems.js';
 export * from './compose.js';
 export * from './composeChart.js';
+export { compileSong } from './songbook.js';
+export { SONGBOOK } from './songs.data.js';
 // pipeline's generate collides with charter's; expose it as generateFromAudio.
 export { ENGINES, generate as generateFromAudio, generateChart } from './pipeline.js';
