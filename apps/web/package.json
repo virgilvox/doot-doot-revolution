@@ -21,6 +21,7 @@
     "@doot-games/library": "^0.1.0",
     "@doot-games/play": "^0.1.0",
     "@doot-games/render": "^0.1.0",
+    "bellowsjs": "^0.1.1",
     "pinia": "^2.2.0",
     "vue": "^3.5.0",
     "youtube-dl-exec": "^3.1.8"

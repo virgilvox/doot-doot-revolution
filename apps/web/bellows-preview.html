@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Bellows audio preview</title>
+<style>body{font-family:system-ui,sans-serif;background:#1a1830;color:#eee;padding:28px;max-width:720px;margin:0 auto}
+h1{font-size:20px}button{font-size:15px;padding:10px 16px;margin:5px 6px 5px 0;border:0;border-radius:8px;background:#7c5cff;color:#fff;cursor:pointer}
+button:disabled{opacity:.5}pre{background:#0f0d20;padding:12px;border-radius:8px;white-space:pre-wrap;font-size:13px}.stop{background:#e0466e}</style></head>
+<body>
+<h1>Bellows audio preview</h1>
+<p>Built-in songs rendered through bellowsjs (real synths + effects) instead of the old subtractive synth. Click a mood to render + hear ~40s.</p>
+<div id="moods"></div>
+<button id="stop" class="stop">Stop</button>
+<pre id="out">pick a mood</pre>
+<script type="module">
+import { composePiece, MOOD_ORDER } from '@doot-games/chart';
+import { renderPieceBellows } from '/src/game/bellowsRender.js';
+const out=document.getElementById('out'), log=m=>{out.textContent=m;console.log('[bell]',m)};
+let ctx, cur;
+const wrap=document.getElementById('moods');
+for(const mood of MOOD_ORDER){ const btn=document.createElement('button'); btn.textContent=mood.toUpperCase(); btn.onclick=()=>go(mood,btn); wrap.appendChild(btn); }
+document.getElementById('stop').onclick=()=>{ if(cur){try{cur.stop()}catch(e){}} };
+async function go(mood,btn){
+  const btns=[...document.querySelectorAll('#moods button')]; btns.forEach(b=>b.disabled=true);
+  try{
+    if(cur){try{cur.stop()}catch(e){}}
+    ctx=ctx||new AudioContext(); await ctx.resume();
+    log(mood.toUpperCase()+': rendering...');
+    const piece=composePiece(mood, mood+'-preview', { targetSeconds: 40 });
+    const t0=performance.now();
+    const buf=await renderPieceBellows(piece, ctx);
+    log(mood.toUpperCase()+': '+buf.duration.toFixed(0)+'s rendered in '+Math.round(performance.now()-t0)+'ms @ '+piece.tempo+' bpm. Playing.');
+    cur=ctx.createBufferSource(); cur.buffer=buf; cur.connect(ctx.destination); cur.start();
+  }catch(e){ log('ERROR '+(e&&e.stack||e)); }
+  btns.forEach(b=>b.disabled=false);
+}
+</script></body></html>
