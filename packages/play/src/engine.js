@@ -20,7 +20,7 @@ export class AudioEngine {
     this.previewSrc = null; this.previewGain = null;
     // live synth scheduler (game)
     this.synth = null; this.schedTimer = null; this.schedStep = 0; this.schedNext = 0;
-    this._piece = null; this._pieceDur = 0; this._stepDur = 0; this._source = null;
+    this._piece = null; this._pieceDur = 0; this._stepDur = 0; this._source = null; this._external = false;
     // live synth preview (select wheel)
     this.previewSynth = null; this.previewTimer = null; this.previewStep = 0; this.previewNext = 0; this.previewFrom = 0; this._prPiece = null; this._prStepDur = 0;
     this.volumes = { master: 0.9, music: 0.85, sfx: 0.7 };
@@ -79,11 +79,20 @@ export class AudioEngine {
     this.schedTimer = done ? null : setTimeout(() => this._scheduler(), TICK);
   }
 
+  // Adopt an external audio clock: the engine holds the song clock + duration for the
+  // game loop, but produces no audio itself (a live bellows performance owns the sound).
+  // startAt is the ctx time of song-second 0; the game reads time() = currentTime - startAt.
+  adoptClock(startAt, durationSec) {
+    this._ensure(); this.stop();
+    this.startAt = startAt; this._pieceDur = durationSec; this._external = true;
+    this.buffer = null; this._piece = null; this.playing = true;
+  }
+
   stop() {
     if (this.src) { try { this.src.onended = null; this.src.stop(); } catch (e) {} this.src = null; }
     if (this.schedTimer) { clearTimeout(this.schedTimer); this.schedTimer = null; }
     if (this.synth) { this.synth.dispose(0.06); this.synth = null; }
-    this._piece = null; this._source = null; this.playing = false;
+    this._piece = null; this._source = null; this._external = false; this.playing = false;
   }
 
   // A looping, faded song preview on the music bus for the select wheel, independent
@@ -138,7 +147,7 @@ export class AudioEngine {
   }
 
   time() { if (!this.ctx || !this.playing) return this.pauseAt; return this.ctx.currentTime - this.startAt; }
-  duration() { if (this._piece) return this._pieceDur; return this.buffer ? this.buffer.duration : 0; }
+  duration() { if (this._external || this._piece) return this._pieceDur; return this.buffer ? this.buffer.duration : 0; }
   beat(bpm, offsetSec) { return (this.time() - offsetSec) / (60 / bpm); }
   onended(fn) { this._onend = fn; }
 

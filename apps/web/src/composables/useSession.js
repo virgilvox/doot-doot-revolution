@@ -14,6 +14,7 @@ import { settings } from '../game/settings.js';
 import { bus } from '../game/bus.js';
 import { ensureBuffer } from '../game/audio.js';
 import { createConductor } from '../game/conductor.js';
+import { playPieceLive, stopLive, bootBellows } from '../game/bellowsConductor.js';
 import { makePlayers, playerForDevice, standings } from '../game/roster.js';
 
 // hit tick pitch per judgment: brighter for a better hit
@@ -60,22 +61,24 @@ function createSession() {
   // then prepare, count down, and begin the loop. shared by every start path.
   async function begin(mine, song, firstChart, onPlay) {
     timing = createTiming(firstChart);
-    // imported songs and bellows-backed composed songs play from a rendered buffer;
-    // rendering a bellows piece takes a moment, so flag loading and let it paint first
-    if (song._bellows || !song._piece) {
+    if (!song._piece) { // imported audio: decode to a buffer
       state.loading = true;
-      await new Promise((r) => setTimeout(r, 30));
       const buf = song.buffer || await ensureBuffer(song);
       state.loading = false;
       if (mine !== epoch || !buf) return false;
       engine.load(buf);
     }
+    // bellows songs play live (no render); warm the worklet during the countdown so the
+    // first play has no boot pause
+    const warm = song._bellows ? bootBellows() : null;
     engine.applyVolumes();
     wireInput();
     await engine.resume(); if (mine !== epoch) return false;
     resizeFields();
     await countdown(() => mine === epoch); if (mine !== epoch) return false;
-    onPlay();
+    if (warm) { await warm; if (mine !== epoch) return false; }
+    await onPlay();
+    if (mine !== epoch) { stopLive(); return false; }
     active = true; state.playing = true; loop();
     return true;
   }
@@ -86,7 +89,11 @@ function createSession() {
     state.players = [playerEntry(0, { device: 'all', difficulty: chart.difficulty }, chart)];
     syncAliases();
     replay = () => start(song, chart);
-    await begin(mine, song, chart, () => { if (song._piece && !song._bellows) engine.playPiece(song._piece); else engine.play(0); });
+    await begin(mine, song, chart, async () => {
+      if (song._bellows && song._piece) { const c = await playPieceLive(song._piece, song.genre); engine.adoptClock(c.startAt, c.duration); }
+      else if (song._piece) engine.playPiece(song._piece);
+      else engine.play(0);
+    });
   }
 
   // Local multiplayer: configs = [{ device, difficulty, chart }]. Every chart is charted
@@ -98,7 +105,11 @@ function createSession() {
     state.players = tagged.map((p, i) => playerEntry(i, p, configs[i].chart));
     syncAliases();
     replay = () => startMatch(song, configs);
-    await begin(mine, song, configs[0].chart, () => { if (song._piece && !song._bellows) engine.playPiece(song._piece); else engine.play(0); });
+    await begin(mine, song, configs[0].chart, async () => {
+      if (song._bellows && song._piece) { const c = await playPieceLive(song._piece, song.genre); engine.adoptClock(c.startAt, c.duration); }
+      else if (song._piece) engine.playPiece(song._piece);
+      else engine.play(0);
+    });
   }
 
   // Perpetual mode: an endless, evolving stream (single-player). cfg = { mood, seed, bpm, difficulty }.
@@ -155,7 +166,7 @@ function createSession() {
     else { const dur = engine.duration(); state.progress = dur ? Math.min(1, t / dur) : 0; if (dur > 0 && t >= dur + 0.6) end(); else if (dur <= 0) console.warn('[END-GUARD] loop active but engine.duration()=0 at t=', t.toFixed(2)); }
   }
 
-  function stop() { epoch++; active = false; state.playing = false; if (raf) cancelAnimationFrame(raf); raf = 0; subs.forEach((u) => u && u()); subs = []; endless = false; conductor = null; engine.stop(); }
+  function stop() { epoch++; active = false; state.playing = false; if (raf) cancelAnimationFrame(raf); raf = 0; subs.forEach((u) => u && u()); subs = []; endless = false; conductor = null; stopLive(); engine.stop(); }
   function restart() { if (replay && !state.endless) replay(); }
   function quit() { if (state.playing) end(); }
   function end() {
