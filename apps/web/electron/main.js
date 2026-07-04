@@ -91,25 +91,27 @@ function sniffAudioMime(b) {
   return 'audio/webm';
 }
 
-// youtube-dl-exec runs a bundled yt-dlp binary. Packaged, that binary lives inside
-// app.asar.unpacked, whose absolute path contains spaces (the ".app" bundle name),
-// and youtube-dl-exec splits the spawn command on spaces on macOS and Linux, so it
-// never finds it (ENOENT). Copy it to a space-free temp dir once and run a
-// youtube-dl-exec instance from that copy. The release bundles the self-contained
-// yt-dlp build, which extracts without a system Python or an external JS runtime. In
-// dev the source path has no spaces, so the default resolution is fine.
+// youtube-dl-exec runs a bundled yt-dlp binary. Packaged on macOS/Linux it lives
+// inside app.asar.unpacked, whose absolute path contains spaces (the ".app" bundle
+// name), and youtube-dl-exec splits the spawn command on spaces there, so it never
+// finds it. The binary is signed and notarized *in place*, so copying it out of the
+// bundle loses that trust and the hardened runtime / Gatekeeper kills the copy
+// (ChildProcessError). Instead point a space-free symlink at it and run that: the OS
+// executes the real, trusted binary. The bundled build is self-contained (its own
+// Python plus built-in signature deciphering), so it needs no system Python or
+// external JS runtime. Windows quotes the path (spaces are fine) and dev paths have no
+// spaces, so both use the default resolution.
 let _ytdlp = null;
 async function getYtdlp() {
   if (_ytdlp) return _ytdlp;
   const mod = await import('youtube-dl-exec');
-  if (!app.isPackaged) { _ytdlp = mod.default; return _ytdlp; }
-  const binName = process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp';
-  const src = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'youtube-dl-exec', 'bin', binName);
-  const dest = path.join(app.getPath('temp'), 'doot-ytdlp', binName);
-  await fs.mkdir(path.dirname(dest), { recursive: true });
-  await fs.copyFile(src, dest);
-  if (process.platform !== 'win32') await fs.chmod(dest, 0o755);
-  _ytdlp = mod.create(dest);
+  if (!app.isPackaged || process.platform === 'win32') { _ytdlp = mod.default; return _ytdlp; }
+  const src = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'youtube-dl-exec', 'bin', 'yt-dlp');
+  const link = path.join(app.getPath('temp'), 'doot-ytdlp', 'yt-dlp');
+  await fs.mkdir(path.dirname(link), { recursive: true });
+  try { await fs.unlink(link); } catch (e) { /* no stale link to clear */ }
+  await fs.symlink(src, link);
+  _ytdlp = mod.create(link);
   return _ytdlp;
 }
 
@@ -135,11 +137,16 @@ function registerIpc() {
     if (host !== 'youtube.com' && host !== 'youtu.be') throw new Error('not a YouTube URL');
     const ytdlp = await getYtdlp();
     const base = { noPlaylist: true, noWarnings: true };
-    const info = await ytdlp(url, { ...base, dumpSingleJson: true, format: 'bestaudio' });
+    // surface yt-dlp's real failure (its stderr tail) rather than a bare ChildProcessError
+    const run = async (opts) => {
+      try { return await ytdlp(url, opts); }
+      catch (err) { const tail = String((err && err.stderr) || '').trim().split('\n').filter(Boolean).pop(); throw new Error(tail || (err && err.shortMessage) || (err && err.message) || 'yt-dlp failed'); }
+    };
+    const info = await run({ ...base, dumpSingleJson: true, format: 'bestaudio' });
     if ((Number(info.duration) || 0) > 12 * 60) throw new Error('video is over 12 minutes');
     const out = path.join(app.getPath('temp'), `doot-yt-${Date.now()}.audio`);
     try {
-      await ytdlp(url, { ...base, format: 'bestaudio', output: out });
+      await run({ ...base, format: 'bestaudio', output: out });
       const b = await fs.readFile(out);
       return { bytes: b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength), title: info.title || 'YouTube', mime: sniffAudioMime(b) };
     } finally { fs.unlink(out).catch(() => {}); }
