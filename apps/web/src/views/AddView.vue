@@ -20,7 +20,8 @@
 
           <div v-show="srcTab === 'url' && plat.canImportUrl" class="src-pane">
             <p class="hint">{{ plat.urlImportHint }}</p>
-            <div class="url-row"><input class="input" v-model="url" placeholder="Paste an audio URL or a YouTube link"><button class="btn blue sm" @click="fromUrl">Import</button></div>
+            <div class="url-row"><input class="input" v-model="url" placeholder="Paste an audio URL or a YouTube link" :disabled="importing" @keydown.enter="fromUrl"><button class="btn blue sm" @click="fromUrl" :disabled="importing || !url"><span v-if="importing" class="spin" aria-hidden="true"></span>{{ importing ? 'Importing…' : 'Import' }}</button></div>
+            <p v-if="importing" class="importing" aria-live="polite"><span class="spin" aria-hidden="true"></span>{{ importMsg }}</p>
             <p v-if="plat.showYtHelp" class="hint">YouTube import only works in the <b>desktop app</b>. In a browser, grab an MP3 with a downloader like <a :href="plat.ytHelpUrl" target="_blank" rel="noopener noreferrer">{{ ytHelpHost }}</a>, then add the file in the Audio file tab.</p>
           </div>
 
@@ -115,6 +116,8 @@ const meta = reactive({ title: 'Untitled', artist: 'Unknown', bpm: '-', len: '-'
 const engineSel = ref('drum');
 const diffSet = reactive(new Set(['basic', 'difficult', 'expert']));
 const url = ref('');
+const importing = ref(false);
+const importMsg = ref('');
 const srcTab = ref('file');
 const ytHelpHost = computed(() => { try { return new URL(plat.ytHelpUrl).hostname; } catch (e) { return 'a downloader'; } });
 const running = ref(false);
@@ -150,10 +153,12 @@ async function onSimPick(e) {
 }
 async function decodeFile(f) { try { await engine.resume(); const buf = await engine.decode(await f.arrayBuffer()); await loadBuffer(buf, f.name.replace(/\.[^.]+$/, '')); draft.value.file = f; } catch (err) { console.error(err); toast('Could not decode this file'); } }
 async function fromUrl() {
-  if (!url.value) return;
+  if (!url.value || importing.value) return;
+  const yt = plat.isYouTube(url.value);
+  importing.value = true;
+  importMsg.value = yt ? 'Ripping audio from YouTube — this can take a moment…' : 'Fetching audio…';
   try {
-    if (plat.isYouTube(url.value)) {
-      toast('Ripping audio from YouTube…');
+    if (yt) {
       const { bytes, title, mime } = await plat.fetchYouTube(url.value);
       const buf = await engine.decode(bytes.slice(0));
       await loadBuffer(buf, title || 'YouTube track');
@@ -164,7 +169,9 @@ async function fromUrl() {
       await loadBuffer(buf, url.value.split('/').pop() || 'Track');
       draft.value.file = new Blob([ab], { type: 'audio/mpeg' });
     }
+    toast('Audio loaded');
   } catch (err) { toast('Import failed: ' + err.message); }
+  finally { importing.value = false; }
 }
 
 function setStage(i, state, tick, label) { const s = stages.value[i]; if (!s) return; s.state = state; if (tick) s.tick = tick; if (label) s.label = label; }
@@ -206,6 +213,9 @@ useScope({ cancel: () => { if (reviewing.value) reviewing.value = false; else ba
 .src-tabs button { flex: 1; padding: 9px 6px; border: 2px solid var(--ink); border-radius: var(--r2); background: #fff; color: var(--ink); font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer; }
 .src-tabs button.on { background: var(--ink); color: #fff; }
 .src-pane { display: flex; flex-direction: column; gap: 10px; }
+.spin { display: inline-block; width: 13px; height: 13px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; flex: none; }
+.url-row .btn .spin { margin-right: 7px; vertical-align: -1px; }
+.importing { display: flex; align-items: center; gap: 8px; margin: 0; font-family: var(--fu); font-weight: 700; font-size: 13px; color: var(--blue); }
 .ed-mount { border: 3px solid var(--ink); border-radius: var(--r2); background: var(--paper); padding: 12px; margin-top: 10px; height: clamp(320px, 60vh, 560px); }
 .review { display: flex; flex-direction: column; gap: 10px; }
 </style>
