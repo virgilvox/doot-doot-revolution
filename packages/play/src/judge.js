@@ -32,9 +32,10 @@ export function gradeFor(accuracyPct) {
 export class Judge {
   constructor(chart, options = {}) {
     this.notes = chart.notes.map((n, i) => ({
-      t: n.t, lane: n.lane, dur: n.dur || 0, quant: n.quant, i,
+      t: n.t, lane: n.lane, dur: n.dur || 0, quant: n.quant, midi: n.midi, i,
       judged: false, holding: false, dropped: false, done: false, releaseAt: null
     }));
+    this.lastHit = null; // the most recently hit note, for pitched hit feedback
     this.W = WINDOWS;
     this.maxScore = options.maxScore || 1000000;
     this.counts = { marvelous: 0, perfect: 0, great: 0, good: 0, boo: 0, miss: 0 };
@@ -59,7 +60,7 @@ export class Judge {
     if (best < 0 || bd > this.W.boo) return null;
     const n = this.notes[best];
     const type = bd <= this.W.marvelous ? 'marvelous' : bd <= this.W.perfect ? 'perfect' : bd <= this.W.great ? 'great' : bd <= this.W.good ? 'good' : 'boo';
-    n.judged = type; n.dt = t - n.t;
+    n.judged = type; n.dt = t - n.t; this.lastHit = n;
     this._apply(type, n.dt);
     if (n.dur > 0 && type !== 'boo') { n.holding = true; this.holdActive[lane] = n; }
     return type;
@@ -114,7 +115,7 @@ export class Judge {
   appendNotes(notes) {
     for (let j = 0; j < notes.length; j++) {
       const n = notes[j];
-      this.notes.push({ t: n.t, lane: n.lane, dur: n.dur || 0, quant: n.quant, i: this._nextI++, judged: false, holding: false, dropped: false, done: false, releaseAt: null });
+      this.notes.push({ t: n.t, lane: n.lane, dur: n.dur || 0, quant: n.quant, midi: n.midi, i: this._nextI++, judged: false, holding: false, dropped: false, done: false, releaseAt: null });
     }
     this.total += notes.length;
   }

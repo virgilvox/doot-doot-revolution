@@ -17,9 +17,6 @@ import { createConductor } from '../game/conductor.js';
 import { playPieceLive, playEndlessLive, stopLive, bootBellows } from '../game/bellowsConductor.js';
 import { makePlayers, playerForDevice, standings } from '../game/roster.js';
 
-// hit tick pitch per judgment: brighter for a better hit
-const TICK_FREQ = { marvelous: 1245, perfect: 1046, great: 880, good: 740, boo: 620 };
-
 function createSession() {
   const state = reactive({
     playing: false, loading: false, count: '', progress: 0, elapsed: 0, endless: false, multi: false,
@@ -53,7 +50,11 @@ function createSession() {
       const p = state.players[pi];
       const type = p.judge.hit(lane, engine.time() + off());
       if (type && fields[pi]) fields[pi].hit(lane, type, engine.time());
-      if (type) engine.tick(TICK_FREQ[type] || 880);
+      // optional hit feedback (off by default), pitched to the note the arrow represents
+      if (type && settings.hitSounds) {
+        const m = p.judge.lastHit && p.judge.lastHit.midi;
+        engine.hitTone(m != null ? 440 * Math.pow(2, (m - 69) / 12) : 660);
+      }
     }));
   }
 

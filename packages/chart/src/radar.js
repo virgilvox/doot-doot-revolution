@@ -9,18 +9,26 @@ const clamp01 = (v) => Math.max(0, Math.min(1, v));
 
 // Compute the radar from a chart's notes and foot rating. Stand-alone so a chart
 // loaded from disk gets a radar without re-running the charter.
+// Every axis is measured from the chart's own notes, so it varies per song rather than
+// echoing the difficulty tier. stream: sustained density. voltage: the busiest 2s (peak
+// intensity, where a jump counts double). air: how many arrows are jumps. freeze: how many
+// are holds. chaos: how much lands off the quarter-note pulse (syncopation).
 export function computeRadar(chart) {
   const notes = chart.notes || [], count = notes.length, dur = chart.duration || durationOf(notes) || 1;
-  const nps = count / dur;
-  let jumps = 0, i = 0;
   const sorted = notes.slice().sort((a, b) => a.t - b.t);
+  const nps = count / dur;
+  // jumps: distinct onset times carrying two or more arrows
+  let jumps = 0, i = 0;
   while (i < sorted.length) { let j = i + 1; while (j < sorted.length && Math.abs(sorted[j].t - sorted[i].t) < 1e-3) j++; if (j - i >= 2) jumps++; i = j; }
   const holds = notes.filter((n) => (n.dur || 0) > 0).length;
-  const busy = notes.filter((n) => n.quant >= 16).length / (count || 1);
-  const foot = chart.foot || 8;
+  // peak density: the most arrows in any 2-second window
+  let peak = 0; for (let a = 0, b = 0; a < sorted.length; a++) { while (sorted[a].t - sorted[b].t > 2) b++; peak = Math.max(peak, a - b + 1); }
+  const peakNps = peak / 2;
+  // syncopation: arrows that fall off the quarter-note grid (eighths and finer)
+  const offbeat = notes.filter((n) => n.quant && n.quant > 4).length / (count || 1);
   return {
-    stream: clamp01(nps / 8), voltage: clamp01(foot / 15), air: clamp01(jumps / (count || 1) * 5),
-    freeze: clamp01(holds / (count || 1) * 5), chaos: clamp01(busy * 1.5)
+    stream: clamp01(nps / 7), voltage: clamp01(peakNps / 11), air: clamp01(jumps / (count || 1) * 5),
+    freeze: clamp01(holds / (count || 1) * 5), chaos: clamp01(offbeat * 1.4)
   };
 }
 

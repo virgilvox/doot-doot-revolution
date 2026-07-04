@@ -42,7 +42,8 @@ const rows = [
   { t: 'Calibrate', id: 'calibrate', kind: 'action', action: runCalibration, label: () => (calib.running ? 'listening…' : 'Tap calibrate'), disabled: () => calib.running },
   { t: 'Master volume', kind: 'vol', key: 'volMaster' },
   { t: 'Music volume', kind: 'vol', key: 'volMusic' },
-  { t: 'SFX volume', d: 'Loudness of the hit tick.', kind: 'vol', key: 'volSfx' },
+  { t: 'SFX volume', d: 'Loudness of menu and hit sounds.', kind: 'vol', key: 'volSfx' },
+  { t: 'Hit sounds', d: 'Play a note on each hit, pitched to the song. Off by default.', kind: 'toggle', key: 'hitSounds' },
   { t: 'Reduced motion', d: 'Calmer menus. Gameplay still animates.', kind: 'toggle', key: 'reducedMotion' },
   { t: 'Background visuals', d: 'Generative shader behind the lanes during play. Off for a plain field.', kind: 'toggle', key: 'background' },
   { t: 'Reset', d: 'Restore default settings.', kind: 'action', action: () => s.reset(), label: () => 'Reset all' }

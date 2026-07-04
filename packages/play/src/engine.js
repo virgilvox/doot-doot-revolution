@@ -161,6 +161,13 @@ export class AudioEngine {
     o.connect(g); g.connect(this.sfx); o.start(); o.stop(this.ctx.currentTime + 0.09);
   }
 
+  // a short pitched pluck for a correct hit (only when hit sounds are enabled): freq is
+  // the musical note of the arrow, so hitting the chart plays the song's own pitches
+  hitTone(freq) {
+    this._ensure(); if (!this.ctx) return;
+    this._note(freq, this.ctx.currentTime + 0.001, 0.13, 'triangle', 0.13);
+  }
+
   cursor(dir = 1) {
     this._ensure(); if (!this.ctx) return;
     if (this.ctx.state === 'suspended') this.ctx.resume();

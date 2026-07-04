@@ -76,13 +76,13 @@ export function chartFromPiece(piece, difficulty, opts = {}) {
   let side = 0, lastLane = -1;
   const pick = (arr) => arr[Math.floor(rng() * arr.length)];
   for (const c of kept) {
-    const t = c.beat * spb, quant = stepQuant(c.s);
+    const t = c.beat * spb, quant = stepQuant(c.s), mid = pitchAt(ev, c.step, piece.rootPc);
     // a jump (two arrows at once) on a beat carrying a kick or snare, at the tier's
     // rate. Kick is four-on-the-floor and snare is on 2 & 4, so this actually fires
     // (the old kick-AND-snare-on-a-strong-beat test never coincided) and the higher
     // tiers' larger jumpProb makes them denser and more technical than the lower ones.
     if (c.med && (c.hasKick || c.hasSnare) && rng() < D.jumpProb) {
-      notes.push(mkNote(t, c.beat, pick([0, 1]), quant), mkNote(t, c.beat, pick([2, 3]), quant));
+      notes.push({ ...mkNote(t, c.beat, pick([0, 1]), quant), midi: mid }, { ...mkNote(t, c.beat, pick([2, 3]), quant), midi: mid });
       side = 0; lastLane = -1;
       continue;
     }
@@ -90,7 +90,7 @@ export function chartFromPiece(piece, difficulty, opts = {}) {
     const lanes = side ? [2, 3] : [0, 1];
     let lane = pick(lanes);
     if (lane === lastLane) lane = lanes[(lanes.indexOf(lane) + 1) % 2];
-    let n = mkNote(t, c.beat, lane, quant);
+    let n = mkNote(t, c.beat, lane, quant); n.midi = mid;
     if ((difficulty === 'expert' || difficulty === 'challenge')) {
       const lead = ev.lead && ev.lead[c.step];
       if (lead && lead[0].dur >= 4 && rng() < D.holdProb) {
@@ -113,3 +113,14 @@ export function chartFromPiece(piece, difficulty, opts = {}) {
 }
 
 function mkNote(t, beat, lane, quant) { return { t, beat, lane, dur: 0, quant, type: 'tap' }; }
+
+// the musical pitch to sound when a step is hit: the melody if there is one, else the arp,
+// counter, bass, chord top, or the tonic. Lets the hit feedback play the song's own notes.
+function pitchAt(ev, step, rootPc) {
+  let m = null;
+  for (const v of ['lead', 'arp', 'counter', 'bass']) { const a = ev[v] && ev[v][step]; if (a && a.length && a[0].midi != null) { m = a[0].midi; break; } }
+  if (m == null) { const pad = ev.pad && ev.pad[step]; m = (pad && pad.length && pad[0].midis && pad[0].midis.length) ? pad[0].midis[pad[0].midis.length - 1] : 60 + (rootPc || 0); }
+  // fold into a pleasant ~2 octaves (A3..C6) so hit plucks stay smooth, no jarring low bass
+  while (m < 57) m += 12; while (m > 84) m -= 12;
+  return m;
+}
