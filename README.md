@@ -10,6 +10,31 @@ workspace of small reusable libraries.
 
 Everything runs client side. There is no server, no account, no telemetry.
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/01-title.png" width="49%" alt="Title screen with the Doot mascot" />
+  <img src="docs/screenshots/05-game.png" width="49%" alt="Gameplay: four lanes over a generative background" />
+</p>
+
+<table>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/02-select.png" alt="Song select" /><br /><sub>Song select</sub></td>
+    <td width="33%"><img src="docs/screenshots/03-difficulty.png" alt="Difficulty and groove radar" /><br /><sub>Difficulty &middot; groove radar</sub></td>
+    <td width="33%"><img src="docs/screenshots/04-players.png" alt="Player setup" /><br /><sub>Players (1&ndash;4)</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/06-results.png" alt="Versus results" /><br /><sub>Versus results</sub></td>
+    <td><img src="docs/screenshots/07-add-song.png" alt="Add a song" /><br /><sub>Add a song</sub></td>
+    <td><img src="docs/screenshots/08-library.png" alt="Library" /><br /><sub>Library</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/09-settings.png" alt="Settings" /><br /><sub>Settings</sub></td>
+    <td><img src="docs/screenshots/10-pads.png" alt="Controller mapping" /><br /><sub>Pads &middot; controller mapping</sub></td>
+    <td></td>
+  </tr>
+</table>
+
 ## Run
 
 ```
