@@ -91,6 +91,28 @@ function sniffAudioMime(b) {
   return 'audio/webm';
 }
 
+// youtube-dl-exec runs a bundled yt-dlp binary. Packaged, that binary lives inside
+// app.asar.unpacked, whose absolute path contains spaces (the ".app" bundle name),
+// and youtube-dl-exec splits the spawn command on spaces on macOS and Linux, so it
+// never finds it (ENOENT). Copy it to a space-free temp dir once and run a
+// youtube-dl-exec instance from that copy. The release bundles the self-contained
+// yt-dlp build, which extracts without a system Python or an external JS runtime. In
+// dev the source path has no spaces, so the default resolution is fine.
+let _ytdlp = null;
+async function getYtdlp() {
+  if (_ytdlp) return _ytdlp;
+  const mod = await import('youtube-dl-exec');
+  if (!app.isPackaged) { _ytdlp = mod.default; return _ytdlp; }
+  const binName = process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp';
+  const src = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'youtube-dl-exec', 'bin', binName);
+  const dest = path.join(app.getPath('temp'), 'doot-ytdlp', binName);
+  await fs.mkdir(path.dirname(dest), { recursive: true });
+  await fs.copyFile(src, dest);
+  if (process.platform !== 'win32') await fs.chmod(dest, 0o755);
+  _ytdlp = mod.create(dest);
+  return _ytdlp;
+}
+
 function registerIpc() {
   // Fetch remote audio bytes past the browser CORS wall.
   ipcMain.handle('audio:fetch', async (e, url) => {
@@ -100,10 +122,10 @@ function registerIpc() {
   });
 
   // Rip audio from a YouTube URL with yt-dlp (via youtube-dl-exec, loaded lazily).
-  // yt-dlp reliably deciphers YouTube's signature/n-parameter where the pure-JS
-  // extractors currently do not; it needs a JavaScript runtime to run YouTube's
-  // player, so we point it at node (present when the desktop app runs from its dev
-  // shell). First a metadata pass for the title and a length cap, then the best
+  // yt-dlp reliably deciphers YouTube's signature where the pure-JS extractors
+  // currently do not. The bundled build is self-contained (its own Python plus a
+  // built-in interpreter for signature deciphering), so it needs no system Python or
+  // external JS runtime. First a metadata pass for the title and a length cap, then the best
   // audio-only stream to a temp file, returned as bytes (webm/opus or m4a, both
   // decodable by the renderer's Web Audio) plus the title. This downloads content
   // subject to YouTube's terms and to copyright; it is meant for material the user
@@ -111,8 +133,8 @@ function registerIpc() {
   ipcMain.handle('audio:youtube', async (e, url) => {
     let host; try { host = new URL(url).hostname.replace(/^(www|m|music)\./, ''); } catch (err) { throw new Error('bad url'); }
     if (host !== 'youtube.com' && host !== 'youtu.be') throw new Error('not a YouTube URL');
-    const ytdlp = (await import('youtube-dl-exec')).default;
-    const base = { noPlaylist: true, noWarnings: true, jsRuntimes: 'node' };
+    const ytdlp = await getYtdlp();
+    const base = { noPlaylist: true, noWarnings: true };
     const info = await ytdlp(url, { ...base, dumpSingleJson: true, format: 'bestaudio' });
     if ((Number(info.duration) || 0) > 12 * 60) throw new Error('video is over 12 minutes');
     const out = path.join(app.getPath('temp'), `doot-yt-${Date.now()}.audio`);
