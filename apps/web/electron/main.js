@@ -7,6 +7,11 @@
 import { app, BrowserWindow, session, protocol, ipcMain, net, dialog, shell } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+
+// This bundles to an ES module (the app package.json has "type": "module"), where
+// __dirname does not exist; derive it from import.meta.url.
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const isDev = !!process.env.VITE_DEV_SERVER_URL;
 const RENDERER = path.join(__dirname, '../dist');

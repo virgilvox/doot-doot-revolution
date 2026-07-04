@@ -18,7 +18,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import { arrowSVG } from '@doot-games/render';
+import { DOOT_LOGO } from './game/logo.js';
 import Toast from './components/Toast.vue';
 import GithubLink from './components/GithubLink.vue';
 import DownloadModal from './components/DownloadModal.vue';
@@ -45,7 +45,7 @@ onMounted(() => {
   useInput();
   bus.on('game:end', () => go('results'));
 });
-const brandMark = arrowSVG('up');
+const brandMark = DOOT_LOGO;
 const tabs = [
   { name: 'select', label: 'Play' },
   { name: 'add', label: 'Add Song' },
