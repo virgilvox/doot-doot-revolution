@@ -40,6 +40,11 @@ jobs:
       # rm -rf work on the Windows runner too. Matches ci.yml.
       - name: Install
         shell: bash
+        env:
+          # youtube-dl-exec's postinstall fetches the yt-dlp binary from the GitHub
+          # API; without a token it hits the 60/hr anonymous rate limit on shared
+          # runner IPs. The runner token authenticates it (and electron's download).
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: rm -rf node_modules package-lock.json && npm install
       - name: Build and publish desktop app
         run: npm --workspace @doot-games/web run release
