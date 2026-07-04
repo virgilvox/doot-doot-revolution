@@ -107,7 +107,8 @@ onBeforeUnmount(() => { aborted = true; clearInterval(timer); });
 
 <style scoped>
 .player-setup :deep(.view-inner) { align-items: center; justify-content: center; }
-.ps-panel { align-items: center; text-align: center; gap: 22px; width: min(440px, 94vw); padding: clamp(26px, 4vw, 36px); }
+/* .panel is a plain block, so establish the flex column here or the gap/align do nothing */
+.ps-panel { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 22px; width: min(440px, 94vw); padding: clamp(26px, 4vw, 36px); }
 
 .ps-song { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
 .ps-title { font-family: var(--fd); font-weight: 800; font-size: clamp(21px, 4vw, 27px); }
