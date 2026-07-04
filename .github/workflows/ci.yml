@@ -14,12 +14,10 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      # A lockfile generated on macOS omits the Linux Rollup optional binary
-      # (npm/cli#4828); with the lockfile present npm never resolves it, so both
-      # `npm ci` and a plain `npm install` fail on the runner with
-      # "Cannot find module @rollup/rollup-linux-x64-gnu". Removing the lockfile
-      # first forces a fresh, platform-correct resolve. This matches the deploy.
-      - run: rm -rf node_modules package-lock.json && npm install
+      # Every OS's Rollup native binary is declared as an optionalDependency in the
+      # root package.json, so the lockfile carries all platforms and npm ci resolves
+      # the Linux one here (works around npm/cli#4828).
+      - run: npm ci
       - name: Package tests
         run: npm test
       - name: Web tests

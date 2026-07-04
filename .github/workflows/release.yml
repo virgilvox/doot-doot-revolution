@@ -39,13 +39,15 @@ jobs:
       # A fresh resolve installs the platform-correct binaries. shell: bash makes
       # rm -rf work on the Windows runner too. Matches ci.yml.
       - name: Install
-        shell: bash
         env:
           # youtube-dl-exec's postinstall fetches yt-dlp through the GitHub API, which
           # hits the 60/hr anonymous limit on shared runner IPs (and its token handling
           # is broken). Skip it here and fetch the binary directly in the next step.
           YOUTUBE_DL_SKIP_DOWNLOAD: 'true'
-        run: rm -rf node_modules package-lock.json && npm install
+        # npm ci gives a complete, deterministic install (a fresh resolve dropped
+        # 7zip-bin's binaries on the runners). The lockfile carries every OS's Rollup
+        # native binary via optionalDependencies, so this resolves on all three.
+        run: npm ci
       - name: Fetch the yt-dlp binary
         shell: bash
         # Standalone builds (no Python runtime needed) pulled straight from the release
