@@ -97,7 +97,7 @@ function createSession() {
     stop(); const mine = ++epoch; endless = true; state.endless = true; state.multi = false;
     conductor = createConductor(cfg);
     const chart = conductor.initialChart();
-    const song = { title: 'Perpetual', artist: (cfg.mood || 'endless').toUpperCase(), bpm: conductor.tempo, endless: true, difficulty: cfg.difficulty };
+    const song = { title: 'Endless', artist: (cfg.mood || 'endless').toUpperCase(), bpm: conductor.tempo, endless: true, difficulty: cfg.difficulty };
     state.song = markRaw(song); state.results = null; state.progress = 0; state.elapsed = 0;
     state.players = [playerEntry(0, { device: 'all', difficulty: cfg.difficulty }, chart, { endless: true })];
     conductor.bindJudge(state.players[0].judge);

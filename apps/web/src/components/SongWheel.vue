@@ -2,10 +2,10 @@
   <div class="wheel-board">
     <div class="wheel-reticle" aria-hidden="true"></div>
     <div class="wheel-cursor" aria-hidden="true"></div>
-    <button v-for="c in cards" :key="c.song.id" class="card" :class="{ sel: c.o === 0 }" :style="c.style" @click="$emit('pick', c.i)">
-      <div class="cv" :style="{ background: cover(c.i) }">{{ letter(c.song) }}</div>
-      <div class="ci"><div class="t">{{ c.song.title }}</div><div class="a">{{ c.song.artist }}</div></div>
-      <div class="cb">{{ Math.round(c.song.bpm) || '-' }}</div>
+    <button v-for="c in cards" :key="c.song.id" class="card" :class="{ sel: c.o === 0, endless: c.song.endless }" :style="c.style" @click="$emit('pick', c.i)">
+      <div class="cv" :style="c.song.endless ? null : { background: cover(c.i) }">{{ c.song.endless ? '∞' : letter(c.song) }}</div>
+      <div class="ci"><div class="t">{{ c.song.title }}<span v-if="c.song.endless" class="inf" aria-hidden="true">∞</span></div><div class="a">{{ c.song.artist }}</div></div>
+      <div class="cb">{{ c.song.endless ? '∞' : (Math.round(c.song.bpm) || '-') }}</div>
     </button>
   </div>
 </template>
@@ -29,3 +29,19 @@ const cards = computed(() => {
 const cover = (i) => covGrad(i);
 const letter = (s) => (s.title || '?')[0].toUpperCase();
 </script>
+
+<style scoped>
+/* The Endless tile reads as a special mode, not just another song: a spectrum cover
+   with an infinity mark, an outline glow that breathes, and a sheen that sweeps across. */
+.card.endless { position: relative; overflow: hidden; border-color: #6b4cff; animation: endless-glow 2.4s ease-in-out infinite; }
+.card.endless .cv { background: conic-gradient(from 210deg, #7c5cff, #ff5ab0, #ffd23f, #22d3c5, #7c5cff); color: #fff; text-shadow: 0 2px 6px rgba(0, 0, 0, .45); }
+.card.endless .t { display: inline-flex; align-items: center; }
+.card.endless .t .inf { margin-left: 6px; font-weight: 800; color: #7c5cff; }
+.card.endless .cb { color: #7c5cff; }
+.card.endless::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, .55) 50%, transparent 62%); transform: translateX(-130%); animation: endless-sheen 3s ease-in-out infinite; pointer-events: none; }
+@keyframes endless-glow {
+  0%, 100% { box-shadow: 0 6px 0 var(--ink-2), 0 0 15px rgba(124, 92, 255, .5); }
+  50% { box-shadow: 0 6px 0 var(--ink-2), 0 0 28px rgba(255, 90, 176, .75); }
+}
+@keyframes endless-sheen { 0% { transform: translateX(-130%); } 55%, 100% { transform: translateX(130%); } }
+</style>

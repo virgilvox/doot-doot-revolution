@@ -5,7 +5,7 @@ import { useLibraryStore } from './library.js';
 
 // A special always-present wheel entry that launches the endless perpetual mode
 // instead of a fixed song (handled by DifficultyModal / useSession.startEndless).
-const ENDLESS_TILE = { id: 'endless', title: 'Perpetual', artist: 'Endless generative mix', genre: 'Generative', bpm: 130, endless: true, source: 'endless', duration: 0, charts: {} };
+const ENDLESS_TILE = { id: 'endless', title: 'Endless', artist: 'Infinite generative mix', genre: 'Generative', bpm: 130, endless: true, source: 'endless', duration: 0, charts: {} };
 
 // The song wheel model: demo songs, the saved library, and the endless tile, with a
 // selection index the wheel and hero read from.
