@@ -8,6 +8,7 @@
 import { watch, onBeforeUnmount } from 'vue';
 import { engine } from '../game/singletons.js';
 import { ensureBuffer } from '../game/audio.js';
+import { previewPieceLive, stopLive, bootBellows } from '../game/bellowsConductor.js';
 
 const SETTLE_MS = 350; // let the wheel settle before a preview fades in
 const LOOP_LEN = 26;   // seconds of the looped window for full-length songs
@@ -27,12 +28,16 @@ export function useSongPreview(currentSong) {
   async function playFor(song) {
     if (!song || song.endless) return; // the endless tile has nothing to preview
     const mine = ++token;
-    // composed songs preview live from the synth, looping from a hook a third in
+    // composed songs preview live through bellows with the same genre rack as playback,
+    // looping from a hook a third in, so a song sounds the same before and after picking it
     if (song._piece) {
+      engine.stopPreview(); // stop any buffer preview
+      await bootBellows(); if (mine !== token) return; // scrolled past while the worklet warmed
       const fromStep = Math.floor(song._piece.totalSteps * 0.33 / 16) * 16;
-      engine.previewPiece(song._piece, { fromStep });
+      await previewPieceLive(song._piece, song.genre, { fromStep });
       return;
     }
+    stopLive(0.2); // leaving a bellows preview for an imported buffer
     let buf = song.buffer;
     if (!buf) {
       try { buf = await ensureBuffer(song); } // decodes an imported blob
@@ -46,14 +51,14 @@ export function useSongPreview(currentSong) {
   function schedule(song) {
     if (timer) clearTimeout(timer);
     token++; // invalidate any in-flight decode from the previous selection
-    if (!song) { engine.stopPreview(); timer = 0; return; }
+    if (!song) { engine.stopPreview(); stopLive(0.2); timer = 0; return; }
     // keep the current preview playing through the settle, then crossfade
     timer = setTimeout(() => playFor(song), SETTLE_MS);
   }
 
   const unwatch = watch(currentSong, (song) => schedule(song), { immediate: true });
 
-  function stop() { if (timer) clearTimeout(timer); timer = 0; token++; engine.stopPreview(); }
+  function stop() { if (timer) clearTimeout(timer); timer = 0; token++; engine.stopPreview(); stopLive(0.2); }
   onBeforeUnmount(() => { unwatch(); stop(); });
 
   return { stop };

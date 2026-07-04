@@ -12,18 +12,18 @@
 const PRESETS = {
   // hard, bright, aggressive: driving FM lead over a snarling saw bass (Neon Tiger)
   synthcore: {
-    buses: { verb: ['fdn', { size: 1.1, decay: 1.6, damp: 5200, mix: 1 }], delay: ['tapeDelay', { time: 0.19, feedback: 0.3, mix: 1 }] },
-    master: [['compressor', { threshold: -14, ratio: 4, attack: 0.004, release: 0.13 }], ['limiter', { threshold: -0.6 }]],
+    buses: { verb: ['fdn', { size: 1.1, decay: 1.6, damp: 4600, mix: 1 }], delay: ['tapeDelay', { time: 0.19, feedback: 0.3, mix: 1 }] },
+    master: [['compressor', { threshold: -15, ratio: 3.5, attack: 0.005, release: 0.15, knee: 8 }], ['limiter', { threshold: -0.7 }]],
     voices: {
-      bass: { engine: 'va', params: { shape: 0, cutoff: 780, resonance: 0.45, envAmount: 1.6, decay: 0.18, sustain: 0.4, sub: 0.6, detune: 8 }, gain: 0.5, fx: [['saturator', { drive: 2.2, tone: -0.2 }]] },
+      bass: { engine: 'va', params: { shape: 0, cutoff: 720, resonance: 0.38, envAmount: 1.5, decay: 0.18, sustain: 0.4, sub: 0.6, detune: 8 }, gain: 0.5, fx: [['saturator', { drive: 1.7, tone: -0.25 }]] },
       pad: { engine: 'wavetable', params: { position: 0.35, scanRate: 0.3, scanDepth: 0.25, attack: 0.4, sustain: 0.85, release: 1, cutoff: 1900, resonance: 0.2 }, gain: 0.12, poly: 6, send: { verb: 0.55 } },
       arp: { engine: 'pluck', params: { damp: 0.35, pickPos: 0.2, decay: 0.5 }, gain: 0.19, send: { verb: 0.3, delay: 0.45 } },
       lead: { engine: 'fm', params: { ops: 4, algorithm: 4, ratio2: 2, ratio3: 3.5, ratio4: 7, feedback: 0.32, brightness: 0.6, decay: 0.3, sustain: 0.5 }, gain: 0.2, fx: [['chorus', { rate: 2.2, depth: 0.4, mix: 0.3 }]], send: { verb: 0.35, delay: 0.32 } },
       counter: { engine: 'va', params: { shape: 2, cutoff: 1600, detune: 6, decay: 0.3, sustain: 0.45 }, gain: 0.1, poly: 3, send: { verb: 0.4 } },
-      kick: { engine: 'kick', params: { decay: 0.3, pitchDecay: 0.05, drive: 2.6, clickTune: 9 }, gain: 0.95 },
-      snare: { engine: 'snare', params: { decay: 0.17, tone: 0.55, snap: 0.06 }, gain: 0.52, send: { verb: 0.16 } },
-      hat: { engine: 'hat', params: { decay: 0.05, tone: 1.3 }, gain: 0.26 },
-      perc: { engine: 'clap', params: { decay: 0.13, tone: 1600 }, gain: 0.32, send: { verb: 0.2 } }
+      kick: { engine: 'kick', params: { decay: 0.3, pitchDecay: 0.05, drive: 2, clickTune: 8 }, gain: 0.92 },
+      snare: { engine: 'snare', params: { decay: 0.17, tone: 0.55, snap: 0.06 }, gain: 0.5, send: { verb: 0.16 } },
+      hat: { engine: 'hat', params: { decay: 0.05, tone: 1.2 }, gain: 0.24 },
+      perc: { engine: 'clap', params: { decay: 0.13, tone: 1600 }, gain: 0.3, send: { verb: 0.2 } }
     }
   },
   // retro 80s: warm saw bass, glassy wavetable pad, singing FM lead, plate space (Plastic Sunrise)
@@ -47,7 +47,7 @@ const PRESETS = {
     buses: { verb: ['plate', { decay: 0.42, damping: 0.55, mix: 1 }], delay: ['delay', { timeL: 0.25, timeR: 0.33, feedback: 0.36, crossFeedback: 0.2, mix: 1 }] },
     master: [['compressor', { threshold: -18, ratio: 3, attack: 0.008, release: 0.28 }], ['limiter', { threshold: -0.8 }]],
     voices: {
-      bass: { engine: 'va', params: { shape: 1, cutoff: 420, resonance: 0.6, envAmount: 0.8, decay: 0.28, sustain: 0.2, detune: 3 }, gain: 0.48, fx: [['compressor', { threshold: -12, ratio: 8, attack: 0.002, release: 0.1, makeup: 4 }]] },
+      bass: { engine: 'va', params: { shape: 1, cutoff: 440, resonance: 0.42, envAmount: 0.8, decay: 0.28, sustain: 0.2, detune: 3 }, gain: 0.46, fx: [['compressor', { threshold: -12, ratio: 6, attack: 0.003, release: 0.11, makeup: 3 }]] },
       pad: { engine: 'additive', params: { decay: 6, rolloff: 0.6, attack: 0.1, release: 1 }, gain: 0.12, poly: 6, send: { verb: 0.5 } },
       arp: { engine: 'wavetable', params: { position: 0.25, attack: 0.005, decay: 0.16, sustain: 0.1, release: 0.18, cutoff: 3600, resonance: 0.3 }, gain: 0.17, fx: [['flanger', { rate: 1.4, depth: 0.5, feedback: 0.25, mix: 0.28 }]], send: { verb: 0.28, delay: 0.35 } },
       lead: { engine: 'wavetable', params: { position: 0.4, scanRate: 0.15, scanDepth: 0.2, attack: 0.01, sustain: 0.7, release: 0.24, cutoff: 4200 }, gain: 0.19, send: { verb: 0.32, delay: 0.3 } },
@@ -63,7 +63,7 @@ const PRESETS = {
     buses: { verb: ['plate', { decay: 0.6, damping: 0.45, mix: 1 }], delay: ['delay', { timeL: 0.25, timeR: 0.333, feedback: 0.3, mix: 1 }] },
     master: [['compressor', { threshold: -16, ratio: 5, knee: 8, attack: 0.005, release: 0.15, makeup: 4 }], ['limiter', { threshold: -0.6 }]],
     voices: {
-      bass: { engine: 'fm', params: { ops: 4, algorithm: 5, ratio2: 2, ratio3: 3, ratio4: 4.5, feedback: 0.15, decay: 0.22, sustain: 0.3 }, gain: 0.46, fx: [['saturator', { drive: 2.5, tone: 0.2, output: -2 }]] },
+      bass: { engine: 'fm', params: { ops: 4, algorithm: 5, ratio2: 2, ratio3: 3, ratio4: 4.5, feedback: 0.15, decay: 0.22, sustain: 0.3 }, gain: 0.44, fx: [['saturator', { drive: 2, tone: 0.1, output: -2 }]] },
       pad: { engine: 'additive', params: { decay: 1.4, rolloff: 0.7, attack: 0.03, release: 0.5 }, gain: 0.12, poly: 6, send: { verb: 0.5 } },
       arp: { engine: 'pluck', params: { damp: 0.3, decay: 0.45 }, gain: 0.18, send: { verb: 0.28, delay: 0.4 } },
       lead: { engine: 'wavetable', params: { position: 0.7, scanRate: 0.2, scanDepth: 0.15, attack: 0.01, sustain: 0.8, release: 0.3, cutoff: 4600 }, gain: 0.2, fx: [['chorus', { rate: 4, depth: 0.5, mix: 0.5 }]], send: { verb: 0.35, delay: 0.32 } },
@@ -76,16 +76,16 @@ const PRESETS = {
   },
   // fast and hard: distorted pluck bass, dense FM stabs, breakbeat kit (Bubblegum Riot / Sugar Static)
   breakcore: {
-    buses: { verb: ['fdn', { size: 1.4, decay: 2.2, damp: 4200, chorus: 0.3, mix: 1 }], delay: ['multitap', { time: 0.14, feedback: 0.3, spread: 0.4, diffusion: 0.4, mix: 1 }] },
-    master: [['compressor', { threshold: -12, ratio: 4, attack: 0.003, release: 0.1 }], ['limiter', { threshold: -0.4 }]],
+    buses: { verb: ['fdn', { size: 1.4, decay: 2, damp: 3800, chorus: 0.3, mix: 1 }], delay: ['multitap', { time: 0.14, feedback: 0.28, spread: 0.4, diffusion: 0.4, mix: 1 }] },
+    master: [['compressor', { threshold: -14, ratio: 3.5, attack: 0.004, release: 0.12, knee: 6 }], ['limiter', { threshold: -0.6 }]],
     voices: {
-      bass: { engine: 'pluck', params: { damp: 0.2, pickPos: 0.1, decay: 1.2 }, gain: 0.5, fx: [['saturator', { drive: 3, tone: -0.5, output: -3 }], ['eq', { b0freq: 60, b0gain: 5, b5freq: 9000, b5gain: -8 }]] },
+      bass: { engine: 'pluck', params: { damp: 0.28, pickPos: 0.12, decay: 1.1 }, gain: 0.48, fx: [['saturator', { drive: 2.2, tone: -0.4, output: -3 }], ['eq', { b0freq: 60, b0gain: 4, b5freq: 8500, b5gain: -8 }]] },
       pad: { engine: 'harmonic', params: { brightness: 0.7, evenOdd: 0.3, attack: 0.05, release: 0.4 }, gain: 0.1, poly: 5, send: { verb: 0.6 } },
       arp: { engine: 'fm', params: { ops: 2, algorithm: 2, ratio2: 3.5, feedback: 0.2, decay: 0.12, sustain: 0.1 }, gain: 0.17, send: { verb: 0.3, delay: 0.4 } },
       lead: { engine: 'fm', params: { ops: 4, algorithm: 3, ratio2: 2, ratio3: 4, feedback: 0.35, brightness: 0.7, decay: 0.2, sustain: 0.4 }, gain: 0.19, fx: [['saturator', { drive: 1.6, tone: 0.1 }]], send: { verb: 0.34, delay: 0.36 } },
       counter: { engine: 'va', params: { shape: 0, cutoff: 1800, detune: 8, decay: 0.25 }, gain: 0.09, poly: 3, send: { verb: 0.4 } },
-      kick: { engine: 'kick', params: { decay: 0.24, pitchDecay: 0.04, drive: 3.4, clickTune: 6 }, gain: 0.95 },
-      snare: { engine: 'snare', params: { decay: 0.13, tone: 0.5, snap: 0.04 }, gain: 0.55, send: { verb: 0.18 } },
+      kick: { engine: 'kick', params: { decay: 0.24, pitchDecay: 0.04, drive: 2.7, clickTune: 6 }, gain: 0.92 },
+      snare: { engine: 'snare', params: { decay: 0.13, tone: 0.5, snap: 0.04 }, gain: 0.52, send: { verb: 0.18 } },
       hat: { engine: 'hat', params: { decay: 0.04, tone: 1.5 }, gain: 0.28 },
       perc: { engine: 'tom', params: { decay: 0.14, sweep: 0.05, noise: 0.4 }, gain: 0.3, send: { verb: 0.24 } }
     }
@@ -136,6 +136,10 @@ export function presetForGenre(genre) { return GENRE_MAP[genre] || 'synthwave'; 
 // nominal drum pitches (the engines are pitched; keep them low and fixed)
 export const DRUM_PITCH = { kick: 36, snare: 38, hat: 42, perc: 39 };
 
+// default stereo placement per voice so the arrangement has width and the center is not
+// crowded (lead/bass/kick/snare stay centered; a preset can override with its own pan)
+const DEFAULT_PAN = { arp: -0.24, counter: 0.24, hat: 0.14, perc: -0.16, pad: 0 };
+
 // Instantiate a preset against a booted Bellows. Returns { voices, buses, dispose }.
 export function buildRack(b, presetKey) {
   const p = PRESETS[presetKey] || PRESETS.synthwave;
@@ -145,6 +149,7 @@ export function buildRack(b, presetKey) {
   for (const [name, v] of Object.entries(p.voices)) {
     const inst = b.voice(v.engine, v.params || {}, v.poly ? { polyphony: v.poly } : undefined).gain(v.gain ?? 0.3);
     if (v.pan != null) inst.pan(v.pan);
+    else if (DEFAULT_PAN[name] != null) inst.pan(DEFAULT_PAN[name]);
     if (v.fx) inst.fx(...v.fx);
     if (v.send) for (const [bn, lvl] of Object.entries(v.send)) if (buses[bn]) inst.send(buses[bn], lvl);
     voices[name] = inst;

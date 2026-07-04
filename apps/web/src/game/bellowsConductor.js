@@ -1,17 +1,37 @@
-// Live bellows playback for composed songs. Boots one Bellows on the engine's shared
-// AudioContext and plays a composed PIECE in realtime through its AudioWorklet, from
-// code, with no pre-render and no loading pause. The engine still owns the song clock
-// (adoptClock) so the judge and renderer read one clock; we start bellows' transport at
-// the same instant so audio and steps stay in sync.
+// Live bellows playback for composed songs, both in-game and as the select-wheel
+// preview, so a song sounds the same before and after you pick it. One Bellows boots on
+// the engine's shared AudioContext and plays a composed PIECE in realtime through its
+// worklet, from code, with no pre-render and no loading pause. Its output is routed
+// through the engine's music bus (so the volume settings apply and we can fade), and the
+// engine adopts bellows' transport start as the song clock so judge and renderer stay
+// synced.
 
 import { Bellows } from 'bellowsjs';
 import { engine } from './singletons.js';
 import { buildRack, presetForGenre, DRUM_PITCH } from './bellowsRacks.js';
 
-let _boot = null; // cached boot promise (worklet loads once)
+let _boot = null;   // cached boot promise (worklet loads once)
+let _gain = null;   // fade node between bellows and the engine music bus
+
 export function bootBellows() {
-  if (!_boot) _boot = Bellows.boot({ context: engine.ensure() });
+  if (!_boot) _boot = Bellows.boot({ context: engine.ensure() }).then((b) => {
+    // route bellows through the engine music bus via a gain we can ramp for fades
+    _gain = b.ctx.createGain(); _gain.gain.value = 1;
+    try { b.analyser.disconnect(); } catch (e) {}
+    b.analyser.connect(_gain); _gain.connect(engine.music);
+    return b;
+  });
   return _boot;
+}
+
+function setGain(v, ramp, ctx) {
+  if (!_gain) return;
+  const t = ctx.currentTime, val = Math.max(0.0001, v);
+  try {
+    _gain.gain.cancelScheduledValues(t);
+    _gain.gain.setValueAtTime(Math.max(0.0001, _gain.gain.value), t);
+    if (ramp > 0) _gain.gain.linearRampToValueAtTime(val, t + ramp); else _gain.gain.setValueAtTime(val, t);
+  } catch (e) {}
 }
 
 // schedule one 16th step's events onto the rack's voices at tick time t
@@ -31,35 +51,66 @@ function scheduleStep(rack, ev, step, t, dsec) {
   drum('perc', V.perc);
 }
 
-let _current = null; // { unsub, b }
+const stepSecs = (piece) => piece.secPerBar / piece.STEPS_PER_BAR;
+const durSecs = (piece) => (d) => Math.max(0.05, (d || 1) * stepSecs(piece) * 0.94);
 
-// Play a composed PIECE live. Returns { startAt, duration } so the caller can adopt the
-// engine clock. Assumes bellows is already booted (call bootBellows() during the countdown).
+let _current = null;          // { unsub, b }
+let _pendingFinalize = null;  // { fn, timer } deferred stop during a fade-out
+
+function finalizeNow() {
+  if (!_pendingFinalize) return;
+  clearTimeout(_pendingFinalize.timer);
+  try { _pendingFinalize.fn(); } catch (e) {}
+  _pendingFinalize = null;
+}
+
+// Play a composed PIECE live for the game. Returns { startAt, duration } so the caller
+// can adopt the engine clock. Assumes bellows is booted (warm it during the countdown).
 export async function playPieceLive(piece, genre) {
   const b = await bootBellows();
   stopLive();
   b.panic();
+  setGain(1, 0, b.ctx);
   const rack = buildRack(b, presetForGenre(genre));
-  const stepDur = piece.secPerBar / piece.STEPS_PER_BAR;
-  const dsec = (d) => Math.max(0.05, (d || 1) * stepDur * 0.94);
-  const ev = piece.events;
-  const total = piece.totalSteps;
-  const unsub = b.clock.at('16n', (t, step) => {
-    if (step >= total) return; // finite song: nothing to schedule past the end
-    scheduleStep(rack, ev, step, t, dsec);
-  });
+  const dsec = durSecs(piece), ev = piece.events, total = piece.totalSteps;
+  const unsub = b.clock.at('16n', (t, step) => { if (step < total) scheduleStep(rack, ev, step, t, dsec); });
   b.bpm(piece.tempo);
   const t0 = b.ctx.currentTime;
   b.start(); // transport beat 0 lands at ~t0 + 0.05
   _current = { unsub, b };
-  return { startAt: t0 + 0.05, duration: total * stepDur };
+  return { startAt: t0 + 0.05, duration: total * stepSecs(piece) };
 }
 
-export function stopLive() {
+// Faded, looping preview of a PIECE for the select wheel, same rack as playback.
+export async function previewPieceLive(piece, genre, { fromStep = 0, fadeIn = 0.4, level = 0.9 } = {}) {
+  const b = await bootBellows();
+  stopLive();
+  if (b.ctx.state === 'suspended') b.ctx.resume();
+  b.panic();
+  const rack = buildRack(b, presetForGenre(genre));
+  const dsec = durSecs(piece), ev = piece.events, total = piece.totalSteps;
+  const span = Math.max(16, total - fromStep); // loop the hook-to-end window
+  const unsub = b.clock.at('16n', (t, step) => { scheduleStep(rack, ev, fromStep + (step % span), t, dsec); });
+  setGain(0.0001, 0, b.ctx);
+  b.bpm(piece.tempo);
+  b.start();
+  setGain(level, fadeIn, b.ctx);
+  _current = { unsub, b, preview: true };
+}
+
+// Stop the current live run. With fade > 0, ramp the output down first (a smooth preview
+// crossfade); otherwise cut immediately.
+export function stopLive(fade = 0) {
+  finalizeNow();
   if (!_current) return;
   const c = _current; _current = null;
-  try { c.unsub(); } catch (e) {}
-  try { c.b.stop(); c.b.panic(); } catch (e) {}
+  const fin = () => { try { c.unsub(); } catch (e) {} try { c.b.stop(); c.b.panic(); } catch (e) {} };
+  if (fade > 0 && _gain && c.b) {
+    setGain(0.0001, fade, c.b.ctx);
+    _pendingFinalize = { fn: fin, timer: setTimeout(() => { _pendingFinalize = null; fin(); }, (fade + 0.06) * 1000) };
+  } else {
+    fin();
+  }
 }
 
 export function isLive() { return !!_current; }
