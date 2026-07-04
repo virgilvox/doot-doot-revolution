@@ -4,7 +4,7 @@
     <div class="wheel-cursor" aria-hidden="true"></div>
     <button v-for="c in cards" :key="c.song.id" class="card" :class="{ sel: c.o === 0, endless: c.song.endless }" :style="c.style" @click="$emit('pick', c.i)">
       <div class="cv" :style="c.song.endless ? null : { background: cover(c.i) }">{{ c.song.endless ? '∞' : letter(c.song) }}</div>
-      <div class="ci"><div class="t">{{ c.song.title }}<span v-if="c.song.endless" class="inf" aria-hidden="true">∞</span></div><div class="a">{{ c.song.artist }}</div></div>
+      <div class="ci"><div class="t">{{ c.song.title }}<span v-if="c.song.endless" class="inf" aria-hidden="true">∞</span></div><div class="a" v-if="hasArtist(c.song)">{{ c.song.artist }}</div></div>
       <div class="cb">{{ c.song.endless ? '∞' : (Math.round(c.song.bpm) || '-') }}</div>
     </button>
   </div>
@@ -28,6 +28,8 @@ const cards = computed(() => {
 });
 const cover = (i) => covGrad(i);
 const letter = (s) => (s.title || '?')[0].toUpperCase();
+// original composed tracks carry no author; imported ones may say "Unknown". Show neither.
+const hasArtist = (s) => !!s.artist && s.artist.toLowerCase() !== 'unknown';
 </script>
 
 <style scoped>

@@ -15,7 +15,7 @@
             <div class="banner" :style="{ background: covGrad(songs.sel) }">
               <div class="big-l">{{ (cur.title || '?')[0].toUpperCase() }}</div>
               <div class="eq"><i></i><i></i><i></i><i></i></div>
-              <div><div class="bt">{{ cur.title }}</div><div class="ba">{{ cur.artist }}<template v-if="cur.genre"> · {{ cur.genre }}</template></div></div>
+              <div><div class="bt">{{ cur.title }}</div><div class="ba">{{ [cur.artist && cur.artist.toLowerCase() !== 'unknown' ? cur.artist : '', cur.genre].filter(Boolean).join(' · ') }}</div></div>
             </div>
             <div class="facts">
               <div class="fact"><span>BPM</span><b>{{ Math.round(cur.bpm) || '-' }}</b></div>

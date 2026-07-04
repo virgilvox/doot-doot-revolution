@@ -72,8 +72,9 @@ const song = computed(() => state.song);
 const fmtT = (s) => { s = Math.max(0, s | 0); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 const sub = computed(() => {
   if (isMatch) return `${playerCount} players · versus`;
-  if (state.endless) return `${state.song?.artist || ''} · ${Math.round(state.chart?.bpm || 0)} BPM · ${state.song?.difficulty} · ${fmtT(state.elapsed)}`;
-  return state.chart ? `${state.song?.artist || ''} · ${Math.round(state.chart.bpm)} BPM · ${state.chart.difficulty}` : '';
+  const a = state.song?.artist, art = a && a.toLowerCase() !== 'unknown' ? a : null;
+  if (state.endless) return [art, `${Math.round(state.chart?.bpm || 0)} BPM`, state.song?.difficulty, fmtT(state.elapsed)].filter(Boolean).join(' · ');
+  return state.chart ? [art, `${Math.round(state.chart.bpm)} BPM`, state.chart.difficulty].filter(Boolean).join(' · ') : '';
 });
 
 // endless and versus quit to a results/standings screen; a solo fixed song abandons

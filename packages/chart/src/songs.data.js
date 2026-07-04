@@ -9,7 +9,7 @@ const PS_HOOK = 'A5:4 A5:2 G5:2 F5:4 A5:4 | B5:4 B5:2 A5:2 G5:4 B5:4 | C6:4 B5:4
 const PS_BRIDGE = 'D5:4 F5:4 A5:6 G5:2 | E5:4 G5:4 B5:6 A5:2 | C5:4 E5:4 G5:6 E5:2 | E5:4 G#5:4 B5:8 | D5:4 F5:4 A5:6 G5:2 | E5:4 G#5:4 B5:6 C6:2 | A5:8 E5:8 | -:16';
 
 const plasticSunrise = {
-  id: 'plastic-sunrise', title: 'Plastic Sunrise', artist: 'Coil Garden', genre: 'Synthwave', genreKey: 'synthwave', mood: 'pulse', bpm: 116,
+  id: 'plastic-sunrise', title: 'Plastic Sunrise', genre: 'Synthwave', genreKey: 'synthwave', mood: 'pulse', bpm: 116,
   form: [
     { tag: 'INTRO', chords: ['Am', 'F', 'C', 'G'], layers: ['pad', 'arp'] },
     { tag: 'VERSE', chords: ['Am', 'F', 'C', 'G', 'Am', 'F', 'C', 'G'], layers: ['bass', 'kick', 'hat', 'pad', 'lead'], lead: PS_VERSE },
@@ -28,7 +28,7 @@ const MV_HOOK = 'F5:2 G5:2 A5:4 A5:2 G5:2 F5:4 | E5:2 F5:2 G5:4 E5:6 C5:2 | D5:2
 const MV_BRIDGE = 'D5:2 F5:2 Bb5:4 A5:4 F5:4 | C5:2 E5:2 A5:4 G5:6 E5:2 | D5:2 F5:2 G5:4 C5:4 E5:4 | F5:8 A5:8 | G5:2 Bb5:2 D6:4 C6:4 A5:4 | G5:2 Bb5:2 C6:4 A5:6 F5:2 | E5:4 G5:4 C6:8 | A5:8 -:8';
 
 const midnightVending = {
-  id: 'midnight-vending', title: 'Midnight Vending', artist: 'Tako Tako', genre: 'City Pop', genreKey: 'citypop', mood: 'glass', bpm: 110,
+  id: 'midnight-vending', title: 'Midnight Vending', genre: 'City Pop', genreKey: 'citypop', mood: 'glass', bpm: 110,
   // warm, mid-register arp and a lead that tops out at C6 so nothing reads as piercing
   reg: { bass: [38, 52], pad: [53, 72], arp: [53, 72], lead: [65, 84] },
   form: [
@@ -48,7 +48,7 @@ const NT_VERSE = 'A5:4 E5:2 F5:2 E5:4 C5:4 | D5:4 B4:2 D5:2 G5:4 B4:4 | C5:4 A4:
 const NT_HOOK = 'E5:2 A5:2 C6:4 B5:4 A5:4 | F5:2 A5:2 C6:4 A5:4 F5:4 | E5:2 G5:2 C6:4 B5:4 G5:4 | D5:2 G5:2 B5:4 C6:2 B5:2 A5:2 | E5:2 A5:2 C6:4 B5:4 A5:4 | F5:2 A5:2 C6:4 A5:4 F5:4 | G5:2 B5:2 C6:4 B5:4 G5:4 | G5:4 B5:4 A5:8';
 const NT_BRIDGE = 'D5:4 F5:4 A5:6 G5:2 | E5:4 A5:4 C6:8 | E5:4 G#5:4 B5:6 A5:2 | E5:4 G#5:4 A5:8 | D5:4 F5:4 A5:6 G5:2 | E5:4 G#5:4 B5:6 C6:2 | B5:4 A5:4 E5:4 A5:4 | A5:8 -:8';
 const neonTiger = {
-  id: 'neon-tiger', title: 'Neon Tiger', artist: 'VOLTKID', genre: 'Synthcore', genreKey: 'synthcore', mood: 'circuit', bpm: 158,
+  id: 'neon-tiger', title: 'Neon Tiger', genre: 'Synthcore', genreKey: 'synthcore', mood: 'circuit', bpm: 158,
   reg: { bass: [33, 47], pad: [52, 71], arp: [55, 74], lead: [64, 84] },
   form: [
     { tag: 'INTRO', chords: ['Am', 'G', 'F', 'G'], layers: ['pad', 'arp'] },
@@ -67,7 +67,7 @@ const GW_VERSE = 'A4:2 C5:2 E5:4 D5:2 C5:2 A4:4 | B4:2 D5:2 G5:4 F5:2 D5:2 B4:4 
 const GW_HOOK = 'E5:2 A5:2 A5:2 G5:2 E5:4 C5:2 | D5:2 G5:2 G5:2 F5:2 D5:4 B4:2 | C5:2 E5:2 G5:4 E5:2 D5:2 C5:2 | A4:2 C5:2 E5:6 A5:2 | E5:2 A5:2 A5:2 G5:2 E5:4 C5:2 | D5:2 G5:2 B5:2 A5:2 G5:4 E5:2 | F5:2 A5:2 C6:4 A5:2 G5:2 E5:2 | A5:8 -:8';
 const GW_BRIDGE = 'D5:2 F5:2 A5:4 C6:2 A5:2 F5:4 | C5:2 E5:2 G5:4 B5:2 G5:2 E5:4 | B4:2 D5:2 F5:4 A5:2 F5:2 D5:4 | E5:4 G5:4 B5:4 A5:4 | A5:2 C6:2 A5:4 G5:2 E5:4 C5:2 | D5:2 F5:2 A5:6 G5:2 | E5:4 C5:4 A4:8 | -:16';
 const glowWormDisco = {
-  id: 'glow-worm-disco', title: 'Glow Worm Disco', artist: 'Pixel Mori', genre: 'Disco House', genreKey: 'house', mood: 'pulse', bpm: 124,
+  id: 'glow-worm-disco', title: 'Glow Worm Disco', genre: 'Disco House', genreKey: 'house', mood: 'pulse', bpm: 124,
   reg: { bass: [36, 50], pad: [55, 72], arp: [60, 79], lead: [64, 84] },
   form: [
     { tag: 'INTRO', chords: ['Am7', 'Dm7', 'G7', 'Cmaj7'], layers: ['pad', 'arp'] },
@@ -86,7 +86,7 @@ const BR_VERSE = 'C5:4 E5:2 G5:2 E5:4 C5:4 | D5:4 G5:2 B5:2 G5:4 D5:4 | E5:4 A5:
 const BR_HOOK = 'G5:2 C6:2 C6:2 B5:2 G5:4 E5:2 | D5:2 G5:2 B5:4 G5:2 D5:2 B4:2 | C5:2 E5:2 A5:4 G5:2 E5:2 C5:2 | F5:2 A5:2 C6:6 G5:2 | G5:2 C6:2 C6:2 B5:2 G5:4 E5:2 | D5:2 G5:2 B5:4 D6:2 B5:2 G5:2 | A5:2 C6:2 B5:4 A5:2 G5:2 E5:2 | C6:8 G5:8';
 const BR_BRIDGE = 'A5:4 G5:2 E5:2 D5:4 C5:4 | F5:4 E5:2 C5:2 A4:4 F5:4 | G5:4 A5:2 B5:2 C6:4 B5:4 | G5:4 E5:4 C5:8 | A5:4 G5:2 E5:2 D5:4 C5:4 | F5:4 A5:2 C6:2 B5:4 G5:4 | A5:4 B5:4 C6:8 | -:16';
 const bubblegumRiot = {
-  id: 'bubblegum-riot', title: 'Bubblegum Riot', artist: 'FizzPop', genre: 'Happy Hardcore', genreKey: 'eurobeat', mood: 'circuit', bpm: 160,
+  id: 'bubblegum-riot', title: 'Bubblegum Riot', genre: 'Happy Hardcore', genreKey: 'eurobeat', mood: 'circuit', bpm: 160,
   reg: { bass: [36, 50], pad: [55, 74], arp: [67, 84], lead: [64, 86] },
   form: [
     { tag: 'INTRO', chords: ['C', 'G', 'Am', 'F'], layers: ['pad', 'arp'] },
@@ -105,7 +105,7 @@ const AH_VERSE = 'D5:4 A4:2 D5:2 F5:4 E5:4 | Bb4:4 D5:2 F5:2 A5:4 G5:4 | F5:4 A5
 const AH_HOOK = 'A5:2 D6:2 C6:2 A5:2 F5:4 A5:2 | G5:2 Bb5:2 A5:2 G5:2 F5:4 D5:2 | E5:2 G5:2 A5:4 C6:2 A5:2 G5:2 | F5:2 A5:2 D6:6 C6:2 | A5:2 D6:2 C6:2 A5:2 F5:4 A5:2 | G5:2 Bb5:2 A5:2 G5:2 F5:4 A5:2 | Bb5:2 C6:2 D6:4 C6:2 A5:2 G5:2 | A5:8 D5:8';
 const AH_BRIDGE = 'D5:4 F5:4 A5:6 G5:2 | Bb5:4 A5:2 G5:2 F5:4 D5:4 | C5:4 E5:4 G5:6 F5:2 | A5:4 C6:4 A5:8 | D5:4 F5:4 A5:6 G5:2 | Bb5:4 C6:2 D6:2 C6:4 A5:4 | G5:4 A5:4 D5:8 | -:16';
 const arcadeHeart = {
-  id: 'arcade-heart', title: 'Arcade Heart', artist: 'DJ Spritz', genre: 'Eurobeat', genreKey: 'eurobeat', mood: 'neon', bpm: 152,
+  id: 'arcade-heart', title: 'Arcade Heart', genre: 'Eurobeat', genreKey: 'eurobeat', mood: 'neon', bpm: 152,
   reg: { bass: [36, 50], pad: [53, 72], arp: [60, 79], lead: [62, 86] },
   form: [
     { tag: 'INTRO', chords: ['Dm', 'Bb', 'F', 'C'], layers: ['pad', 'arp'] },
@@ -124,7 +124,7 @@ const SS_VERSE = 'A4:2 A4:2 E5:4 A4:2 C5:2 A4:4 | F4:2 F4:2 C5:4 F4:2 A4:2 F4:4 
 const SS_HOOK = 'A5:2 A5:2 G5:2 E5:2 A5:4 C6:2 | A5:2 F5:2 E5:2 C5:2 F5:4 A5:2 | G5:2 E5:2 D5:2 E5:2 G5:4 B5:2 | A5:2 E5:2 A5:6 C6:2 | A5:2 A5:2 G5:2 E5:2 A5:4 C6:2 | A5:2 F5:2 E5:2 C5:2 F5:4 A5:2 | B5:2 A5:2 G5:2 E5:2 A5:4 B5:2 | C6:4 B5:4 A5:8';
 const SS_BRIDGE = 'A4:4 C5:4 E5:6 D5:2 | F4:4 A4:4 C5:8 | D5:4 F5:4 A5:6 G5:2 | E5:4 G#5:4 A5:8 | A4:4 C5:4 E5:6 D5:2 | F5:4 E5:2 D5:2 C5:4 A4:4 | E5:4 G#5:4 A5:8 | -:16';
 const sugarStatic = {
-  id: 'sugar-static', title: 'Sugar Static', artist: 'Maho', genre: 'Breakcore', genreKey: 'breakcore', mood: 'circuit', bpm: 150,
+  id: 'sugar-static', title: 'Sugar Static', genre: 'Breakcore', genreKey: 'breakcore', mood: 'circuit', bpm: 150,
   reg: { bass: [33, 47], pad: [52, 71], arp: [55, 74], lead: [64, 84] },
   form: [
     { tag: 'INTRO', chords: ['Am', 'F', 'Dm', 'E'], layers: ['pad', 'arp'] },
@@ -143,7 +143,7 @@ const MT_VERSE = 'C5:4 E5:4 G5:4 E5:4 | A4:4 C5:4 E5:4 C5:4 | F4:4 A4:4 C5:4 A4:
 const MT_HOOK = 'G5:2 E5:2 C5:2 E5:2 G5:4 A5:2 | E5:2 C5:2 A4:2 C5:2 E5:4 G5:2 | F5:2 A5:2 C6:2 A5:2 F5:4 A5:2 | G5:2 B5:2 D6:2 B5:2 G5:4 D5:2 | G5:2 E5:2 C5:2 E5:2 G5:4 A5:2 | E5:2 C5:2 A4:2 C5:2 E5:4 G5:2 | F5:2 E5:2 D5:2 C5:2 D5:4 B4:2 | C5:8 G5:8';
 const MT_BRIDGE = 'A4:4 B4:4 C5:4 D5:4 | E5:4 D5:4 C5:4 B4:4 | A4:4 G4:4 F4:6 E4:2 | D4:4 G4:4 C5:8 | A4:4 B4:4 C5:4 D5:4 | E5:4 F5:4 G5:6 A5:2 | G5:4 F5:4 E5:4 D5:4 | C5:8 -:8';
 const metronomicon = {
-  id: 'metronomicon', title: 'Metronomicon', artist: 'DDR Engine', genre: 'Test Pattern', genreKey: 'chiptune', mood: 'neon', bpm: 140,
+  id: 'metronomicon', title: 'Metronomicon', genre: 'Test Pattern', genreKey: 'chiptune', mood: 'neon', bpm: 140,
   reg: { bass: [36, 50], pad: [55, 74], arp: [60, 79], lead: [60, 86] },
   form: [
     { tag: 'INTRO', chords: ['C', 'Am', 'F', 'G'], layers: ['pad', 'arp'] },
@@ -162,7 +162,7 @@ const AD_VERSE = 'B4:4 E5:2 G5:2 B5:4 A5:4 | C5:4 E5:2 G5:2 E5:4 C5:4 | B4:4 D5:
 const AD_HOOK = 'E5:2 G5:2 B5:4 A5:2 G5:2 E5:4 | D5:2 G5:2 B5:4 A5:2 G5:2 D5:4 | E5:2 A5:2 C6:4 B5:2 A5:2 F#5:2 | G5:4 B5:4 D6:8 | E5:2 G5:2 B5:4 A5:2 G5:2 E5:4 | D5:2 G5:2 B5:4 D6:2 B5:2 G5:2 | A5:2 B5:2 C6:4 B5:2 A5:2 G5:2 | B5:8 E5:8';
 const AD_BRIDGE = 'A4:4 C5:4 E5:6 D5:2 | B4:4 D5:4 G5:8 | C5:4 E5:4 G5:6 F#5:2 | B4:4 D#5:4 F#5:8 | A4:4 C5:4 E5:6 D5:2 | B4:4 D5:2 F#5:2 A5:4 G5:4 | E5:4 B4:4 E5:8 | -:16';
 const auroraDrift = {
-  id: 'aurora-drift', title: 'Aurora Drift', artist: 'Lumen', genre: 'Melodic Trance', genreKey: 'synthwave', mood: 'neon', bpm: 136,
+  id: 'aurora-drift', title: 'Aurora Drift', genre: 'Melodic Trance', genreKey: 'synthwave', mood: 'neon', bpm: 136,
   reg: { bass: [35, 49], pad: [54, 73], arp: [59, 78], lead: [64, 84] },
   form: [
     { tag: 'INTRO', chords: ['Em', 'C', 'G', 'D'], layers: ['pad', 'arp'] },
@@ -181,7 +181,7 @@ const CC_VERSE = 'C5:4 E5:2 G5:2 C6:4 B5:4 | B4:4 D5:2 G5:2 B5:4 D5:4 | A4:4 C5:
 const CC_HOOK = 'A5:2 C6:2 C6:2 B5:2 A5:4 G5:2 | G5:2 E5:2 G5:4 C6:2 G5:2 E5:2 | D5:2 G5:2 B5:4 D6:2 B5:2 G5:2 | A5:2 C6:2 D6:4 C6:2 A5:2 F5:2 | A5:2 C6:2 C6:2 B5:2 A5:4 G5:2 | G5:2 E5:2 G5:4 C6:2 G5:2 E5:2 | D5:2 G5:2 B5:4 A5:2 G5:2 E5:2 | C6:8 G5:8';
 const CC_BRIDGE = 'A5:4 G5:2 E5:2 C5:4 E5:4 | F5:4 A5:2 C6:2 A5:4 F5:4 | G5:4 E5:2 C5:2 E5:4 G5:4 | D5:4 G5:4 B5:8 | A5:4 G5:2 E5:2 C5:4 E5:4 | F5:4 A5:2 C6:2 D6:4 C6:4 | B5:4 A5:4 G5:4 E5:4 | C6:8 -:8';
 const candyCircuit = {
-  id: 'candy-circuit', title: 'Candy Circuit', artist: 'Miku Modem', genre: 'Future Bass', genreKey: 'eurobeat', mood: 'circuit', bpm: 148,
+  id: 'candy-circuit', title: 'Candy Circuit', genre: 'Future Bass', genreKey: 'eurobeat', mood: 'circuit', bpm: 148,
   reg: { bass: [36, 50], pad: [55, 74], arp: [60, 79], lead: [62, 86] },
   form: [
     { tag: 'INTRO', chords: ['C', 'G', 'Am', 'F'], layers: ['pad', 'arp'] },

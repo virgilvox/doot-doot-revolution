@@ -112,7 +112,7 @@ const STAGE_INDEX = { decode: 0, tempo: 1, isolate: 2, place: 3, balance: 4 };
 const diffKeys = Object.keys(DIFFS);
 
 const draft = ref(null);
-const meta = reactive({ title: 'Untitled', artist: 'Unknown', bpm: '-', len: '-' });
+const meta = reactive({ title: 'Untitled', artist: '', bpm: '-', len: '-' });
 const engineSel = ref('drum');
 const diffSet = reactive(new Set(['basic', 'difficult', 'expert']));
 const url = ref('');
@@ -198,7 +198,7 @@ async function save() {
   const charts = editor.value ? editor.value.getCharts() : draft.value.charts;
   Object.keys(charts).forEach((df) => { charts[df].radar = computeRadar(charts[df]); charts[df].count = charts[df].notes.length; });
   const bpm = parseFloat(meta.bpm) || draft.value.tempo.bpm;
-  const rec = { id: 'song-' + Date.now(), title: meta.title || 'Untitled', artist: meta.artist || 'Unknown', bpm, offset: draft.value.tempo.offset || 0, source: 'file', createdAt: Date.now(), duration: draft.value.buffer.duration, audio: draft.value.file || null, charts };
+  const rec = { id: 'song-' + Date.now(), title: meta.title || 'Untitled', artist: meta.artist || '', bpm, offset: draft.value.tempo.offset || 0, source: 'file', createdAt: Date.now(), duration: draft.value.buffer.duration, audio: draft.value.file || null, charts };
   await lib.put(rec); toast('Saved to library'); go('library');
 }
 

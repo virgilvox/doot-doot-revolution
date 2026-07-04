@@ -31,7 +31,7 @@
       <div v-else class="lib-list">
         <div v-for="(sng, i) in lib.songs" :key="sng.id" class="lib-item">
           <div class="cv" :style="{ background: covGrad(i + 1) }">{{ (sng.title || '?')[0].toUpperCase() }}</div>
-          <div class="li"><div class="t">{{ sng.title }}</div><div class="d">{{ sng.artist }} · {{ Math.round(sng.bpm || 0) }} BPM · {{ Object.keys(sng.charts || {}).length }} charts · {{ sng.duration ? fmtTime(sng.duration) : '-' }}</div></div>
+          <div class="li"><div class="t">{{ sng.title }}</div><div class="d"><template v-if="sng.artist && sng.artist.toLowerCase() !== 'unknown'">{{ sng.artist }} · </template>{{ Math.round(sng.bpm || 0) }} BPM · {{ Object.keys(sng.charts || {}).length }} charts · {{ sng.duration ? fmtTime(sng.duration) : '-' }}</div></div>
           <button class="btn sm" :class="{ kfocus: fi === TOP + i * PER }" @click="play(sng)">Play</button>
           <button class="btn white sm" :class="{ kfocus: fi === TOP + i * PER + 1 }" @click="exportSM(sng)">.sm</button>
           <button class="btn white sm" :class="{ kfocus: fi === TOP + i * PER + 2 }" @click="del(sng)">Delete</button>
