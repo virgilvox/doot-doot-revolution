@@ -35,7 +35,7 @@
 
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
-import { go } from '../game/screen.js';
+import { go, navTrail } from '../game/screen.js';
 import NoteField from '../components/NoteField.vue';
 import ShaderBackground from '../components/ShaderBackground.vue';
 import GameHud from '../components/GameHud.vue';
@@ -88,7 +88,7 @@ onMounted(() => {
     const p = pending;
     if (p && p.endless) session.startEndless(p.config);
     else if (p && p.song) session.start(p.song, p.chart);
-    else go('select');
+    else { console.warn('[BOUNCE] GameView no pending play:', JSON.stringify(pending), 'trail:', navTrail.join('>')); go('select'); }
   }
 });
 onBeforeUnmount(() => session.stop());

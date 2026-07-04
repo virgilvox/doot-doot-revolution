@@ -42,7 +42,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { go } from '../game/screen.js';
+import { go, navTrail } from '../game/screen.js';
 import { DIFFS } from '@doot-games/chart';
 import { session } from '../composables/useSession.js';
 import { useRovingFocus } from '../composables/useRovingFocus.js';
@@ -95,7 +95,7 @@ function toSelect() { go('select'); }
 const { index } = useRovingFocus({ size: () => 2, onConfirm: (i) => (i === 0 ? retry() : toSelect()), onCancel: toSelect });
 
 onMounted(() => {
-  if (!results.value) { go('select'); return; }
+  if (!results.value) { console.warn('[BOUNCE] Results mounted with no results; playing=', session.state.playing, 'song=', session.state.song?.title, 'trail:', navTrail.join('>')); go('select'); return; }
   requestAnimationFrame(() => { revealed.value = true; });
   if (isMulti.value) { engine.fanfare(true); countUpMulti(); return; }
   engine.fanfare((results.value.accuracy || 0) >= 65); // triumphant for a good run, gentle otherwise

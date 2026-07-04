@@ -143,13 +143,14 @@ function createSession() {
     }
     syncAliases();
     if (endless) state.elapsed = Math.max(0, t);
-    else { const dur = engine.duration(); state.progress = dur ? Math.min(1, t / dur) : 0; if (t >= dur + 0.6) end(); }
+    else { const dur = engine.duration(); state.progress = dur ? Math.min(1, t / dur) : 0; if (dur > 0 && t >= dur + 0.6) end(); else if (dur <= 0) console.warn('[END-GUARD] loop active but engine.duration()=0 at t=', t.toFixed(2)); }
   }
 
   function stop() { epoch++; active = false; state.playing = false; if (raf) cancelAnimationFrame(raf); raf = 0; subs.forEach((u) => u && u()); subs = []; endless = false; conductor = null; engine.stop(); }
   function restart() { if (replay && !state.endless) replay(); }
   function quit() { if (state.playing) end(); }
   function end() {
+    console.warn('[END] called; multi=', state.multi, 'players=', state.players.length, 'elapsed=', state.elapsed);
     if (state.multi) {
       const players = standings(state.players.map((p) => ({ index: p.index, label: p.label, color: p.color, difficulty: p.difficulty, ...p.judge.results() })));
       state.results = { multi: true, players };

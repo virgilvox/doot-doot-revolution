@@ -33,7 +33,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { go } from '../game/screen.js';
+import { go, navTrail } from '../game/screen.js';
 import { DIFFS } from '@doot-games/chart';
 import { DIFF_VAR } from '../styles/tokens.js';
 import { input, engine } from '../game/singletons.js';
@@ -98,7 +98,7 @@ useScope({
 
 let timer = 0;
 onMounted(() => {
-  if (!song) { go('select'); return; }
+  if (!song) { console.warn('[BOUNCE] PlayerSetup no song; pendingSetup=', JSON.stringify(pendingSetup.value), 'trail:', navTrail.join('>')); go('select'); return; }
   // controllers can wake up while this screen is open; keep the device list live
   timer = setInterval(() => { padList.value = input.pads(); if (count.value > maxPlayers.value) count.value = maxPlayers.value; }, 500);
 });
