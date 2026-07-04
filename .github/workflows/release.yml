@@ -41,11 +41,25 @@ jobs:
       - name: Install
         shell: bash
         env:
-          # youtube-dl-exec's postinstall fetches the yt-dlp binary from the GitHub
-          # API; without a token it hits the 60/hr anonymous rate limit on shared
-          # runner IPs. The runner token authenticates it (and electron's download).
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # youtube-dl-exec's postinstall fetches yt-dlp through the GitHub API, which
+          # hits the 60/hr anonymous limit on shared runner IPs (and its token handling
+          # is broken). Skip it here and fetch the binary directly in the next step.
+          YOUTUBE_DL_SKIP_DOWNLOAD: 'true'
         run: rm -rf node_modules package-lock.json && npm install
+      - name: Fetch the yt-dlp binary
+        shell: bash
+        # Standalone builds (no Python runtime needed) pulled straight from the release
+        # CDN, so no API rate limit. Placed where youtube-dl-exec expects it; asarUnpack
+        # keeps it runnable in the packaged app.
+        run: |
+          BIN=node_modules/youtube-dl-exec/bin
+          mkdir -p "$BIN"
+          base=https://github.com/yt-dlp/yt-dlp/releases/latest/download
+          case "$RUNNER_OS" in
+            Windows) curl -fL --retry 5 --retry-all-errors -o "$BIN/yt-dlp.exe" "$base/yt-dlp.exe" ;;
+            macOS)   curl -fL --retry 5 --retry-all-errors -o "$BIN/yt-dlp" "$base/yt-dlp_macos" && chmod +x "$BIN/yt-dlp" ;;
+            Linux)   curl -fL --retry 5 --retry-all-errors -o "$BIN/yt-dlp" "$base/yt-dlp_linux" && chmod +x "$BIN/yt-dlp" ;;
+          esac
       - name: Build and publish desktop app
         run: npm --workspace @doot-games/web run release
         env:
