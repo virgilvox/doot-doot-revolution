@@ -30,7 +30,11 @@ mac:
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
-  notarize: true
+  # notarytool needs the team id explicitly; the boolean form does not pick it up from
+  # APPLE_TEAM_ID. The team id is not secret (it is embedded in every signed build).
+  # APPLE_ID and APPLE_APP_SPECIFIC_PASSWORD still come from the job env.
+  notarize:
+    teamId: '48CAD95Y7R'
 
 win:
   target:
