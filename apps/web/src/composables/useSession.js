@@ -21,7 +21,7 @@ const TICK_FREQ = { marvelous: 1245, perfect: 1046, great: 880, good: 740, boo: 
 
 function createSession() {
   const state = reactive({
-    playing: false, count: '', progress: 0, elapsed: 0, endless: false, multi: false,
+    playing: false, loading: false, count: '', progress: 0, elapsed: 0, endless: false, multi: false,
     players: [], song: null, results: null,
     // single-player aliases (mirror players[0]) so single-player HUD/readers stay simple
     score: 0, combo: 0, life: 50, judge: null, chart: null
@@ -60,7 +60,16 @@ function createSession() {
   // then prepare, count down, and begin the loop. shared by every start path.
   async function begin(mine, song, firstChart, onPlay) {
     timing = createTiming(firstChart);
-    if (!song._piece) { const buf = song.buffer || await ensureBuffer(song); if (mine !== epoch || !buf) return false; engine.load(buf); }
+    // imported songs and bellows-backed composed songs play from a rendered buffer;
+    // rendering a bellows piece takes a moment, so flag loading and let it paint first
+    if (song._bellows || !song._piece) {
+      state.loading = true;
+      await new Promise((r) => setTimeout(r, 30));
+      const buf = song.buffer || await ensureBuffer(song);
+      state.loading = false;
+      if (mine !== epoch || !buf) return false;
+      engine.load(buf);
+    }
     engine.applyVolumes();
     wireInput();
     await engine.resume(); if (mine !== epoch) return false;
@@ -77,7 +86,7 @@ function createSession() {
     state.players = [playerEntry(0, { device: 'all', difficulty: chart.difficulty }, chart)];
     syncAliases();
     replay = () => start(song, chart);
-    await begin(mine, song, chart, () => { if (song._piece) engine.playPiece(song._piece); else engine.play(0); });
+    await begin(mine, song, chart, () => { if (song._piece && !song._bellows) engine.playPiece(song._piece); else engine.play(0); });
   }
 
   // Local multiplayer: configs = [{ device, difficulty, chart }]. Every chart is charted
@@ -89,7 +98,7 @@ function createSession() {
     state.players = tagged.map((p, i) => playerEntry(i, p, configs[i].chart));
     syncAliases();
     replay = () => startMatch(song, configs);
-    await begin(mine, song, configs[0].chart, () => { if (song._piece) engine.playPiece(song._piece); else engine.play(0); });
+    await begin(mine, song, configs[0].chart, () => { if (song._piece && !song._bellows) engine.playPiece(song._piece); else engine.play(0); });
   }
 
   // Perpetual mode: an endless, evolving stream (single-player). cfg = { mood, seed, bpm, difficulty }.

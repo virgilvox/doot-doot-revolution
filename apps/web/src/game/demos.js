@@ -10,7 +10,7 @@ import { composePiece, chartFromPiece } from '@doot-games/chart';
 const TARGET_SECONDS = 96; // DDR/StepMania-length
 
 const DEFS = [
-  { id: 'neon-tiger', title: 'Neon Tiger', artist: 'VOLTKID', genre: 'Synthcore', mood: 'circuit', bpm: 158, seed: 0x1a2b },
+  { id: 'neon-tiger', title: 'Neon Tiger', artist: 'VOLTKID', genre: 'Synthcore', mood: 'circuit', bpm: 158, seed: 0x1a2b, bellows: true },
   { id: 'glow-worm-disco', title: 'Glow Worm Disco', artist: 'Pixel Mori', genre: 'Disco House', mood: 'pulse', bpm: 126, seed: 0x51c7 },
   { id: 'bubblegum-riot', title: 'Bubblegum Riot', artist: 'FizzPop', genre: 'Happy Hardcore', mood: 'circuit', bpm: 160, seed: 0x77a1 },
   { id: 'midnight-vending', title: 'Midnight Vending', artist: 'Tako Tako', genre: 'City Pop', mood: 'glass', bpm: 132, seed: 0x2d9e },
@@ -26,7 +26,7 @@ export function makeDemos() {
     const duration = piece.totalSteps * (60 / def.bpm / 4);
     const song = {
       id: 'demo-' + def.id, title: def.title, artist: def.artist, genre: def.genre, bpm: def.bpm,
-      offset: 0, source: 'demo', duration, createdAt: 0, _piece: piece, _mood: def.mood, _engine: 'compose', charts: {}
+      offset: 0, source: 'demo', duration, createdAt: 0, _piece: piece, _mood: def.mood, _engine: 'compose', _bellows: !!def.bellows, charts: {}
     };
     ['basic', 'difficult', 'expert'].forEach((df) => { song.charts[df] = chartFromPiece(piece, df); });
     return song;

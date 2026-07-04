@@ -3,6 +3,8 @@
     <div class="stage game-stage">
       <ShaderBackground v-if="settings.background" :mood="bgMood" :seed="bgSeed" />
 
+      <div v-if="state.loading" class="ld-ov"><span class="ld-spin" aria-hidden="true"></span><span>Preparing audio…</span></div>
+
       <!-- single player -->
       <template v-if="!isMatch">
         <NoteField ref="soloField" :rec-frac="0.16" :lane-bg="laneBg" />
@@ -96,6 +98,8 @@ onBeforeUnmount(() => session.stop());
 
 <style scoped>
 .game-view { padding: clamp(8px, 1.5vw, 16px); }
+.ld-ov { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: #fff; font-family: var(--fd); font-weight: 800; font-size: 20px; background: rgba(9, 8, 24, .55); backdrop-filter: blur(2px); }
+.ld-spin { width: 34px; height: 34px; border: 4px solid rgba(255, 255, 255, .3); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; }
 .game-stage { flex: 1; min-height: 0; position: relative; border: 3px solid var(--ink); border-radius: var(--r3); overflow: hidden; background: linear-gradient(180deg, #3A2A6E, #241a49); }
 .game-stage :deep(canvas) { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* multiplayer: a positioned column per player so each notefield canvas fills its own
