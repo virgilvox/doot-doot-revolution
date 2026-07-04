@@ -62,7 +62,11 @@ jobs:
             macOS)   curl -fL --retry 5 --retry-all-errors -o "$BIN/yt-dlp" "$base/yt-dlp_macos" && chmod +x "$BIN/yt-dlp" ;;
             Linux)   curl -fL --retry 5 --retry-all-errors -o "$BIN/yt-dlp" "$base/yt-dlp_linux" && chmod +x "$BIN/yt-dlp" ;;
           esac
-      - name: Build and publish desktop app
+      # The signing secrets are a macOS Developer ID cert, so they only apply to the
+      # macOS job (which signs and notarizes). Windows and Linux publish unsigned --
+      # passing them there just makes electron-builder try to sign with a Mac cert.
+      - name: Build and publish (macOS, signed + notarized)
+        if: matrix.os == 'macos-latest'
         run: npm --workspace @doot-games/web run release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -71,3 +75,8 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - name: Build and publish (Windows/Linux, unsigned)
+        if: matrix.os != 'macos-latest'
+        run: npm --workspace @doot-games/web run release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
