@@ -17,18 +17,22 @@ asarUnpack:
 # mac.notarize below to true and provide the APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD
 # / APPLE_TEAM_ID secrets.
 mac:
-  target: [dmg]
+  target:
+    - target: dmg
+      arch: [arm64, x64]        # Apple Silicon and Intel
+  artifactName: DootDootRevolution-${version}-mac-${arch}.${ext}
   category: public.app-category.games
   hardenedRuntime: true
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
-  notarize: false
+  notarize: true
 
 win:
   target:
     - target: nsis
       arch: [x64]
+  artifactName: DootDootRevolution-${version}-win-${arch}.${ext}
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
@@ -36,6 +40,7 @@ nsis:
 linux:
   target: [AppImage]
   category: Game
+  artifactName: DootDootRevolution-${version}-linux-${arch}.${ext}
 
 publish:
   provider: github

@@ -9,10 +9,10 @@
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
-    "dev:desktop": "ELECTRON=1 vite",
+    "dev:desktop": "cross-env ELECTRON=1 vite",
     "build": "vite build",
-    "build:desktop": "ELECTRON=1 vite build && electron-builder --publish never",
-    "release": "ELECTRON=1 vite build && electron-builder --publish always",
+    "build:desktop": "cross-env ELECTRON=1 vite build && electron-builder --publish never",
+    "release": "cross-env ELECTRON=1 vite build && electron-builder --publish always",
     "preview": "vite preview --port 4319",
     "test": "vitest run"
   },
@@ -28,6 +28,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.0",
     "@vue/test-utils": "^2.4.6",
+    "cross-env": "^7.0.3",
     "electron": "^31.0.0",
     "electron-builder": "^24.13.3",
     "jsdom": "^25.0.0",

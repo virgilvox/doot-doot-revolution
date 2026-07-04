@@ -34,7 +34,13 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
+      # A lockfile generated on one OS omits the other platforms' Rollup optional
+      # binary (npm/cli#4828), so npm ci fails on the Linux and Windows runners.
+      # A fresh resolve installs the platform-correct binaries. shell: bash makes
+      # rm -rf work on the Windows runner too. Matches ci.yml.
+      - name: Install
+        shell: bash
+        run: rm -rf node_modules package-lock.json && npm install
       - name: Build and publish desktop app
         run: npm --workspace @doot-games/web run release
         env:
