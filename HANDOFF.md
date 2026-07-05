@@ -56,7 +56,17 @@ uses the same rack (`previewPieceLive`) so a song sounds the same before and aft
 pick it.
 
 `chartFromPiece` (pure, Node-tested) maps the PIECE events to a step chart per
-difficulty (foot-alternated lanes, quant coloring, jumps, holds, `DIFFS` tuning). A
+difficulty. It gates density by subdivision COVERAGE, not a notes-per-second cap:
+`DIFFS` carries `eighth` and `sixteenth` fractions, so Beginner is quarters, Basic
+quarters plus half the eighths, Difficult full eighths, Expert full eighths plus
+sixteenth bursts (kept as runs, not gallops), and Challenge full sixteenth streams. This
+is tempo-independent, unlike the old nps cap, which at ~160 bpm silently dropped every
+sixteenth and collapsed Expert onto Difficult (why Expert used to feel under-Expert);
+Expert now runs ~640 notes with real sixteenth bursts at any tempo, Challenge clearly
+above it with roughly double the jumps. Lane selection is the shared `pickPanel` (home-
+side bias, controlled crossover and footswitch) so composed and audio charts feel the
+same. `maxNps` still caps the audio charter, where noisy onsets make peak spacing the
+right tool. A
 `leadIn` (~2.2s) holds the first arrow so nothing is unmissable on the receptor at t=0.
 Each note carries the musical pitch of the arrow, so the optional hit sounds (off by
 default, a Settings toggle) play the song's own notes instead of one beep. The groove
@@ -91,6 +101,43 @@ chart and Judge in lockstep; old events/notes prune behind the playhead so any r
 stays bounded. The engine scheduler gained a `source.extend()` hook, the Judge gained
 `appendNotes`/`pruneBefore` and a monotonic endless score, and `useSession.startEndless`
 runs the normal loop with no end and quit-to-summary. No buffers, no seams.
+
+## VRM dancer (optional)
+
+An optional VRM character dances over the gameplay shader, cycling moves and cutting
+camera shots, in the SWIVEL mockup's style. The engine is a new subpath export
+`@doot-games/render/avatar` (three 0.164.1 + `@pixiv/three-vrm` 3.5.4 +
+`three-vrm-animation` 3.5.4), kept out of the render barrel so `three` is not in the
+base bundle: `ShaderBackground.vue`'s sibling `DancerStage.vue` dynamic-imports it, so
+it rides a lazy chunk loaded only when the Dancer setting is on (verified: the entry
+chunk has zero three/VRM code; the split chunk carries it). It draws to a transparent
+canvas layered over `ShaderBackground` and under the notefield in `GameView`.
+
+The stage always keeps a full-body mocap clip looping and cross-fading to a new one
+every 7-12 seconds, so the avatar is never idle: the pixiv `VRMA_0x` motions and the
+two Mixamo `.fbx` dances (retargeted at runtime by `avatar/fbxRetarget.js`, the verified
+pixiv method, with the parsed FBX cached per URL so an avatar swap only re-runs the
+retarget). Roughly a third of segments hand back to the procedural swivel rig
+(`avatar/moves.js`, ported and smoothed from the mockup; tiered by combo, cross-faded by
+`avatar/director.js`) for variety. Clip and procedural never pop into each other:
+`avatar/retarget.js` `applyVRMPose(bones, pose, weight)` slerps the procedural pose over
+whatever the clip mixer wrote, and a `procWeight` eases the handoff both ways.
+`avatar/camera.js` cuts eight framings independently. The pure pieces are Node-tested
+(`packages/render/test/avatar.test.js`); the stage is verified in-browser.
+
+Assets are bundled in `apps/web/public/{vrm,vrma,fbx}` and fetched by URL on demand
+(manifest `game/avatars.js`). Only one VRM is resident. The default is the `7536…` model;
+on web one avatar is picked at random from a small pool (`WEB_POOL`) per session for
+variety, on desktop from the full roster, and an explicit Settings choice overrides the
+pick. On desktop every dance clip preloads; on web a light subset preloads
+(`WEB_PRELOAD`). The stage reads a non-reactive `game/dancerClock.js` (beat + combo)
+written once per `useSession` loop, so the avatar never triggers a Vue re-render, and it
+re-seeds its schedulers when the beat rewinds so a song restart never freezes it. Guards:
+the canvas is `pointer-events:none`, the rAF pauses when the tab is hidden, reduced motion
+calms the camera and amplitude, `pixelRatio` is capped, and the VRM is `deepDispose`d on
+unmount or swap. Settings has a Dancer toggle (on by default) and a "Dancer model"
+picker; dropping a `.vrm`/`.vrma`/`.fbx` on the game stage swaps the avatar or adds a
+dance.
 
 ## Run, build, test
 
