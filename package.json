@@ -1,6 +1,6 @@
 {
   "name": "doot-doot-revolution",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "private": true,
   "description": "Browser rhythm game in the DDR and StepMania tradition, built as a workspace of small libraries.",
   "type": "module",

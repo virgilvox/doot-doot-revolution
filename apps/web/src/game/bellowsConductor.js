@@ -12,6 +12,7 @@ import { buildRack, presetForGenre, presetForMood, DRUM_PITCH } from './bellowsR
 
 let _boot = null;   // cached boot promise (worklet loads once)
 let _gain = null;   // fade node between bellows and the engine music bus
+let _buses = null;  // shared reverb + delay sends, created once and reused by every rack
 
 export function bootBellows() {
   if (!_boot) _boot = Bellows.boot({ context: engine.ensure() }).then((b) => {
@@ -19,6 +20,12 @@ export function bootBellows() {
     _gain = b.ctx.createGain(); _gain.gain.value = 1;
     try { b.analyser.disconnect(); } catch (e) {}
     b.analyser.connect(_gain); _gain.connect(engine.music);
+    // one reverb and one delay for the whole session (the kernel has no removeBus, so a
+    // fresh pair per song would leak); racks vary only the per-voice send amounts
+    _buses = {
+      verb: b.bus([['fdn', { size: 1.1, decay: 1.7, damp: 4200, mix: 1 }]], { level: 0.9 }),
+      delay: b.bus([['tapeDelay', { time: 0.26, feedback: 0.32, mix: 1 }]], { level: 0.8 })
+    };
     return b;
   });
   return _boot;
@@ -71,13 +78,13 @@ export async function playPieceLive(piece, genre) {
   stopLive();
   b.panic();
   setGain(1, 0, b.ctx);
-  const rack = buildRack(b, presetForGenre(genre));
+  const rack = buildRack(b, presetForGenre(genre), _buses);
   const dsec = durSecs(piece), ev = piece.events, total = piece.totalSteps;
   const unsub = b.clock.at('16n', (t, step) => { if (step < total) scheduleStep(rack, ev, step, t, dsec); });
   b.bpm(piece.tempo);
   const t0 = b.ctx.currentTime;
   b.start(); // transport beat 0 lands at ~t0 + 0.05
-  _current = { unsub, b };
+  _current = { unsub, b, channels: rack.channels };
   return { startAt: t0 + 0.05, duration: total * stepSecs(piece) };
 }
 
@@ -87,7 +94,7 @@ export async function previewPieceLive(piece, genre, { fromStep = 0, fadeIn = 0.
   stopLive();
   if (b.ctx.state === 'suspended') b.ctx.resume();
   b.panic();
-  const rack = buildRack(b, preset || presetForGenre(genre));
+  const rack = buildRack(b, preset || presetForGenre(genre), _buses);
   const dsec = durSecs(piece), ev = piece.events, total = piece.totalSteps;
   const span = Math.max(16, total - fromStep); // loop the hook-to-end window
   const unsub = b.clock.at('16n', (t, step) => { scheduleStep(rack, ev, fromStep + (step % span), t, dsec); });
@@ -95,7 +102,7 @@ export async function previewPieceLive(piece, genre, { fromStep = 0, fadeIn = 0.
   b.bpm(piece.tempo);
   b.start();
   setGain(level, fadeIn, b.ctx);
-  _current = { unsub, b, preview: true };
+  _current = { unsub, b, preview: true, channels: rack.channels };
 }
 
 // Stop the current live run. With fade > 0, ramp the output down first (a smooth preview
@@ -104,7 +111,12 @@ export function stopLive(fade = 0) {
   finalizeNow();
   if (!_current) return;
   const c = _current; _current = null;
-  const fin = () => { try { c.unsub(); } catch (e) {} try { c.b.stop(); c.b.panic(); } catch (e) {} };
+  const fin = () => {
+    try { c.unsub(); } catch (e) {}
+    try { c.b.stop(); c.b.panic(); } catch (e) {}
+    // remove this rack's channels so the kernel stops processing them every audio block
+    if (c.channels) for (const id of c.channels) { try { c.b.structural({ type: 'removeChannel', id }); } catch (e) {} }
+  };
   if (fade > 0 && _gain && c.b) {
     setGain(0.0001, fade, c.b.ctx);
     _pendingFinalize = { fn: fin, timer: setTimeout(() => { _pendingFinalize = null; fin(); }, (fade + 0.06) * 1000) };
@@ -122,7 +134,7 @@ export async function playEndlessLive(cond, mood) {
   stopLive();
   b.panic();
   setGain(1, 0, b.ctx);
-  const rack = buildRack(b, presetForMood(mood));
+  const rack = buildRack(b, presetForMood(mood), _buses);
   const piece = cond.piece;
   const dsec = durSecs(piece);
   let cur = 0;
@@ -130,7 +142,7 @@ export async function playEndlessLive(cond, mood) {
   b.bpm(cond.tempo);
   const t0 = b.ctx.currentTime;
   b.start();
-  _current = { unsub, b };
+  _current = { unsub, b, channels: rack.channels };
   return { startAt: t0 + 0.05, stepOf: () => cur };
 }
 

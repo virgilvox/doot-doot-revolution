@@ -145,21 +145,24 @@ export const DRUM_PITCH = { kick: 36, snare: 38, hat: 42, perc: 39 };
 // crowded (lead/bass/kick/snare stay centered; a preset can override with its own pan)
 const DEFAULT_PAN = { arp: -0.24, counter: 0.24, hat: 0.14, perc: -0.16, pad: 0 };
 
-// Instantiate a preset against a booted Bellows. Returns { voices, buses, dispose }.
-export function buildRack(b, presetKey) {
+// Instantiate a preset's voices against a booted Bellows. The reverb/delay buses are
+// shared (created once by the conductor and passed in) because the kernel has no
+// removeBus, so a fresh pair per rack would leak; per-voice send amounts still vary by
+// preset. Returns the voices and the channel ids to remove on stop, so nothing lingers in
+// the kernel's per-block processing after a song ends.
+export function buildRack(b, presetKey, buses) {
   const p = PRESETS[presetKey] || PRESETS.synthwave;
-  const buses = {};
-  for (const [name, spec] of Object.entries(p.buses || {})) buses[name] = b.bus([spec], { level: 1 });
-  const voices = {};
+  const voices = {}, channels = [];
   for (const [name, v] of Object.entries(p.voices)) {
     const inst = b.voice(v.engine, v.params || {}, v.poly ? { polyphony: v.poly } : undefined).gain(v.gain ?? 0.3);
+    channels.push(inst.channel);
     if (v.pan != null) inst.pan(v.pan);
     else if (DEFAULT_PAN[name] != null) inst.pan(DEFAULT_PAN[name]);
     if (v.fx) inst.fx(...v.fx);
-    if (v.send) for (const [bn, lvl] of Object.entries(v.send)) if (buses[bn]) inst.send(buses[bn], lvl);
+    if (v.send && buses) { if (v.send.verb && buses.verb) inst.send(buses.verb, v.send.verb); if (v.send.delay && buses.delay) inst.send(buses.delay, v.send.delay); }
     voices[name] = inst;
   }
   if (p.master) b.masterFx(...p.master);
   b.masterGain(p.masterGain ?? 0.92);
-  return { voices, buses, preset: presetKey };
+  return { voices, channels, preset: presetKey };
 }
