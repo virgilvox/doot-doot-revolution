@@ -8,12 +8,18 @@
   "main": "./src/index.js",
   "module": "./src/index.js",
   "exports": {
-    ".": "./src/index.js"
+    ".": "./src/index.js",
+    "./avatar": "./src/avatar/index.js"
   },
   "files": [
     "src",
     "README.md"
   ],
+  "dependencies": {
+    "@pixiv/three-vrm": "3.5.4",
+    "@pixiv/three-vrm-animation": "3.5.4",
+    "three": "0.164.1"
+  },
   "license": "MIT",
   "author": "Moheeb Zara"
 }

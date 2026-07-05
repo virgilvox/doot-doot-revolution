@@ -27,6 +27,7 @@ import { go } from '../game/screen.js';
 import { settings, resetSettings } from '../game/settings.js';
 import { useRovingFocus } from '../composables/useRovingFocus.js';
 import { engine } from '../game/singletons.js';
+import { AVATARS, avatarById } from '../game/avatars.js';
 
 // settings is one reactive object; assigning to it triggers the persistence and
 // side-effect watchers in game/settings.js. This adapter keeps the template's
@@ -34,6 +35,11 @@ import { engine } from '../game/singletons.js';
 const s = { state: settings, set: (k, v) => { settings[k] = v; }, reset: resetSettings };
 const back = () => go('select');
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function cycleAvatar(delta) {
+  const i = AVATARS.findIndex((a) => a.id === s.state.avatar);
+  const n = (((i < 0 ? 0 : i) + delta) % AVATARS.length + AVATARS.length) % AVATARS.length;
+  s.set('avatar', AVATARS[n].id);
+}
 
 const calib = reactive({ running: false, msg: '', clicks: [], taps: [] });
 
@@ -74,12 +80,15 @@ const rows = [
   { t: 'Hit sounds', d: 'Play a note on each hit, pitched to the song. Off by default.', kind: 'toggle', key: 'hitSounds' },
   { t: 'Reduced motion', d: 'Calmer menus. Gameplay still animates.', kind: 'toggle', key: 'reducedMotion' },
   { t: 'Background visuals', d: 'Generative shader behind the lanes during play. Off for a plain field.', kind: 'toggle', key: 'background' },
+  { t: 'Dancer', d: 'A VRM character dances over the background during play. Cycles moves and camera shots.', kind: 'toggle', key: 'dancer' },
+  { t: 'Dancer model', id: 'avatar', kind: 'action', action: () => cycleAvatar(1), label: () => avatarById(s.state.avatar).label },
   ...(isDesktop ? [{ t: 'Check for updates', id: 'update', kind: 'action', action: () => (upd.ready ? installUpdate() : checkForUpdate()), label: () => (upd.ready ? 'Update' : 'Check now') }] : []),
   { t: 'Reset', d: 'Restore default settings.', kind: 'action', action: () => s.reset(), label: () => 'Reset all' }
 ];
 function desc(r) {
   if (r.id === 'calibrate') return calib.msg || 'Play 8 clicks and tap Space in time to find your offset.';
   if (r.id === 'update') return upd.msg || 'A newer version installs itself; you just restart. Your settings are kept.';
+  if (r.id === 'avatar') return 'Which character dances. Drop a .vrm on the game to use your own.';
   return r.d || '';
 }
 function rangeValue(r) { return r.kind === 'vol' ? Math.round(s.state[r.key] * 100) : s.state[r.key]; }
@@ -90,6 +99,7 @@ function adjust(i, delta) {
   if (r.kind === 'range') s.set(r.key, clamp(s.state[r.key] + delta * r.step, r.min, r.max));
   else if (r.kind === 'vol') s.set(r.key, clamp(Math.round(s.state[r.key] * 100) + delta * 5, 0, 100) / 100);
   else if (r.kind === 'toggle') s.set(r.key, !s.state[r.key]);
+  else if (r.id === 'avatar') cycleAvatar(delta);
 }
 function activate(i) { const r = rows[i]; if (r.kind === 'action') r.action(); else if (r.kind === 'toggle') s.set(r.key, !s.state[r.key]); }
 const { index: fi } = useRovingFocus({ size: () => rows.length, onConfirm: activate, onAdjust: adjust, onCancel: back });

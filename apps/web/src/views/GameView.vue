@@ -2,6 +2,7 @@
   <div class="view-fill game-view">
     <div class="stage game-stage">
       <ShaderBackground v-if="settings.background" :mood="bgMood" :seed="bgSeed" />
+      <DancerStage v-if="settings.dancer" />
 
       <div v-if="state.loading" class="ld-ov"><span class="ld-spin" aria-hidden="true"></span><span>Preparing audio…</span></div>
 
@@ -40,6 +41,7 @@ import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { go, navTrail } from '../game/screen.js';
 import NoteField from '../components/NoteField.vue';
 import ShaderBackground from '../components/ShaderBackground.vue';
+import DancerStage from '../components/DancerStage.vue';
 import GameHud from '../components/GameHud.vue';
 import { session } from '../composables/useSession.js';
 import { useScope } from '../composables/useNavigation.js';

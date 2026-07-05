@@ -16,6 +16,7 @@ import { ensureBuffer } from '../game/audio.js';
 import { createConductor } from '../game/conductor.js';
 import { playPieceLive, playEndlessLive, stopLive, bootBellows } from '../game/bellowsConductor.js';
 import { makePlayers, playerForDevice, standings } from '../game/roster.js';
+import { dancerClock } from '../game/dancerClock.js';
 
 function createSession() {
   const state = reactive({
@@ -168,11 +169,14 @@ function createSession() {
       p.score = p.judge.score; p.combo = p.judge.combo; p.life = p.judge.life;
     }
     syncAliases();
+    // feed the optional dancer stage: cheap, non-reactive writes read directly by its
+    // own render loop (like settings.speed). combo drives its tier, beat drives motion.
+    dancerClock.beat = beat || 0; dancerClock.combo = state.players[0] ? state.players[0].combo : 0; dancerClock.playing = active;
     if (endless) state.elapsed = Math.max(0, t);
     else { const dur = engine.duration(); state.progress = dur ? Math.min(1, t / dur) : 0; if (dur > 0 && t >= dur + 0.6) end(); else if (dur <= 0) console.warn('[END-GUARD] loop active but engine.duration()=0 at t=', t.toFixed(2)); }
   }
 
-  function stop() { epoch++; active = false; state.playing = false; if (raf) cancelAnimationFrame(raf); raf = 0; subs.forEach((u) => u && u()); subs = []; endless = false; conductor = null; endlessStep = null; stopLive(); engine.stop(); }
+  function stop() { epoch++; active = false; state.playing = false; dancerClock.playing = false; if (raf) cancelAnimationFrame(raf); raf = 0; subs.forEach((u) => u && u()); subs = []; endless = false; conductor = null; endlessStep = null; stopLive(); engine.stop(); }
   function restart() { if (replay && !state.endless) replay(); }
   function quit() { if (state.playing) end(); }
   function end() {

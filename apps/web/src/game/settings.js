@@ -9,7 +9,7 @@ import { engine } from './singletons.js';
 // sync.
 
 const KEY = 'ddr.settings.v1';
-const DEFAULTS = { speed: 2.6, offsetMs: 0, volMaster: 0.9, volMusic: 0.85, volSfx: 0.7, reducedMotion: false, background: true, hitSounds: false };
+const DEFAULTS = { speed: 2.6, offsetMs: 0, volMaster: 0.9, volMusic: 0.85, volSfx: 0.7, reducedMotion: false, background: true, hitSounds: false, dancer: true, avatar: '7536306365885596509' };
 
 function load() {
   try { const raw = localStorage.getItem(KEY); return raw ? Object.assign({}, DEFAULTS, JSON.parse(raw)) : Object.assign({}, DEFAULTS); }
