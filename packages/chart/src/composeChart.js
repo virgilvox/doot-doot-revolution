@@ -6,7 +6,7 @@
 // meter) so composed charts line up with the ones the audio charter produces.
 
 import { makeRng, mixSeed } from './compose.js';
-import { DIFFS } from './charter.js';
+import { DIFFS, pickPanel } from './charter.js';
 import { computeRadar } from './radar.js';
 
 // which voices feed arrows at each difficulty (denser tiers add melodic layers)
@@ -43,7 +43,7 @@ export function chartFromPiece(piece, difficulty, opts = {}) {
       if (!D.subs.includes(stepSub(s))) continue;
       if (bar * 4 + s / 4 < leadInBeat) continue;        // hold arrows until the lead-in passes
       const step = bar * SPB + s;
-      let strength = 0, hit = false, hasKick = false, hasSnare = false;
+      let strength = 0, hit = false, hasKick = false, hasSnare = false, hasHi = false;
       for (const v of layers) {
         const arr = ev[v] && ev[v][step];
         if (!arr) continue;
@@ -51,20 +51,34 @@ export function chartFromPiece(piece, difficulty, opts = {}) {
         for (const e of arr) strength += (e.vel || 0.6);
         if (v === 'kick') hasKick = true;
         if (v === 'snare') hasSnare = true;
+        if (v === 'lead' || v === 'arp' || v === 'counter') hasHi = true;
       }
       if (!hit) continue;
-      cands.push({ step, s, beat: bar * 4 + s / 4, strength, hasKick, hasSnare, strong: s % 8 === 0, med: s % 4 === 0 });
+      cands.push({ step, s, beat: bar * 4 + s / 4, strength, hasKick, hasSnare, hasHi, strong: s % 8 === 0, med: s % 4 === 0 });
     }
   }
 
-  // 2) thin to the tier's density with a minimum spacing, keeping the stronger /
-  //    more on-beat of two candidates that fall too close together. Spacing (rather
-  //    than a global top-N) keeps low tiers steady instead of clumping notes where
-  //    the music happens to be loudest.
-  const minDt = 1 / D.maxNps;
+  // 2) gate density by subdivision coverage (tempo-independent). Quarters always pass;
+  //    eighths and sixteenths pass at the tier's coverage. Below full coverage,
+  //    sixteenths are kept only in runs (a neighbor sixteenth present) so Expert reads as
+  //    bursts, not isolated gallops. A fixed nps cap fails here: at high tempo it drops
+  //    every sixteenth and Expert collapses onto Difficult.
+  const candSteps = new Set(cands.map((c) => c.step));
+  const inRun = (c) => candSteps.has(c.step - 1) || candSteps.has(c.step + 1);
+  const covered = cands.filter((c) => {
+    const sub = stepSub(c.s);
+    if (sub === 1) return true;                                   // quarters
+    if (sub === 2) return D.eighth >= 1 || rng() < D.eighth;      // eighths
+    if (D.sixteenth <= 0) return false;                           // no sixteenths this tier
+    if (D.sixteenth >= 1) return true;                            // full sixteenth streams
+    return inRun(c) && rng() < (0.55 + 0.45 * D.sixteenth);       // Expert: sixteenth bursts
+  });
+  // 3) light safety thin: the 16-step grid already spaces onsets by a sixteenth, so this
+  //    only catches an accidental sub-32nd overlap from a pathological piece.
+  const minDt = 1 / Math.max(D.maxNps, 13);
   const pri = (c) => c.strength + (c.strong ? 2 : c.med ? 1 : 0);
   const kept = [];
-  for (const c of cands) {
+  for (const c of covered) {
     const prev = kept[kept.length - 1];
     if (!prev || (c.beat - prev.beat) * spb >= minDt) kept.push(c);
     else if (pri(c) > pri(prev)) kept[kept.length - 1] = c;
@@ -73,7 +87,7 @@ export function chartFromPiece(piece, difficulty, opts = {}) {
   // 3) assign lanes (strict foot alternation) with jumps on strong kick+snare
   //    coincidences and holds off sustained lead notes
   const notes = [];
-  let side = 0, lastLane = -1;
+  let lastFoot = -1, lastPanel = -1, prevPanel = -1;
   const pick = (arr) => arr[Math.floor(rng() * arr.length)];
   for (const c of kept) {
     const t = c.beat * spb, quant = stepQuant(c.s), mid = pitchAt(ev, c.step, piece.rootPc);
@@ -83,13 +97,18 @@ export function chartFromPiece(piece, difficulty, opts = {}) {
     // tiers' larger jumpProb makes them denser and more technical than the lower ones.
     if (c.med && (c.hasKick || c.hasSnare) && rng() < D.jumpProb) {
       notes.push({ ...mkNote(t, c.beat, pick([0, 1]), quant), midi: mid }, { ...mkNote(t, c.beat, pick([2, 3]), quant), midi: mid });
-      side = 0; lastLane = -1;
+      lastFoot = -1; lastPanel = -1; prevPanel = -1;
       continue;
     }
-    side ^= 1;
-    const lanes = side ? [2, 3] : [0, 1];
-    let lane = pick(lanes);
-    if (lane === lastLane) lane = lanes[(lanes.indexOf(lane) + 1) % 2];
+    // strict foot alternation through the shared pickPanel, so composed charts get the
+    // same home-side bias plus the tier's controlled crossover and footswitch variety as
+    // the audio charter (the old rigid side-flip made patterns predictable). Pseudo band
+    // energy from the voices present keeps lanes tracking the kit: kick low -> Down,
+    // snare mid, lead/arp high -> Up.
+    const r = { lo: c.hasKick ? 1 : 0.25, mi: c.hasSnare ? 1 : 0.3, hi: c.hasHi ? 1 : 0.25 };
+    const allowRepeat = rng() < D.footswitch;
+    const foot = lastFoot === 0 ? 1 : (lastFoot === 1 ? 0 : (rng() < 0.5 ? 0 : 1));
+    const lane = pickPanel(foot, lastPanel, prevPanel, r, rng, D, allowRepeat, true);
     let n = mkNote(t, c.beat, lane, quant); n.midi = mid;
     if ((difficulty === 'expert' || difficulty === 'challenge')) {
       const lead = ev.lead && ev.lead[c.step];
@@ -99,7 +118,7 @@ export function chartFromPiece(piece, difficulty, opts = {}) {
       }
     }
     notes.push(n);
-    lastLane = lane;
+    prevPanel = lastPanel; lastPanel = lane; lastFoot = foot;
   }
 
   notes.sort((a, b) => a.t - b.t || a.lane - b.lane);

@@ -26,12 +26,28 @@
 // step up by subdivision: Beginner quarters, Basic/Difficult eighths, Expert/Challenge
 // sixteenths, with the notes-per-second cap and layers separating the pairs. Foot
 // meters follow DDR convention so Basic reads as genuinely easy.
+// maxNps is a PEAK cap (the minimum spacing between consecutive notes is 1/maxNps), not
+// an average. DDR/StepMania convention: Beginner is quarter-note sparse, Basic a
+// step-on-the-beat chart, Difficult a steady eighth-note stream, Expert dense eighths
+// with sixteenth bursts and frequent jumps, Challenge sixteenth streams. The earlier caps
+// topped Expert at 6.5 peak nps, which reads as a busy Difficult rather than an Expert
+// (sixteenths at ~130 bpm need ~8.7 nps), so mid and high tiers were raised to let real
+// eighth and sixteenth streams through and the jump rates lifted so the top tiers feel
+// technical, not just fast.
+// The composed charter (chartFromPiece) gates density by subdivision COVERAGE, which is
+// tempo-independent: `eighth` and `sixteenth` are the fraction of eighth- and
+// sixteenth-grid onsets to keep. A fixed notes-per-second cap does not work here because
+// at ~160 bpm sixteenths run ~10.7 nps and any Expert-ish cap drops them all, collapsing
+// Expert into Difficult; coverage keeps Expert's sixteenth bursts at every tempo. Below
+// full coverage, sixteenths are kept as runs (bursts) rather than isolated galloping
+// singles. `maxNps` still caps the audio charter (noisy onsets, so peak spacing is the
+// right tool there), and doubles as a high safety limit for composed charts.
 export const DIFFS = {
-  beginner:  { name: 'Beginner',  foot: 2,  subs: [1],       minStrength: 0.50, maxNps: 2.0,  jumpProb: 0.00, jumpMin: 9,    crossover: 0.00, footswitch: 0.00, holdProb: 0.22 },
-  basic:     { name: 'Basic',     foot: 4,  subs: [1, 2],    minStrength: 0.32, maxNps: 2.7,  jumpProb: 0.02, jumpMin: 0.80, crossover: 0.00, footswitch: 0.00, holdProb: 0.15 },
-  difficult: { name: 'Difficult', foot: 7,  subs: [1, 2],    minStrength: 0.18, maxNps: 4.3,  jumpProb: 0.10, jumpMin: 0.74, crossover: 0.03, footswitch: 0.03, holdProb: 0.12 },
-  expert:    { name: 'Expert',    foot: 11, subs: [1, 2, 4], minStrength: 0.10, maxNps: 6.5,  jumpProb: 0.18, jumpMin: 0.66, crossover: 0.08, footswitch: 0.08, holdProb: 0.10 },
-  challenge: { name: 'Challenge', foot: 15, subs: [1, 2, 4], minStrength: 0.05, maxNps: 9.0,  jumpProb: 0.34, jumpMin: 0.58, crossover: 0.12, footswitch: 0.14, holdProb: 0.08 }
+  beginner:  { name: 'Beginner',  foot: 2,  subs: [1],       eighth: 0.00, sixteenth: 0.00, minStrength: 0.50, maxNps: 2.2,  jumpProb: 0.00, jumpMin: 9,    crossover: 0.00, footswitch: 0.00, holdProb: 0.22 },
+  basic:     { name: 'Basic',     foot: 4,  subs: [1, 2],    eighth: 0.50, sixteenth: 0.00, minStrength: 0.30, maxNps: 3.4,  jumpProb: 0.03, jumpMin: 0.80, crossover: 0.00, footswitch: 0.00, holdProb: 0.16 },
+  difficult: { name: 'Difficult', foot: 8,  subs: [1, 2],    eighth: 1.00, sixteenth: 0.00, minStrength: 0.16, maxNps: 5.5,  jumpProb: 0.12, jumpMin: 0.72, crossover: 0.05, footswitch: 0.05, holdProb: 0.12 },
+  expert:    { name: 'Expert',    foot: 12, subs: [1, 2, 4], eighth: 1.00, sixteenth: 0.55, minStrength: 0.09, maxNps: 8.3,  jumpProb: 0.22, jumpMin: 0.62, crossover: 0.10, footswitch: 0.10, holdProb: 0.11 },
+  challenge: { name: 'Challenge', foot: 15, subs: [1, 2, 4], eighth: 1.00, sixteenth: 1.00, minStrength: 0.04, maxNps: 12.0, jumpProb: 0.44, jumpMin: 0.52, crossover: 0.14, footswitch: 0.16, holdProb: 0.08 }
 };
 
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
@@ -59,8 +75,10 @@ function thinByNPS(list, period, maxNps) {
 }
 
 // Choose a panel for one foot without crossing the body, biased to the home side
-// and (in drum mode) nudged by the onset's band energy.
-function pickPanel(foot, last, prev, r, rng, D, allowRepeat, useBands) {
+// and (in drum mode) nudged by the onset's band energy. Exported so the composed-piece
+// charter shares the exact same foot logic (home-side bias, controlled crossover and
+// footswitch) rather than a simpler alternation, keeping difficulty feel consistent.
+export function pickPanel(foot, last, prev, r, rng, D, allowRepeat, useBands) {
   let cands = foot === 0 ? [0, 1, 2] : [3, 2, 1];        // left foot reaches L/D/U, right reaches R/U/D
   if (rng() < D.crossover) cands.push(foot === 0 ? 3 : 0); // controlled crossover at high tiers only
   if (!allowRepeat) cands = cands.filter((p) => p !== last);
