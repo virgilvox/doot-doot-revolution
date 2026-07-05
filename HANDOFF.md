@@ -17,13 +17,14 @@ The earlier vanilla single-file app (`apps/ddr`) was retired; the packages remai
 the proof the logic is framework-free.
 
 Current status: builds clean, 92 tests pass (80 package, 12 Vue), deployed live at
-https://dance.doot.games (current release v2.1.5), signed and notarized desktop
-installers published to GitHub Releases, with an in-app auto-updater. Verified end to
-end in the browser (controller-only play, difficulty modal, viewport-fit gameplay with
-the game-feel pass, StepMania import, add/review/save, all menus, a bellows song preview
-on the select wheel, hand-composed built-in songs, and the Endless mode). Navigation is
-state-driven (no router). No console errors. CI is green (it installs with `npm install`
-after clearing the lockfile, working around npm/cli#4828).
+https://dance.doot.games (current release v2.1.8) with full SEO (meta, Open Graph,
+Twitter cards, JSON-LD, an OG share image, sitemap, and web manifest), signed and
+notarized desktop installers published to GitHub Releases, and a working in-app
+auto-updater. Verified end to end in the browser (controller-only play, difficulty
+modal, viewport-fit gameplay with the game-feel pass, StepMania import, add/review/save,
+all menus, a bellows song preview on the select wheel, hand-composed built-in songs, and
+the Endless mode). Navigation is state-driven (no router). No console errors. CI is green
+(it installs with `npm install` after clearing the lockfile, working around npm/cli#4828).
 
 ## Music: composed songs, the bellows engine, and Endless
 
@@ -148,6 +149,15 @@ moves onto the top nav (shared `game/navFocus.js` signal) so Add, Library,
 Settings, and Pads are reachable, and confirm dances or opens the nav target. Every
 menu screen shows a focus ring. Gameplay maps the four arrows to the lanes.
 
+The nav bus (`useInput` to `useNavigation`, a scope stack where only the top scope gets
+input) is the only focus authority; the browser's own DOM focus is not used. So the
+input handler (`@doot-games/play` `input.js`) `preventDefault`s confirm and back
+(Enter/Escape) as well as the lane keys: otherwise Enter would also fire the default
+click on whatever button the browser still had focused (a nav tab you clicked), which
+made a confirm exit a modal or navigate instead. The text-field guard runs first, so
+Enter to submit a URL still works. `screen.js` `go()` also blurs the active element on
+every navigation so a clicked tab does not keep a stray focus ring.
+
 ## Electron
 
 Web-first via `vite-plugin-electron` (electron 31, electron-builder 24). `main.js`
@@ -160,15 +170,28 @@ filesystem access (path-contained). `preload.js` bridges them as `window.doot`.
 The packaged app self-updates with electron-updater (a runtime dependency,
 externalized from the electron bundle like youtube-dl-exec). `setupUpdater` checks
 GitHub releases on launch and every few hours, downloads a newer build in the
-background, and posts status to the renderer over `update:status`. The nav button is
-adaptive (`components/DownloadModal.vue`): on web it is Download (opens the release
-modal); on desktop the Download button is gone and an Update button appears (pulsing)
-only when a newer build is downloaded and ready, and clicking it runs
-`autoUpdater.quitAndInstall`. Settings (localStorage under the `app://` origin) and the
-song library (a user-picked folder) both live in userData, which the update never
-touches, so they carry over. Settings also has a manual "Check for updates" row on
-desktop. Auto-update ships from v2.1.5 on; earlier builds have no updater and are
-replaced once via the Download button.
+background, and posts status to the renderer over `update:status` (available,
+downloading with a percent, ready, or error). The main process also remembers the last
+status and serves it over `update:state`, so a view opened after the download finished
+still sees it, not only future events. The nav button is adaptive
+(`components/DownloadModal.vue`): on web it is Download (opens the release modal); on
+desktop the Download button is gone and an Update button appears (pulsing) only when a
+newer build is downloaded and ready, and clicking it runs `autoUpdater.quitAndInstall`.
+Settings has a "Check for updates" row (desktop) that shows the download percent, and
+when ready its label turns from Check now to Update and installs on click. If
+auto-update errors, the nav Update button opens the releases page as a manual fallback.
+
+macOS gotcha, since it silently breaks in-app updates: Squirrel.Mac can only apply a
+`zip`, not a `dmg`. `electron-builder.yml` must build both mac targets (`dmg` for manual
+download, `zip` for the updater); with `dmg` only, `latest-mac.yml` points at the dmg and
+the updater hangs in downloading forever and never fires ready. Confirm a release lists
+`mac-arm64.zip`/`mac-x64.zip` and that `latest-mac.yml` references the zips. Windows
+(NSIS `.exe`) and Linux (AppImage) update fine from their single artifact.
+
+Settings (localStorage under the `app://` origin) and the song library (a user-picked
+folder) both live in userData, which the update never touches, so they carry over.
+Auto-update ships from v2.1.5 on, and the zip fix from v2.1.7 on; a build older than the
+first zip release needs one manual update to a zip build, after which it is automatic.
 
 ## Audit results folded in
 
@@ -330,19 +353,34 @@ exports any song's charts as one StepMania `.sm`.
 - Component test coverage is smoke-level. Deeper tests for the roving focus and the
   session loop would help.
 
+## SEO
+
+`apps/web/index.html` carries a descriptive title and meta description, keywords,
+canonical, robots, Open Graph and Twitter card tags, and a VideoGame JSON-LD block, plus
+a noscript fallback for crawlers that do not run JS. `public/` holds the share assets:
+`og.png` (a 1200x630 card with the mascot, title, and DDR arrows, rendered from an SVG
+with rsvg-convert), PNG app icons, `manifest.webmanifest`, `robots.txt`, and
+`sitemap.xml`. Vite copies `public/` into `dist` and preserves the head tags, so the
+static site serves them; the social image is referenced by absolute URL so scrapers
+fetch it. Copy is plain with no em dashes, per `RULES.md`.
+
 ## Git state
 
 Branch `main`, remote `github.com/virgilvox/doot-doot-revolution`. Fully committed
 and pushed; the web app auto-deploys from `main` and desktop releases cut from
-`vX.Y.Z` tags. Releases run v2.0.0 through v2.1.5 (current), signed and notarized.
-Recent work, newest first: desktop auto-update + adaptive nav button + release
-auto-publish; a channel-leak fix that was causing audio dropouts; dropping the fake
-artist credits (the built-ins are originals); an honest groove radar and off-by-
-default pitched hit sounds; the chart lead-in, Endless preview, wheel sparkle, and
-two more composed songs; hand-composing all ten prebuilt songs (the songbook +
-compiler); a danceable four-on-the-floor drum rewrite and Endless on bellows;
-per-genre bellows voice racks with live playback; and the bellows audio engine
-integration itself. Keep the working tree clean between tasks.
+`vX.Y.Z` tags. Releases run v2.0.0 through v2.1.8 (current), signed and notarized.
+Recent work, newest first: reflect a finished update in Settings (its button turns to
+Update, with a download percent); fix macOS auto-update that hung in downloading (build
+a zip target Squirrel.Mac can apply); stop Enter and Escape from also triggering a
+focused button's default click; full SEO (meta, Open Graph, JSON-LD, OG image, sitemap,
+manifest); desktop auto-update + adaptive nav button + release auto-publish; a
+channel-leak fix that was causing audio dropouts; dropping the fake artist credits (the
+built-ins are originals); an honest groove radar and off-by-default pitched hit sounds;
+the chart lead-in, Endless preview, wheel sparkle, and two more composed songs;
+hand-composing all ten prebuilt songs (the songbook + compiler); a danceable
+four-on-the-floor drum rewrite and Endless on bellows; per-genre bellows voice racks
+with live playback; and the bellows audio engine integration itself. Keep the working
+tree clean between tasks.
 
 ## Packages are private
 
