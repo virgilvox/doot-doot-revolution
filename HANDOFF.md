@@ -16,28 +16,64 @@ opens on the Title attract screen.
 The earlier vanilla single-file app (`apps/ddr`) was retired; the packages remain
 the proof the logic is framework-free.
 
-Current status: builds clean, 70 tests pass (62 package, 8 Vue), deployed live at
-https://dance.doot.games, verified end to end in the browser (controller-only play,
-difficulty modal, viewport-fit gameplay with the game-feel pass, StepMania import,
-add/review/save, all menus, a looping song preview on the select wheel, full-length
-composed built-in songs, and the endless perpetual mode). Navigation is state-driven
-(no router). No console errors. CI is green (it installs with `npm install` after
-clearing the lockfile, working around npm/cli#4828).
+Current status: builds clean, 92 tests pass (80 package, 12 Vue), deployed live at
+https://dance.doot.games (current release v2.1.5), signed and notarized desktop
+installers published to GitHub Releases, with an in-app auto-updater. Verified end to
+end in the browser (controller-only play, difficulty modal, viewport-fit gameplay with
+the game-feel pass, StepMania import, add/review/save, all menus, a bellows song preview
+on the select wheel, hand-composed built-in songs, and the Endless mode). Navigation is
+state-driven (no router). No console errors. CI is green (it installs with `npm install`
+after clearing the lockfile, working around npm/cli#4828).
 
-## Generative music and perpetual mode
+## Music: composed songs, the bellows engine, and Endless
 
-The built-in songs are no longer short drum loops; they are full-length dance tracks
-composed deterministically from a seed (ported from the ferrule engine into
-`@doot-games/chart`): `composePiece` builds functional-harmony Markov chord
-progressions, a build-to-peak intensity arc, Euclidean-rhythm bass/arp/drums, and a
-chord-tone-snapped Markov lead on a 16-step grid; `chartFromPiece` maps those events
-straight to a step chart (foot-alternated lanes, quant coloring, jumps, holds),
-reusing the `DIFFS` tuning. Both are pure and Node-tested. Songs play through a live
-subtractive synth in `@doot-games/play` (`synth.js` + `engine.playPiece`) scheduled a
-little ahead of the audio clock — only the sounding voices cost anything, so playback
-starts instantly (a full offline render of a 96s song froze the tab for 45s). Composed
-songs carry a `_piece` and no buffer; `game/audio.js` `ensureBuffer` only decodes
-imported blobs.
+The audio engine is bellowsjs (a browser-native AudioWorklet synth/DSP library, an npm
+dependency of `apps/web`). Everything plays live from code through it: no pre-render, no
+loading pause.
+
+Built-in songs are hand-composed, not generative. `packages/chart/src/songs.data.js`
+holds ten authored tracks (a real key and tempo, an ordered intro/verse/chorus/bridge/
+outro form with intentional chord progressions and written melodies/basslines in a
+compact note notation, with reused hooks). `packages/chart/src/songbook.js`
+`compileSong` turns a song into a PIECE (the same shape `composePiece` produces and
+`chartFromPiece` consumes), filling the accompaniment the author does not spell out
+(nearest-motion pad voicings, a genre bass groove, a chord-tone arp, and a danceable
+four-on-the-floor kit) on the 16-step grid so it serves the written parts. These are
+originals, so they carry no artist. The generative `composePiece` (functional-harmony
+Markov, Euclidean rhythms, chord-tone Markov lead) is now used only by Endless.
+
+`apps/web/src/game/bellowsConductor.js` plays a PIECE live: it boots one Bellows on the
+engine's shared AudioContext, routes it through the engine music bus (so volume and
+fades apply), builds a genre voice rack (`game/bellowsRacks.js` maps the composer's nine
+voices to bellows engines + fx per genre, e.g. synthwave/house/breakcore/chiptune), and
+schedules the piece via `b.clock.at('16n', ...)`. The engine adopts bellows' transport
+start as the song clock (`engine.adoptClock`) so the judge and renderer read one clock.
+Reverb and delay are shared session buses created once (the kernel has no removeBus);
+racks report their channel ids and `stopLive` removes them, so dead channels do not
+accumulate and starve the worklet (that leak caused audio dropouts). The wheel preview
+uses the same rack (`previewPieceLive`) so a song sounds the same before and after you
+pick it.
+
+`chartFromPiece` (pure, Node-tested) maps the PIECE events to a step chart per
+difficulty (foot-alternated lanes, quant coloring, jumps, holds, `DIFFS` tuning). A
+`leadIn` (~2.2s) holds the first arrow so nothing is unmissable on the receptor at t=0.
+Each note carries the musical pitch of the arrow, so the optional hit sounds (off by
+default, a Settings toggle) play the song's own notes instead of one beep. The groove
+radar is measured from the notes (stream=density, voltage=peak 2s density, air=jumps,
+freeze=holds, chaos=off-quarter syncopation) so every axis varies per song.
+
+The `∞ Endless` tile (renamed from Perpetual) launches an endless, evolving stream. The
+conductor (`game/conductor.js`) grows one generative piece in place and charts it ahead;
+`playEndlessLive` plays that growing piece live through a bellows rack, and old events/
+notes prune behind the playhead so any run stays bounded. Its wheel card glows and
+sparkles at all times and sweeps a sheen when selected, and it previews a short
+generative piece.
+
+There is still an optional generative shader background (ported from the spline engine
+into `@doot-games/render` `background.js`) behind the notefield in `GameView`, keyed to
+the song's mood, with a `settings.background` toggle. The old subtractive synth
+(`@doot-games/play` `synth.js`, `engine.playPiece`) remains in the engine but is no
+longer the built-in playback path.
 
 Gameplay has an optional generative shader background (ported from the spline engine
 into `@doot-games/render` `background.js`): a seeded grammar bakes a GLSL fragment
@@ -59,12 +95,12 @@ runs the normal loop with no end and quit-to-summary. No buffers, no seams.
 
 ```
 npm install            # workspaces
-npm run dev            # web dev server at http://localhost:4318
+npm run dev            # web dev server (Vite, default http://localhost:5173)
 npm run build          # web build (apps/web/dist)
 npm run dev:desktop    # Vite inside an Electron window
 npm run build:desktop  # electron-builder installers (needs a desktop OS; dmg needs macOS)
-npm test               # 62 package unit tests (node --test)
-npm run test:web       # 8 Vue component/nav/settings/preview tests (Vitest)
+npm test               # 80 package unit tests (node --test)
+npm run test:web       # 12 Vue component/nav/settings/preview tests (Vitest)
 npm run test:all       # both
 ```
 
@@ -121,6 +157,19 @@ sets COOP/COEP headers, restricts navigation and window-open, and exposes deskto
 capabilities over IPC: CORS-free audio fetch (http(s) only), native dialogs, and
 filesystem access (path-contained). `preload.js` bridges them as `window.doot`.
 
+The packaged app self-updates with electron-updater (a runtime dependency,
+externalized from the electron bundle like youtube-dl-exec). `setupUpdater` checks
+GitHub releases on launch and every few hours, downloads a newer build in the
+background, and posts status to the renderer over `update:status`. The nav button is
+adaptive (`components/DownloadModal.vue`): on web it is Download (opens the release
+modal); on desktop the Download button is gone and an Update button appears (pulsing)
+only when a newer build is downloaded and ready, and clicking it runs
+`autoUpdater.quitAndInstall`. Settings (localStorage under the `app://` origin) and the
+song library (a user-picked folder) both live in userData, which the update never
+touches, so they carry over. Settings also has a manual "Check for updates" row on
+desktop. Auto-update ships from v2.1.5 on; earlier builds have no updater and are
+replaced once via the Download button.
+
 ## Audit results folded in
 
 Two review passes ran (UI/color/accessibility and Vue/Electron correctness). Fixed:
@@ -143,8 +192,9 @@ Feedback is a rendering concern, so it lives in `@doot-games/render` (and the
 engine for sound), keeping logic pure. A hit stacks channels and scales them by
 the judgment (accumulation, not substitution): receptor pop, spark burst,
 expanding ring, a judgment word scaled by tier, a combo counter that punches per
-increment and celebrates every 50th, and a brighter hit tick for a better hit. A
-miss gives a restrained red field-tint at the edges. Receptors pulse to the beat
+increment and celebrates every 50th, and (off by default, a Settings toggle) a hit
+sound pitched to the note the arrow plays. A miss gives a restrained red field-tint at
+the edges. Receptors pulse to the beat
 as a timing anchor. `notefield.setReducedMotion(true)` trims the cosmetic motion
 while keeping essential feedback, wired to the reduced-motion setting.
 
@@ -161,9 +211,10 @@ uses the lane only for rotation, so a jump is one color. The per-direction palet
 is decoration for menu specimens only. Cycling the song wheel plays a soft
 `engine.cursor` blip (SelectView watches `songs.sel`), and the highlighted song
 plays a looping, faded preview so the screen is not silent
-(`composables/useSongPreview.js` over `engine.preview`/`stopPreview`): debounced so
-scrolling stays quiet, crossfaded between songs on the music bus, and stopped the
-moment a song starts (`engine.play` stops it) or the screen changes.
+(`composables/useSongPreview.js`): composed songs preview live through their bellows
+rack (`previewPieceLive`), imported ones from a decoded buffer; debounced so scrolling
+stays quiet, faded on the music bus, and stopped the moment a song starts or the
+screen changes.
 
 Next feel ideas (not done): an osu-style hit-error bar with running deviation, a
 combo-to-score multiplier, escalating milestone tiers, and pitch-rising ticks per
@@ -214,11 +265,17 @@ O(events) on a heavy gimmick chart; a cached cursor would make it O(1).
   and pull request.
 - `.github/workflows/release.yml` builds the Electron installers for macOS,
   Windows, and Linux on a `vX.Y.Z` tag and publishes them to a GitHub Release via
-  electron-builder. Signing and notarization are gated on repo secrets (listed in
-  the workflow header): with none set the build still succeeds, unsigned; set
-  `CSC_LINK`/`CSC_KEY_PASSWORD` to sign, and the `APPLE_*` secrets plus
-  `mac.notarize: true` to notarize. macOS entitlements live at
-  `apps/web/build/entitlements.mac.plist`.
+  electron-builder. The macOS job is signed and notarized (Developer ID cert +
+  `APPLE_*` secrets + `mac.notarize`); Windows and Linux publish unsigned. Each job
+  fetches a standalone yt-dlp binary first (the npm postinstall hits the API rate
+  limit on shared runner IPs). electron-builder uploads to a draft release, and
+  GitHub's `/releases/latest` (the in-app Download button and the auto-updater both
+  read it) ignores drafts, so a final `publish` job flips the release to published +
+  latest once all four platforms have uploaded. macOS entitlements live at
+  `apps/web/build/entitlements.mac.plist`. To cut a release: bump the version in
+  `package.json` and `apps/web/package.json` (surgical string edit, keep the root
+  `workspaces` and `optionalDependencies` intact), commit, tag `vX.Y.Z`, and push the
+  tag.
 - The web app is LIVE at https://dance.doot.games as a DigitalOcean App Platform
   Static Site (the free tier: no server, no container), app name `dance-doot-games`.
   `doot.games` is a DO-managed zone, so App Platform created the `dance` CNAME and
@@ -275,17 +332,17 @@ exports any song's charts as one StepMania `.sm`.
 
 ## Git state
 
-Branch `main`, remote `github.com/virgilvox/doot-doot-revolution`. The only commit
-so far is `d39dc84 add the initial workspace, libraries, and single-file app`,
-which is the original vanilla single-file build.
-
-Everything since (the Vue app in `apps/web`, the Electron target, the two audit
-passes and their fixes, the game-feel pass, the retirement of `apps/ddr`, and the
-doc updates) is UNCOMMITTED in the working tree: about two dozen changed, added,
-and deleted paths. Nothing here is pushed. First step for whoever picks this up is
-to review and commit this work (imperative subject, no AI attribution per
-`RULES.md`), for example a commit that adds the Vue app and desktop target and
-removes the vanilla app.
+Branch `main`, remote `github.com/virgilvox/doot-doot-revolution`. Fully committed
+and pushed; the web app auto-deploys from `main` and desktop releases cut from
+`vX.Y.Z` tags. Releases run v2.0.0 through v2.1.5 (current), signed and notarized.
+Recent work, newest first: desktop auto-update + adaptive nav button + release
+auto-publish; a channel-leak fix that was causing audio dropouts; dropping the fake
+artist credits (the built-ins are originals); an honest groove radar and off-by-
+default pitched hit sounds; the chart lead-in, Endless preview, wheel sparkle, and
+two more composed songs; hand-composing all ten prebuilt songs (the songbook +
+compiler); a danceable four-on-the-floor drum rewrite and Endless on bellows;
+per-genre bellows voice racks with live playback; and the bellows audio engine
+integration itself. Keep the working tree clean between tasks.
 
 ## Packages are private
 
