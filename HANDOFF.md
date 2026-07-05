@@ -16,8 +16,8 @@ opens on the Title attract screen.
 The earlier vanilla single-file app (`apps/ddr`) was retired; the packages remain
 the proof the logic is framework-free.
 
-Current status: builds clean, 92 tests pass (80 package, 12 Vue), deployed live at
-https://dance.doot.games (current release v2.1.8) with full SEO (meta, Open Graph,
+Current status: builds clean, 102 tests pass (86 package, 16 Vue), deployed live at
+https://dance.doot.games (current release v2.2.1) with full SEO (meta, Open Graph,
 Twitter cards, JSON-LD, an OG share image, sitemap, and web manifest), signed and
 notarized desktop installers published to GitHub Releases, and a working in-app
 auto-updater. Verified end to end in the browser (controller-only play, difficulty
@@ -113,17 +113,22 @@ it rides a lazy chunk loaded only when the Dancer setting is on (verified: the e
 chunk has zero three/VRM code; the split chunk carries it). It draws to a transparent
 canvas layered over `ShaderBackground` and under the notefield in `GameView`.
 
-The stage always keeps a full-body mocap clip looping and cross-fading to a new one
-every 7-12 seconds, so the avatar is never idle: the pixiv `VRMA_0x` motions and the
-two Mixamo `.fbx` dances (retargeted at runtime by `avatar/fbxRetarget.js`, the verified
-pixiv method, with the parsed FBX cached per URL so an avatar swap only re-runs the
-retarget). Roughly a third of segments hand back to the procedural swivel rig
-(`avatar/moves.js`, ported and smoothed from the mockup; tiered by combo, cross-faded by
-`avatar/director.js`) for variety. Clip and procedural never pop into each other:
-`avatar/retarget.js` `applyVRMPose(bones, pose, weight)` slerps the procedural pose over
-whatever the clip mixer wrote, and a `procWeight` eases the handoff both ways.
-`avatar/camera.js` cuts eight framings independently. The pure pieces are Node-tested
-(`packages/render/test/avatar.test.js`); the stage is verified in-browser.
+The avatar is always in a real dance clip, never a static or default pose. On mount it is
+kept hidden until a clip is actually driving it, then revealed straight into that clip
+(the first clip snaps to full weight), so the model's bind/default pose is never shown.
+The stage loops one full-body mocap clip and cross-fades to a fresh one every 7-12
+seconds: the pixiv `VRMA_0x` motions and the two Mixamo `.fbx` dances (retargeted at
+runtime by `avatar/fbxRetarget.js`, the verified pixiv method, with the parsed FBX cached
+per URL so an avatar swap only re-runs the retarget). The procedural swivel rig
+(`avatar/moves.js`, ported and smoothed from the mockup; tiered by combo via
+`avatar/director.js`) is only a fallback while clips load or if none are bundled;
+`avatar/retarget.js` `applyVRMPose(bones, pose, weight)` slerps it over whatever the clip
+mixer wrote so the handoff never pops. `avatar/camera.js` cuts nine framings (side thirds
+plus centered close/hero shots behind the lane band), each an eased smootherstep push
+rather than a hard jump, with longer shots so it never feels busy. The contact shadow
+tracks the avatar's hips world position, so it follows a clip that translates (the slide
+dance). The pure pieces are Node-tested (`packages/render/test/avatar.test.js`); the
+stage is verified in-browser.
 
 Assets are bundled in `apps/web/public/{vrm,vrma,fbx}` and fetched by URL on demand
 (manifest `game/avatars.js`). Only one VRM is resident. The default is the `7536…` model;
@@ -415,8 +420,15 @@ fetch it. Copy is plain with no em dashes, per `RULES.md`.
 
 Branch `main`, remote `github.com/virgilvox/doot-doot-revolution`. Fully committed
 and pushed; the web app auto-deploys from `main` and desktop releases cut from
-`vX.Y.Z` tags. Releases run v2.0.0 through v2.1.8 (current), signed and notarized.
-Recent work, newest first: reflect a finished update in Settings (its button turns to
+`vX.Y.Z` tags. Releases run v2.0.0 through v2.2.1 (current), signed and notarized.
+Recent work, newest first: the optional VRM dancer over the gameplay shader (v2.2.0),
+which always plays a real dance clip (revealed hidden-until-a-clip-drives, so the static
+default/arms-up pose is never shown), cycles the pixiv VRMA and runtime-retargeted Mixamo
+FBX dances, and cuts an eased, calmer camera (v2.2.1 smoothed the cuts with a
+smootherstep transition and longer shots); the step-chart difficulty rebalance to DDR
+conventions (subdivision coverage so Expert keeps sixteenth bursts at every tempo);
+clarifying the import time estimate and scrolling to the build progress; reflect a
+finished update in Settings (its button turns to
 Update, with a download percent); fix macOS auto-update that hung in downloading (build
 a zip target Squirrel.Mac can apply); stop Enter and Escape from also triggering a
 focused button's default click; full SEO (meta, Open Graph, JSON-LD, OG image, sitemap,
