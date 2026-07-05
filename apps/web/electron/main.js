@@ -76,6 +76,7 @@ function setupUpdater(win) {
   autoUpdater.autoInstallOnAppQuit = true;
   const send = (data) => { try { if (win && !win.isDestroyed()) win.webContents.send('update:status', data); } catch (e) {} };
   autoUpdater.on('update-available', (info) => send({ state: 'available', version: info && info.version }));
+  autoUpdater.on('download-progress', (p) => send({ state: 'downloading', percent: Math.round((p && p.percent) || 0) }));
   autoUpdater.on('update-downloaded', (info) => send({ state: 'ready', version: info && info.version }));
   autoUpdater.on('error', (err) => send({ state: 'error', message: String((err && err.message) || err) }));
   autoUpdater.checkForUpdates().catch(() => {});

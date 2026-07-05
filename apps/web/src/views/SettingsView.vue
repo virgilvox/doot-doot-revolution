@@ -40,12 +40,22 @@ const calib = reactive({ running: false, msg: '', clicks: [], taps: [] });
 // desktop-only manual update check (the app also checks on launch and every few hours)
 const isDesktop = !!(window.doot && window.doot.isDesktop);
 const upd = reactive({ msg: '' });
+// reflect live update status (download progress, ready, or error) as it is reported
+if (isDesktop && window.doot.onUpdate) window.doot.onUpdate((d) => {
+  if (!d) return;
+  if (d.state === 'available') upd.msg = 'Update found, downloading…';
+  else if (d.state === 'downloading') upd.msg = 'Downloading update' + (d.percent != null ? ' ' + d.percent + '%' : '…');
+  else if (d.state === 'ready') upd.msg = 'Update ' + (d.version ? 'v' + d.version + ' ' : '') + 'ready. Restart to install.';
+  else if (d.state === 'error') upd.msg = 'Auto-update failed. Get it from the releases page.';
+});
 async function checkForUpdate() {
   if (!window.doot || !window.doot.checkUpdate) return;
   upd.msg = 'Checking…';
   try {
     const r = await window.doot.checkUpdate();
-    upd.msg = r && r.updateAvailable ? ('Update v' + r.latest + ' downloading…') : (r && r.error ? 'Could not check' : 'You have the latest' + (r && r.current ? ' (v' + r.current + ')' : ''));
+    if (r && r.updateAvailable) upd.msg = 'Update v' + r.latest + ' found, downloading…';
+    else if (r && r.error) upd.msg = 'Could not check';
+    else upd.msg = 'You have the latest' + (r && r.current ? ' (v' + r.current + ')' : '');
   } catch (e) { upd.msg = 'Could not check'; }
 }
 

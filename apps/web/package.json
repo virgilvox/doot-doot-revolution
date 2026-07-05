@@ -1,6 +1,6 @@
 {
   "name": "@doot-games/web",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "private": true,
   "description": "Doot Doot Revolution as a Vue 3 app, also packaged for the desktop with Electron.",
   "type": "module",

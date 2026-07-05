@@ -23,7 +23,10 @@ asarUnpack:
 mac:
   target:
     - target: dmg
-      arch: [arm64, x64]        # Apple Silicon and Intel
+      arch: [arm64, x64]        # Apple Silicon and Intel, for manual download
+    - target: zip
+      arch: [arm64, x64]        # required for in-app auto-update (Squirrel.Mac cannot
+                                # apply a dmg; latest-mac.yml points the updater at the zip)
   artifactName: DootDootRevolution-${version}-mac-${arch}.${ext}
   category: public.app-category.games
   hardenedRuntime: true

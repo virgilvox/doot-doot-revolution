@@ -6,6 +6,12 @@
     <span class="dlbtn-l">Update</span>
   </button>
 
+  <!-- auto-update failed: send the user to the releases page to update by hand -->
+  <button v-else-if="isDesktop && updateError" class="dlbtn" @click="openReleases" title="Open the releases page to update" aria-label="Get the update">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/></svg>
+    <span class="dlbtn-l">Update</span>
+  </button>
+
   <template v-else-if="!isDesktop">
   <button class="dlbtn" @click="toggle" title="Download the desktop app" aria-label="Download the desktop app">
     <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M11 3h2v9.2l3.1-3.1 1.4 1.4L12 16.1 6.5 10.5l1.4-1.4L11 12.2V3zM5 19h14v2H5v-2z"/></svg>
@@ -46,13 +52,16 @@ import { ref, watch, onMounted } from 'vue';
 // desktop exposes window.doot; the auto-updater pushes status here
 const isDesktop = !!(window.doot && window.doot.isDesktop);
 const updateReady = ref(false);
+const updateError = ref(false);
 const updateVersion = ref('');
 function installUpdate() { if (window.doot && window.doot.installUpdate) window.doot.installUpdate(); }
+function openReleases() { window.open(RELEASES, '_blank'); }
 onMounted(() => {
   if (isDesktop && window.doot.onUpdate) window.doot.onUpdate((d) => {
     if (!d) return;
     if (d.version) updateVersion.value = d.version;
-    if (d.state === 'ready') updateReady.value = true;
+    if (d.state === 'ready') { updateReady.value = true; updateError.value = false; }
+    else if (d.state === 'error') updateError.value = true;
   });
 });
 
