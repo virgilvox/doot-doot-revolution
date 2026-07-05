@@ -80,3 +80,17 @@ jobs:
         run: npm --workspace @doot-games/web run release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # electron-builder uploads assets to a draft release; GitHub's /releases/latest (used
+  # by the in-app Download button and the desktop auto-updater) ignores drafts. Once all
+  # platforms have uploaded, flip the release to published and mark it latest.
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "${{ github.ref_name }}" --repo "${{ github.repository }}" --draft=false --latest

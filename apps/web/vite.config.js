@@ -14,7 +14,7 @@ export default defineConfig(async () => {
       // youtube-dl-exec (the yt-dlp wrapper, used only by the main process for YouTube
       // audio import) is a Node runtime dep with a bundled binary; externalize it so it
       // loads from node_modules instead of being bundled.
-      main: { entry: 'electron/main.js', vite: { build: { rollupOptions: { external: ['youtube-dl-exec'] } } } },
+      main: { entry: 'electron/main.js', vite: { build: { rollupOptions: { external: ['youtube-dl-exec', 'electron-updater'] } } } },
       // sandboxed preload must be a single CommonJS file named preload.js
       preload: { input: 'electron/preload.js', vite: { build: { rollupOptions: { output: { format: 'cjs', entryFileNames: 'preload.js', inlineDynamicImports: true } } } } }
     }));

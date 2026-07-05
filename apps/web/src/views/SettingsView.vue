@@ -36,6 +36,19 @@ const back = () => go('select');
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 const calib = reactive({ running: false, msg: '', clicks: [], taps: [] });
+
+// desktop-only manual update check (the app also checks on launch and every few hours)
+const isDesktop = !!(window.doot && window.doot.isDesktop);
+const upd = reactive({ msg: '' });
+async function checkForUpdate() {
+  if (!window.doot || !window.doot.checkUpdate) return;
+  upd.msg = 'Checking…';
+  try {
+    const r = await window.doot.checkUpdate();
+    upd.msg = r && r.updateAvailable ? ('Update v' + r.latest + ' downloading…') : (r && r.error ? 'Could not check' : 'You have the latest' + (r && r.current ? ' (v' + r.current + ')' : ''));
+  } catch (e) { upd.msg = 'Could not check'; }
+}
+
 const rows = [
   { t: 'Scroll speed', d: 'How fast arrows travel. Higher is faster.', kind: 'range', key: 'speed', min: 1, max: 5, step: 0.1, fmt: (v) => v.toFixed(1) + 'x' },
   { t: 'Judge offset', d: 'Nudge timing if hits feel early or late.', kind: 'range', key: 'offsetMs', min: -100, max: 100, step: 2, fmt: (v) => (v > 0 ? '+' : '') + Math.round(v) + ' ms' },
@@ -46,9 +59,14 @@ const rows = [
   { t: 'Hit sounds', d: 'Play a note on each hit, pitched to the song. Off by default.', kind: 'toggle', key: 'hitSounds' },
   { t: 'Reduced motion', d: 'Calmer menus. Gameplay still animates.', kind: 'toggle', key: 'reducedMotion' },
   { t: 'Background visuals', d: 'Generative shader behind the lanes during play. Off for a plain field.', kind: 'toggle', key: 'background' },
+  ...(isDesktop ? [{ t: 'Check for updates', id: 'update', kind: 'action', action: checkForUpdate, label: () => 'Check now' }] : []),
   { t: 'Reset', d: 'Restore default settings.', kind: 'action', action: () => s.reset(), label: () => 'Reset all' }
 ];
-function desc(r) { if (r.id === 'calibrate') return calib.msg || 'Play 8 clicks and tap Space in time to find your offset.'; return r.d || ''; }
+function desc(r) {
+  if (r.id === 'calibrate') return calib.msg || 'Play 8 clicks and tap Space in time to find your offset.';
+  if (r.id === 'update') return upd.msg || 'A newer version installs itself; you just restart. Your settings are kept.';
+  return r.d || '';
+}
 function rangeValue(r) { return r.kind === 'vol' ? Math.round(s.state[r.key] * 100) : s.state[r.key]; }
 function rangeLabel(r) { return r.kind === 'vol' ? Math.round(s.state[r.key] * 100) + '%' : r.fmt(s.state[r.key]); }
 function onInput(r, e) { const v = Number(e.target.value); s.set(r.key, r.kind === 'vol' ? v / 100 : v); }

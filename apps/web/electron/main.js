@@ -8,6 +8,8 @@ import { app, BrowserWindow, session, protocol, ipcMain, net, dialog, shell } fr
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import electronUpdater from 'electron-updater';
+const { autoUpdater } = electronUpdater;
 
 // This bundles to an ES module (the app package.json has "type": "module"), where
 // __dirname does not exist; derive it from import.meta.url.
@@ -60,6 +62,24 @@ function createWindow() {
   });
   if (isDev) win.loadURL(process.env.VITE_DEV_SERVER_URL);
   else win.loadURL('app://local/index.html');
+  setupUpdater(win);
+}
+
+// Desktop auto-update. In the packaged app, check GitHub releases on launch (and every
+// few hours), download a newer build in the background, and tell the renderer when one is
+// available and when it is downloaded. The user chooses when to restart to apply it;
+// nothing installs behind their back mid-session. Settings and the song library live in
+// userData, which the update never touches, so they carry over.
+function setupUpdater(win) {
+  if (!app.isPackaged) return;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  const send = (data) => { try { if (win && !win.isDestroyed()) win.webContents.send('update:status', data); } catch (e) {} };
+  autoUpdater.on('update-available', (info) => send({ state: 'available', version: info && info.version }));
+  autoUpdater.on('update-downloaded', (info) => send({ state: 'ready', version: info && info.version }));
+  autoUpdater.on('error', (err) => send({ state: 'error', message: String((err && err.message) || err) }));
+  autoUpdater.checkForUpdates().catch(() => {});
+  setInterval(() => autoUpdater.checkForUpdates().catch(() => {}), 6 * 60 * 60 * 1000);
 }
 
 // The library location is remembered in a small config file in userData. The song
@@ -116,6 +136,18 @@ async function getYtdlp() {
 }
 
 function registerIpc() {
+  // Auto-update controls: install the downloaded update (quit + replace + relaunch), or
+  // re-check on demand. Safe no-ops in dev / when not packaged.
+  ipcMain.handle('update:install', () => { try { autoUpdater.quitAndInstall(); } catch (e) {} });
+  ipcMain.handle('update:check', async () => {
+    const current = app.getVersion();
+    if (!app.isPackaged) return { current, latest: current, updateAvailable: false };
+    try {
+      const r = await autoUpdater.checkForUpdates();
+      const latest = (r && r.updateInfo && r.updateInfo.version) || current;
+      return { current, latest, updateAvailable: latest !== current };
+    } catch (e) { return { current, latest: null, updateAvailable: false, error: true }; }
+  });
   // Fetch remote audio bytes past the browser CORS wall.
   ipcMain.handle('audio:fetch', async (e, url) => {
     let proto; try { proto = new URL(url).protocol; } catch (err) { throw new Error('bad url'); }

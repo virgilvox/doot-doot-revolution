@@ -1,4 +1,12 @@
 <template>
+  <!-- Desktop already has the app: no Download. Instead an Update button appears only when
+       a newer release has been downloaded in the background and is ready to install. -->
+  <button v-if="isDesktop && updateReady" class="dlbtn upd" @click="installUpdate" :title="updateVersion ? 'Restart to update to v' + updateVersion : 'Restart to update'" aria-label="Install update">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/></svg>
+    <span class="dlbtn-l">Update</span>
+  </button>
+
+  <template v-else-if="!isDesktop">
   <button class="dlbtn" @click="toggle" title="Download the desktop app" aria-label="Download the desktop app">
     <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M11 3h2v9.2l3.1-3.1 1.4 1.4L12 16.1 6.5 10.5l1.4-1.4L11 12.2V3zM5 19h14v2H5v-2z"/></svg>
     <span class="dlbtn-l">Download</span>
@@ -29,10 +37,24 @@
       </div>
     </div>
   </teleport>
+  </template>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
+
+// desktop exposes window.doot; the auto-updater pushes status here
+const isDesktop = !!(window.doot && window.doot.isDesktop);
+const updateReady = ref(false);
+const updateVersion = ref('');
+function installUpdate() { if (window.doot && window.doot.installUpdate) window.doot.installUpdate(); }
+onMounted(() => {
+  if (isDesktop && window.doot.onUpdate) window.doot.onUpdate((d) => {
+    if (!d) return;
+    if (d.version) updateVersion.value = d.version;
+    if (d.state === 'ready') updateReady.value = true;
+  });
+});
 
 const REPO = 'virgilvox/doot-doot-revolution';
 const RELEASES = `https://github.com/${REPO}/releases/latest`;
@@ -87,6 +109,9 @@ watch(open, (v) => { if (v) load(); });
 .dlbtn { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--green); color: #fff; font-family: var(--fu); font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 3px 0 var(--ink-2); transition: transform .1s var(--sp), box-shadow .1s; }
 .dlbtn:hover { transform: translateY(-1px); }
 .dlbtn:active { transform: translateY(3px); box-shadow: 0 0 0 var(--ink-2); }
+/* the desktop Update button pulses so a ready update is noticed */
+.dlbtn.upd { animation: dl-upd 1.9s ease-in-out infinite; }
+@keyframes dl-upd { 0%, 100% { box-shadow: 0 3px 0 var(--ink-2); } 50% { box-shadow: 0 3px 0 var(--ink-2), 0 0 16px rgba(53, 208, 127, .85); } }
 .dlbtn svg { display: block; }
 @media (max-width: 620px) { .dlbtn-l { display: none; } .dlbtn { padding: 0 11px; } }
 

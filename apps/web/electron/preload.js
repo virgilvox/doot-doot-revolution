@@ -18,5 +18,9 @@ contextBridge.exposeInMainWorld('doot', {
     put: (id, json) => ipcRenderer.invoke('lib:put', id, json),
     remove: (id) => ipcRenderer.invoke('lib:remove', id),
     reveal: () => ipcRenderer.invoke('lib:reveal')
-  }
+  },
+  // auto-update: subscribe to status (available/ready/error) and trigger the install
+  onUpdate: (cb) => ipcRenderer.on('update:status', (_e, data) => cb(data)),
+  installUpdate: () => ipcRenderer.invoke('update:install'),
+  checkUpdate: () => ipcRenderer.invoke('update:check')
 });
