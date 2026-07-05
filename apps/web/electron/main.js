@@ -10,6 +10,7 @@ import fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import electronUpdater from 'electron-updater';
 const { autoUpdater } = electronUpdater;
+let _updateStatus = null; // latest update status, so a view opened after it fired can read it
 
 // This bundles to an ES module (the app package.json has "type": "module"), where
 // __dirname does not exist; derive it from import.meta.url.
@@ -74,7 +75,7 @@ function setupUpdater(win) {
   if (!app.isPackaged) return;
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
-  const send = (data) => { try { if (win && !win.isDestroyed()) win.webContents.send('update:status', data); } catch (e) {} };
+  const send = (data) => { _updateStatus = data; try { if (win && !win.isDestroyed()) win.webContents.send('update:status', data); } catch (e) {} };
   autoUpdater.on('update-available', (info) => send({ state: 'available', version: info && info.version }));
   autoUpdater.on('download-progress', (p) => send({ state: 'downloading', percent: Math.round((p && p.percent) || 0) }));
   autoUpdater.on('update-downloaded', (info) => send({ state: 'ready', version: info && info.version }));
@@ -140,6 +141,7 @@ function registerIpc() {
   // Auto-update controls: install the downloaded update (quit + replace + relaunch), or
   // re-check on demand. Safe no-ops in dev / when not packaged.
   ipcMain.handle('update:install', () => { try { autoUpdater.quitAndInstall(); } catch (e) {} });
+  ipcMain.handle('update:state', () => _updateStatus);
   ipcMain.handle('update:check', async () => {
     const current = app.getVersion();
     if (!app.isPackaged) return { current, latest: current, updateAvailable: false };

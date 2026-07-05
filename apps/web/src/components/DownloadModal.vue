@@ -56,13 +56,17 @@ const updateError = ref(false);
 const updateVersion = ref('');
 function installUpdate() { if (window.doot && window.doot.installUpdate) window.doot.installUpdate(); }
 function openReleases() { window.open(RELEASES, '_blank'); }
-onMounted(() => {
-  if (isDesktop && window.doot.onUpdate) window.doot.onUpdate((d) => {
-    if (!d) return;
-    if (d.version) updateVersion.value = d.version;
-    if (d.state === 'ready') { updateReady.value = true; updateError.value = false; }
-    else if (d.state === 'error') updateError.value = true;
-  });
+function applyStatus(d) {
+  if (!d) return;
+  if (d.version) updateVersion.value = d.version;
+  if (d.state === 'ready') { updateReady.value = true; updateError.value = false; }
+  else if (d.state === 'error') updateError.value = true;
+}
+onMounted(async () => {
+  if (!isDesktop) return;
+  if (window.doot.onUpdate) window.doot.onUpdate(applyStatus);
+  // also read the current status, in case the update finished before this mounted
+  if (window.doot.updateState) { try { applyStatus(await window.doot.updateState()); } catch (e) {} }
 });
 
 const REPO = 'virgilvox/doot-doot-revolution';

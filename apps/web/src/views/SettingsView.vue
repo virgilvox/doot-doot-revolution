@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { reactive, onBeforeUnmount } from 'vue';
+import { reactive, onBeforeUnmount, onMounted } from 'vue';
 import { go } from '../game/screen.js';
 import { settings, resetSettings } from '../game/settings.js';
 import { useRovingFocus } from '../composables/useRovingFocus.js';
@@ -39,15 +39,20 @@ const calib = reactive({ running: false, msg: '', clicks: [], taps: [] });
 
 // desktop-only manual update check (the app also checks on launch and every few hours)
 const isDesktop = !!(window.doot && window.doot.isDesktop);
-const upd = reactive({ msg: '' });
-// reflect live update status (download progress, ready, or error) as it is reported
-if (isDesktop && window.doot.onUpdate) window.doot.onUpdate((d) => {
+const upd = reactive({ msg: '', ready: false });
+// reflect update status (download progress, ready, or error). ready flips the row's action
+// and label to Update. Both the live event and a state query on open feed it, so opening
+// Settings after the download already finished still shows ready.
+function applyStatus(d) {
   if (!d) return;
   if (d.state === 'available') upd.msg = 'Update found, downloading…';
   else if (d.state === 'downloading') upd.msg = 'Downloading update' + (d.percent != null ? ' ' + d.percent + '%' : '…');
-  else if (d.state === 'ready') upd.msg = 'Update ' + (d.version ? 'v' + d.version + ' ' : '') + 'ready. Restart to install.';
+  else if (d.state === 'ready') { upd.ready = true; upd.msg = 'Update ' + (d.version ? 'v' + d.version + ' ' : '') + 'downloaded. Restart to install it.'; }
   else if (d.state === 'error') upd.msg = 'Auto-update failed. Get it from the releases page.';
-});
+}
+if (isDesktop && window.doot.onUpdate) window.doot.onUpdate(applyStatus);
+onMounted(async () => { if (isDesktop && window.doot.updateState) { try { applyStatus(await window.doot.updateState()); } catch (e) {} } });
+function installUpdate() { if (window.doot && window.doot.installUpdate) window.doot.installUpdate(); }
 async function checkForUpdate() {
   if (!window.doot || !window.doot.checkUpdate) return;
   upd.msg = 'Checking…';
@@ -69,7 +74,7 @@ const rows = [
   { t: 'Hit sounds', d: 'Play a note on each hit, pitched to the song. Off by default.', kind: 'toggle', key: 'hitSounds' },
   { t: 'Reduced motion', d: 'Calmer menus. Gameplay still animates.', kind: 'toggle', key: 'reducedMotion' },
   { t: 'Background visuals', d: 'Generative shader behind the lanes during play. Off for a plain field.', kind: 'toggle', key: 'background' },
-  ...(isDesktop ? [{ t: 'Check for updates', id: 'update', kind: 'action', action: checkForUpdate, label: () => 'Check now' }] : []),
+  ...(isDesktop ? [{ t: 'Check for updates', id: 'update', kind: 'action', action: () => (upd.ready ? installUpdate() : checkForUpdate()), label: () => (upd.ready ? 'Update' : 'Check now') }] : []),
   { t: 'Reset', d: 'Restore default settings.', kind: 'action', action: () => s.reset(), label: () => 'Reset all' }
 ];
 function desc(r) {

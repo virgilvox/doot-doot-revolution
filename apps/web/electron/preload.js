@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld('doot', {
   },
   // auto-update: subscribe to status (available/ready/error) and trigger the install
   onUpdate: (cb) => ipcRenderer.on('update:status', (_e, data) => cb(data)),
+  updateState: () => ipcRenderer.invoke('update:state'),
   installUpdate: () => ipcRenderer.invoke('update:install'),
   checkUpdate: () => ipcRenderer.invoke('update:check')
 });
