@@ -53,8 +53,12 @@ export function createInput(options = {}) {
     // resolve against both keyboards; the first match owns the key (arrows -> p1, WASD -> p2)
     for (const dev of KEYBOARDS) {
       const m = mapFor(dev);
-      if (inSlot(m, 'start', e.code)) emit('start', { device: dev });
-      if (inSlot(m, 'back', e.code)) emit('back', { device: dev });
+      // preventDefault on start/back too, not just lanes: otherwise Enter also fires the
+      // browser default click on a DOM-focused button (a nav tab you clicked earlier), so a
+      // confirm would exit a modal or navigate instead of confirming. The input/textarea
+      // guard above keeps text fields (Enter to submit a URL) working.
+      if (inSlot(m, 'start', e.code)) { emit('start', { device: dev }); if (e.preventDefault) e.preventDefault(); return; }
+      if (inSlot(m, 'back', e.code)) { emit('back', { device: dev }); if (e.preventDefault) e.preventDefault(); return; }
       const l = laneFor(m, e.code); if (l >= 0) { down(dev, l); if (e.preventDefault) e.preventDefault(); return; }
     }
   }
