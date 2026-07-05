@@ -47,7 +47,7 @@
             <div v-for="(u, k) in ENGINE_UI" :key="k" class="engine" :class="{ on: engineSel === k }" @click="engineSel = k">
               <div class="en-ic" :style="{ background: `var(${u.color})` }">{{ u.ic }}</div>
               <div class="en-b"><div class="en-t">{{ ENGINES[k].name }}</div><div class="en-d">{{ ENGINES[k].desc }}</div></div>
-              <div class="en-m"><span>{{ u.time }}</span><div class="emeter" :class="u.cls"><i v-for="n in 3" :key="n" :class="{ f: n <= u.q }"></i></div></div>
+              <div class="en-m"><span class="en-est" title="estimated time to analyze and build the chart">est {{ u.time }}</span><div class="emeter" :class="u.cls"><i v-for="n in 3" :key="n" :class="{ f: n <= u.q }"></i></div></div>
             </div>
           </div>
           <span class="eyebrow" style="margin-top:2px">Generate difficulties</span>
@@ -61,7 +61,8 @@
         </div>
       </div>
 
-      <div v-if="running || stages.length" class="panel" style="margin-top:14px">
+      <div v-if="running || stages.length" ref="progressPanel" class="panel prog-panel" :class="{ live: running }" style="margin-top:14px">
+        <span class="eyebrow">{{ done ? 'Chart ready' : 'Building your chart' }}</span>
         <div class="run-bar"><i :style="{ width: (bar * 100) + '%' }"></i></div>
         <div class="stages" style="margin-top:10px">
           <div v-for="(st, i) in stages" :key="i" class="stg" :class="st.state"><span class="tick">{{ st.tick }}</span><span class="lbl">{{ st.label }}</span></div>
@@ -85,7 +86,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, nextTick } from 'vue';
 import { go } from '../game/screen.js';
 import { analyze, estimateTempo, DIFFS, ENGINES, computeRadar, generateFromAudio as pipelineGenerate } from '@doot-games/chart';
 import { DIFF_VAR } from '../styles/tokens.js';
@@ -102,10 +103,12 @@ const plat = usePlatform();
 const lib = useLibraryStore();
 const ctx = engine.ensure();
 
+// times are estimated processing durations (shown as "est 5s"), not an amount removed
+// from the song; the "est" prefix and title keep a bare "~15s" from reading as minus 15s
 const ENGINE_UI = {
-  quick: { ic: 'Q', color: '--green', time: '~5s', q: 2, cls: '' },
-  drum: { ic: 'D', color: '--blue', time: '~15s', q: 2, cls: '' },
-  stem: { ic: 'S', color: '--purple', time: '~60s', q: 3, cls: 'q' }
+  quick: { ic: 'Q', color: '--green', time: '5s', q: 2, cls: '' },
+  drum: { ic: 'D', color: '--blue', time: '15s', q: 2, cls: '' },
+  stem: { ic: 'S', color: '--purple', time: '60s', q: 3, cls: 'q' }
 };
 const STAGE_LABELS = ['Decode & resample', 'Detect tempo', 'Isolate drums · WebGPU', 'Place steps per subdivision', 'Balance feet & write .doot'];
 const STAGE_INDEX = { decode: 0, tempo: 1, isolate: 2, place: 3, balance: 4 };
@@ -127,6 +130,7 @@ const stages = ref([]);
 const reviewing = ref(false);
 const enginePath = ref('drum-aware');
 const editor = ref(null);
+const progressPanel = ref(null);
 const firstDiff = computed(() => (draft.value && draft.value.charts && draft.value.charts.expert) ? 'expert' : (draft.value ? Object.keys(draft.value.charts)[0] : 'basic'));
 
 function back() { go('select'); }
@@ -181,6 +185,9 @@ async function generate() {
   running.value = true; done.value = false; bar.value = 0;
   stages.value = STAGE_LABELS.map((l, i) => ({ label: l, tick: String(i + 1), state: '' }));
   if (engineSel.value !== 'stem') setStage(2, 'skip', '-', 'Isolate drums · not needed');
+  // pull the progress panel into view so the player watches it work rather than staring
+  // at the button they just pressed (the panel appears below the form)
+  await nextTick(); if (progressPanel.value) progressPanel.value.scrollIntoView({ behavior: 'smooth', block: 'center' });
   const bpm = parseFloat(meta.bpm) || d.tempo.bpm;
   const hooks = { stage: (name) => { const i = STAGE_INDEX[name]; if (i != null) setStage(i, 'run'); }, progress: (p) => { bar.value = Math.max(0, Math.min(1, p)); }, status: (msg) => setStage(2, 'run', null, 'Isolate drums · ' + msg) };
   try {
@@ -218,4 +225,8 @@ useScope({ cancel: () => { if (reviewing.value) reviewing.value = false; else ba
 .importing { display: flex; align-items: center; gap: 8px; margin: 0; font-family: var(--fu); font-weight: 700; font-size: 13px; color: var(--blue); }
 .ed-mount { border: 3px solid var(--ink); border-radius: var(--r2); background: var(--paper); padding: 12px; margin-top: 10px; height: clamp(320px, 60vh, 560px); }
 .review { display: flex; flex-direction: column; gap: 10px; }
+/* the build-progress panel gets a soft ring while working so, once scrolled to, it reads
+   as the active thing on screen without becoming a blocking modal */
+.prog-panel.live { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(90, 120, 255, .16); }
+.prog-panel.live .eyebrow { color: var(--blue); }
 </style>
