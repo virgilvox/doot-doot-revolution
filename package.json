@@ -20,7 +20,7 @@
     "build:desktop": "npm --workspace @doot-games/web run build:desktop"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20 <=24"
   },
   "comment": "Rollup ships its native binary as a per-platform optional dep, but npm omits the ones not matching the machine that generated the lockfile (npm/cli#4828), which breaks `npm ci` on the other OS runners. Declaring all of them here forces every platform's binary into the lockfile so `npm ci` resolves correctly everywhere. Keep the versions in lockstep with rollup.",
   "optionalDependencies": {
@@ -28,5 +28,12 @@
     "@rollup/rollup-darwin-x64": "4.62.2",
     "@rollup/rollup-linux-x64-gnu": "4.62.2",
     "@rollup/rollup-win32-x64-msvc": "4.62.2"
+  },
+  "allowScripts": {
+    "electron": true,
+    "esbuild": true,
+    "fsevents": true,
+    "vue-demi": true,
+    "youtube-dl-exec": true
   }
 }

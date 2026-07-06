@@ -78,6 +78,7 @@ const rows = [
   { t: 'Music volume', kind: 'vol', key: 'volMusic' },
   { t: 'SFX volume', d: 'Loudness of menu and hit sounds.', kind: 'vol', key: 'volSfx' },
   { t: 'Hit sounds', d: 'Play a note on each hit, pitched to the song. Off by default.', kind: 'toggle', key: 'hitSounds' },
+  { t: 'Pause when unfocused', d: 'Freeze the game and mute the sound when you switch to another window or tab.', kind: 'toggle', key: 'pauseOnBlur' },
   { t: 'Reduced motion', d: 'Calmer menus. Gameplay still animates.', kind: 'toggle', key: 'reducedMotion' },
   { t: 'Background visuals', d: 'Generative shader behind the lanes during play. Off for a plain field.', kind: 'toggle', key: 'background' },
   { t: 'Dancer', d: 'A VRM character dances over the background during play. Cycles moves and camera shots.', kind: 'toggle', key: 'dancer' },

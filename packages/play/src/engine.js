@@ -23,6 +23,7 @@ export class AudioEngine {
     this._piece = null; this._pieceDur = 0; this._stepDur = 0; this._source = null; this._external = false;
     // live synth preview (select wheel)
     this.previewSynth = null; this.previewTimer = null; this.previewStep = 0; this.previewNext = 0; this.previewFrom = 0; this._prPiece = null; this._prStepDur = 0;
+    this.uiCtx = null; // side context for the count-in, so its clicks sound while the main context is suspended
     this.volumes = { master: 0.9, music: 0.85, sfx: 0.7 };
   }
   _ensure() {
@@ -39,6 +40,7 @@ export class AudioEngine {
   applyVolumes() { if (!this.ctx) return; this.master.gain.value = this.volumes.master; this.music.gain.value = this.volumes.music; this.sfx.gain.value = this.volumes.sfx; }
 
   resume() { this._ensure(); if (this.ctx.state === 'suspended') return this.ctx.resume(); return Promise.resolve(); }
+  suspend() { if (this.ctx && this.ctx.state === 'running') return this.ctx.suspend(); return Promise.resolve(); }
   async decode(arrayBuffer) { this._ensure(); return await this.ctx.decodeAudioData(arrayBuffer.slice(0)); }
   load(buffer) { this.buffer = buffer; }
 
@@ -159,6 +161,33 @@ export class AudioEngine {
     g.gain.exponentialRampToValueAtTime(0.25, this.ctx.currentTime + 0.004);
     g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.08);
     o.connect(g); g.connect(this.sfx); o.start(); o.stop(this.ctx.currentTime + 0.09);
+  }
+
+  // Count the player back in after a pause: `beats` evenly spaced clicks at the song tempo,
+  // then resolve on the beat after the last click, which is the moment the caller resumes
+  // the song. The clicks play on a dedicated side context so the main context can stay
+  // suspended and the paused song stays silent until then. onBeat(n) fires per click for the
+  // on-screen number. Returns a promise that resolves at that resume moment.
+  countIn(bpm = 120, beats = 3, { onBeat = null, freq = 1120 } = {}) {
+    const period = 60 / (bpm > 0 ? bpm : 120);
+    const lead = 0.08;
+    if (!this.uiCtx) this.uiCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = this.uiCtx;
+    if (ctx.state === 'suspended') ctx.resume();
+    const peak = Math.max(0.0001, 0.3 * this.volumes.master * this.volumes.sfx);
+    const t0 = ctx.currentTime + lead;
+    for (let i = 0; i < beats; i++) {
+      const o = ctx.createOscillator(), g = ctx.createGain(), at = t0 + i * period;
+      o.type = 'square'; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(peak, at + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + 0.09);
+      o.connect(g); g.connect(ctx.destination); o.start(at); o.stop(at + 0.1);
+    }
+    return new Promise((res) => {
+      for (let i = 0; i < beats; i++) setTimeout(() => onBeat && onBeat(i + 1), Math.round((lead + i * period) * 1000));
+      setTimeout(res, Math.round((lead + beats * period) * 1000));
+    });
   }
 
   // a short pitched pluck for a correct hit (only when hit sounds are enabled): freq is

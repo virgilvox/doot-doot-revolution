@@ -32,6 +32,9 @@
         <div class="acts"><button class="btn white sm" @click="restart">Restart</button><button class="btn white sm" @click="quit">Quit</button></div>
       </div>
       <div class="gp-prog" v-if="!state.endless"><i :style="{ width: (state.progress * 100) + '%' }"></i></div>
+
+      <!-- shown only after a focus-loss pause; the count-in hides it and takes over -->
+      <PauseMenu v-if="state.paused && !state.count" @resume="resumeGame" @quit="quit" />
     </div>
   </div>
 </template>
@@ -43,6 +46,7 @@ import NoteField from '../components/NoteField.vue';
 import ShaderBackground from '../components/ShaderBackground.vue';
 import DancerStage from '../components/DancerStage.vue';
 import GameHud from '../components/GameHud.vue';
+import PauseMenu from '../components/PauseMenu.vue';
 import { session } from '../composables/useSession.js';
 import { useScope } from '../composables/useNavigation.js';
 import { pendingPlay } from '../game/play.js';
@@ -82,7 +86,10 @@ const sub = computed(() => {
 // endless and versus quit to a results/standings screen; a solo fixed song abandons
 function quit() { if (state.endless || state.multi) session.quit(); else { session.stop(); go('select'); } }
 function restart() { session.restart(); }
-useScope({ cancel: quit });
+function resumeGame() { session.resumeCountIn(); }
+// keyboard Enter (confirm) counts back in from the pause menu; the input layer swallows
+// Enter, so the focused Resume button cannot rely on its native activation
+useScope({ cancel: quit, confirm: () => { if (state.paused && !state.count) resumeGame(); } });
 
 onMounted(() => {
   if (isMatch) {

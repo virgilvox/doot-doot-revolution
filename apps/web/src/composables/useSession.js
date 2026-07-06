@@ -20,12 +20,13 @@ import { dancerClock } from '../game/dancerClock.js';
 
 function createSession() {
   const state = reactive({
-    playing: false, loading: false, count: '', progress: 0, elapsed: 0, endless: false, multi: false,
+    playing: false, paused: false, loading: false, count: '', progress: 0, elapsed: 0, endless: false, multi: false,
     players: [], song: null, results: null,
     // single-player aliases (mirror players[0]) so single-player HUD/readers stay simple
     score: 0, combo: 0, life: 50, judge: null, chart: null
   });
-  let raf = 0, active = false, epoch = 0, subs = [], fields = [], timing = null;
+  let raf = 0, active = false, paused = false, epoch = 0, subs = [], fields = [], timing = null;
+  let resumeEpoch = 0, resuming = false;
   let endless = false, conductor = null, replay = null, endlessStep = null;
   const off = () => settings.offsetMs / 1000;
 
@@ -46,7 +47,7 @@ function createSession() {
 
   function wireInput() {
     subs.push(bus.on('lane:down', ({ lane, device }) => {
-      if (!active) return;
+      if (!active || paused) return;
       const pi = playerForDevice(state.players, device); if (pi < 0) return;
       const p = state.players[pi];
       const type = p.judge.hit(lane, engine.time() + off());
@@ -149,9 +150,35 @@ function createSession() {
     });
   }
 
+  // Freeze the run while the window is unfocused: the audio clock is suspended by the
+  // caller (useFocusPause), so the loop must stop simulating too or it would run the judge
+  // and conductor against a frozen clock. rAF stays armed and idles until resume. state.paused
+  // drives the pause menu; the player leaves it through resumeCountIn, not an automatic resume.
+  // Bumping resumeEpoch cancels any count-in still in flight if the window blurs again.
+  function pause() { resumeEpoch++; if (!active) return; paused = true; state.paused = true; dancerClock.playing = false; }
+  function resume() { if (!active) return; paused = false; state.paused = false; state.count = ''; dancerClock.playing = true; }
+
+  // Menu-driven resume: count the player back in on the beat, then unfreeze the loop and
+  // resume the song in one step so audio and visuals restart together. The song stays
+  // suspended (silent) through the count-in and only the side-context clicks sound. A blur
+  // mid-count-in bumps resumeEpoch, so we drop out without resuming into a hidden window.
+  async function resumeCountIn() {
+    if (!active || !paused || resuming) return;
+    resuming = true;
+    const my = ++resumeEpoch;
+    const bpm = (timing && timing.bpmAtTime && timing.bpmAtTime(engine.time())) || (state.chart && state.chart.bpm) || 120;
+    try {
+      await engine.countIn(bpm, 3, { onBeat: (n) => { if (my === resumeEpoch) state.count = String(n); } });
+    } finally { resuming = false; }
+    if (my !== resumeEpoch || !active || !paused) { state.count = ''; return; }
+    state.count = '';
+    await engine.resume();
+    resume();
+  }
+
   function loop() {
     raf = requestAnimationFrame(loop);
-    if (!active) return;
+    if (!active || paused) return;
     const t = engine.time();
     if (endless && conductor) {
       conductor.pump(t, 4);
@@ -176,7 +203,7 @@ function createSession() {
     else { const dur = engine.duration(); state.progress = dur ? Math.min(1, t / dur) : 0; if (dur > 0 && t >= dur + 0.6) end(); else if (dur <= 0) console.warn('[END-GUARD] loop active but engine.duration()=0 at t=', t.toFixed(2)); }
   }
 
-  function stop() { epoch++; active = false; state.playing = false; dancerClock.playing = false; if (raf) cancelAnimationFrame(raf); raf = 0; subs.forEach((u) => u && u()); subs = []; endless = false; conductor = null; endlessStep = null; stopLive(); engine.stop(); }
+  function stop() { const wasPaused = state.paused; epoch++; resumeEpoch++; active = false; paused = false; resuming = false; state.playing = false; state.paused = false; state.count = ''; dancerClock.playing = false; if (raf) cancelAnimationFrame(raf); raf = 0; subs.forEach((u) => u && u()); subs = []; endless = false; conductor = null; endlessStep = null; stopLive(); engine.stop(); if (wasPaused) engine.resume(); }
   function restart() { if (replay && !state.endless) replay(); }
   function quit() { if (state.playing) end(); }
   function end() {
@@ -193,7 +220,7 @@ function createSession() {
     bus.emit('game:end', { results: state.results, song: state.song, chart: state.chart });
   }
 
-  return { state, start, startMatch, startEndless, stop, restart, quit, attachField, setFields };
+  return { state, start, startMatch, startEndless, stop, restart, quit, pause, resume, resumeCountIn, attachField, setFields };
 }
 
 export const session = createSession();
