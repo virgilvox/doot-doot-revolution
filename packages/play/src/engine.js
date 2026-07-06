@@ -39,6 +39,7 @@ export class AudioEngine {
   applyVolumes() { if (!this.ctx) return; this.master.gain.value = this.volumes.master; this.music.gain.value = this.volumes.music; this.sfx.gain.value = this.volumes.sfx; }
 
   resume() { this._ensure(); if (this.ctx.state === 'suspended') return this.ctx.resume(); return Promise.resolve(); }
+  suspend() { if (this.ctx && this.ctx.state === 'running') return this.ctx.suspend(); return Promise.resolve(); }
   async decode(arrayBuffer) { this._ensure(); return await this.ctx.decodeAudioData(arrayBuffer.slice(0)); }
   load(buffer) { this.buffer = buffer; }
 

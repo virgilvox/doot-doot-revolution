@@ -32,6 +32,7 @@ import SettingsView from './views/SettingsView.vue';
 import PadsView from './views/PadsView.vue';
 import PlayerSetup from './views/PlayerSetup.vue';
 import { useInput } from './composables/useInput.js';
+import { useFocusPause } from './composables/useFocusPause.js';
 import { bus } from './game/bus.js';
 import { navFocus } from './game/navFocus.js';
 import { screen, go } from './game/screen.js';
@@ -43,6 +44,7 @@ const view = computed(() => VIEWS[screen.value] || TitleView);
 
 onMounted(() => {
   useInput();
+  useFocusPause();
   bus.on('game:end', () => go('results'));
 });
 const brandMark = DOOT_LOGO;

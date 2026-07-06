@@ -25,7 +25,7 @@ function createSession() {
     // single-player aliases (mirror players[0]) so single-player HUD/readers stay simple
     score: 0, combo: 0, life: 50, judge: null, chart: null
   });
-  let raf = 0, active = false, epoch = 0, subs = [], fields = [], timing = null;
+  let raf = 0, active = false, paused = false, epoch = 0, subs = [], fields = [], timing = null;
   let endless = false, conductor = null, replay = null, endlessStep = null;
   const off = () => settings.offsetMs / 1000;
 
@@ -149,9 +149,15 @@ function createSession() {
     });
   }
 
+  // Freeze the run while the window is unfocused: the audio clock is suspended by the
+  // caller (useFocusPause), so the loop must stop simulating too or it would run the
+  // judge and conductor against a frozen clock. rAF stays armed and idles until resume.
+  function pause() { if (!active || paused) return; paused = true; dancerClock.playing = false; }
+  function resume() { if (!active || !paused) return; paused = false; dancerClock.playing = true; }
+
   function loop() {
     raf = requestAnimationFrame(loop);
-    if (!active) return;
+    if (!active || paused) return;
     const t = engine.time();
     if (endless && conductor) {
       conductor.pump(t, 4);
@@ -176,7 +182,7 @@ function createSession() {
     else { const dur = engine.duration(); state.progress = dur ? Math.min(1, t / dur) : 0; if (dur > 0 && t >= dur + 0.6) end(); else if (dur <= 0) console.warn('[END-GUARD] loop active but engine.duration()=0 at t=', t.toFixed(2)); }
   }
 
-  function stop() { epoch++; active = false; state.playing = false; dancerClock.playing = false; if (raf) cancelAnimationFrame(raf); raf = 0; subs.forEach((u) => u && u()); subs = []; endless = false; conductor = null; endlessStep = null; stopLive(); engine.stop(); }
+  function stop() { epoch++; active = false; paused = false; state.playing = false; dancerClock.playing = false; if (raf) cancelAnimationFrame(raf); raf = 0; subs.forEach((u) => u && u()); subs = []; endless = false; conductor = null; endlessStep = null; stopLive(); engine.stop(); }
   function restart() { if (replay && !state.endless) replay(); }
   function quit() { if (state.playing) end(); }
   function end() {
@@ -193,7 +199,7 @@ function createSession() {
     bus.emit('game:end', { results: state.results, song: state.song, chart: state.chart });
   }
 
-  return { state, start, startMatch, startEndless, stop, restart, quit, attachField, setFields };
+  return { state, start, startMatch, startEndless, stop, restart, quit, pause, resume, attachField, setFields };
 }
 
 export const session = createSession();
