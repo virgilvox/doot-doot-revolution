@@ -5,7 +5,9 @@
 //
 // Lanes are 0 LEFT, 1 DOWN, 2 UP, 3 RIGHT. A "device map" lists the raw inputs that fire
 // each lane plus start/back: keyboard maps hold KeyboardEvent.code strings, pad maps hold
-// gamepad button indices. The root shape is { keyboard: map, pads: { [deviceKey]: map } }.
+// gamepad button indices, or an axis token 'a<index><sign>' (e.g. 'a1+') for a d-pad or
+// arrow delivered as an analog axis rather than a button. The root shape is
+// { keyboard: map, pads: { [deviceKey]: map } }.
 
 export const LANE_NAMES = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
 const V2_KEY = 'ddr.binds.v2';
@@ -55,10 +57,16 @@ export function ensurePad(bindings, deviceKey) {
 }
 
 function keyLabel(code) { return String(code).replace('Arrow', '').replace('Key', '').replace('Digit', ''); }
+// a pad input is a button index (number) or an axis token like 'a1+'
+function padLabel(x) {
+  const m = typeof x === 'string' && /^a(\d+)([+-])$/.exec(x);
+  if (m) return 'Axis ' + m[1] + ' ' + m[2];
+  return 'Btn ' + x;
+}
 export function describeSlot(map, slot, isPad) {
   const arr = (slot === 'start' || slot === 'back') ? (map[slot] || []) : map.lanes[slot];
   if (!arr || !arr.length) return 'unbound';
-  return arr.map((x) => (isPad ? 'Btn ' + x : keyLabel(x))).join(' + ');
+  return arr.map((x) => (isPad ? padLabel(x) : keyLabel(x))).join(' + ');
 }
 
 // Fill any missing structure so a hand-edited or partial store cannot crash resolution.

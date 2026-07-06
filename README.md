@@ -66,6 +66,22 @@ Great 90ms, Good 135ms, Boo 180ms. Scroll speed is XMOD, so a 2.4 multiplier
 travels 2.4 note-heights per beat. Set a latency offset in Settings, with a tap
 calibration to find it.
 
+## Controllers and dance pads
+
+Every screen is playable with a gamepad or a dance pad, and every input is
+remappable, including Start and Select. The Pads screen has a guided remap that
+walks Left, Down, Up, Right, Start, and Select in order and binds each to whatever
+you press next. A standard controller needs no setup; its face buttons already
+confirm and cancel menus.
+
+Dance pads and PSX or DirectInput to USB adapters often deliver the four arrows as
+an analog axis rather than buttons, so the game reads gamepad axes as well and lets
+you bind an arrow that arrives that way. A live readout on the Pads screen shows
+exactly what the browser sees from a connected pad, button by button and axis by
+axis, so you can tell a device the browser cannot see at all (a driver or adapter
+issue, for example an Xbox 360 wired pad on macOS, which needs a system driver)
+from one you only need to map.
+
 ## Charting engines
 
 Only engines with a working in-browser method exist: Quick (onset and tempo),

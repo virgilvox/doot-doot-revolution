@@ -3,9 +3,10 @@
 //   - gameplay: 'lane:down' / 'lane:up' { lane }
 //   - navigation: 'move' { dir }, 'confirm', 'cancel'
 // Directions come from the four lanes (0 left, 1 down, 2 up, 3 right), which the
-// keyboard arrows already produce, so keys and gamepad share one path. Confirm
-// and cancel come from Enter/Escape and from the first two gamepad face buttons,
-// so the whole app is playable with no mouse.
+// keyboard arrows already produce, so keys and gamepad share one path. Confirm and
+// cancel come from Enter/Escape and from each device's bound start/back (input.js
+// resolves gamepad start/back through the bindings, so a remapped or non-standard
+// pad is correct), so the whole app is playable with no mouse.
 
 import { engine, input } from '../game/singletons.js';
 import { bus } from '../game/bus.js';
@@ -24,23 +25,12 @@ export function useInput() {
 
   input.attach(window);
 
-  // one global loop samples gamepads. face buttons 0/1 drive confirm/cancel with
-  // rising-edge detection so a controller alone can operate every menu.
-  let prevA = false, prevB = false;
-  const loop = () => {
-    input.poll();
-    const pads = (typeof navigator !== 'undefined' && navigator.getGamepads) ? navigator.getGamepads() : [];
-    let a = false, b = false;
-    for (const gp of pads) {
-      if (!gp || !input.padEnabled()) continue;
-      if (gp.buttons[0] && gp.buttons[0].pressed) a = true;
-      if (gp.buttons[1] && gp.buttons[1].pressed) b = true;
-    }
-    if (a && !prevA) bus.emit('confirm');
-    if (b && !prevB) bus.emit('cancel');
-    prevA = a; prevB = b;
-    requestAnimationFrame(loop);
-  };
+  // one global loop samples gamepads; input.poll() resolves every button (lanes,
+  // start, back, and the standard-mapped face-button convenience) through the
+  // per-device bindings and emits the same start/back events the bridge above turns
+  // into confirm/cancel. No second raw button read, so a non-standard pad's Down
+  // panel can never masquerade as confirm or cancel.
+  const loop = () => { input.poll(); requestAnimationFrame(loop); };
   requestAnimationFrame(loop);
 
   // resume the audio context on the first gesture (browser autoplay policy)

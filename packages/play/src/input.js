@@ -8,6 +8,13 @@
 // listeners and poll() every frame to sample gamepads. Consumers read the song clock
 // synchronously in the handler for accurate hit timing. Held state is tracked per device
 // (heldFor) with a combined view (held) for single-player.
+//
+// Gamepad start/back come from the device's bound slots (a real dance pad or non-standard
+// controller maps whatever buttons the user pressed during setup). As a convenience,
+// a standard-mapped pad also treats the bottom face button (0) as start and the right
+// face button (1) as back, so a plain Xbox/PlayStation controller drives menus with no
+// setup. That convenience is gated on gp.mapping === 'standard': a non-standard pad, whose
+// Down panel commonly enumerates as button 0 or 1, must never fire a spurious start/back.
 
 import {
   LANE_NAMES, loadBindings, saveBindings, defaultBindings, padDeviceKey,
@@ -31,8 +38,17 @@ export function createInput(options = {}) {
   let padEnabled = true;
   let listening = null;              // { device, slot } while capturing a rebind
   const heldMap = {};                // device -> [bool x4]
-  const prevPad = {};                // 'gpIndex:button' -> pressed (rising-edge detect)
+  const prevActive = {};             // gp.index -> Set of raw inputs active last poll (edge detect)
+  const axisRest = {};               // gp.index -> resting axis values, sampled on first sight
   const listeners = new Map();
+
+  // A raw pad input is either a button index (number) or an axis token 'a<index><sign>'.
+  // Many dance pads and PSX/DirectInput adapters deliver the four arrows as an analog
+  // axis (a stick or a hat) instead of buttons, so the arrows never appear in gp.buttons.
+  // We read gp.axes too and turn a deflection past AXIS_ON (measured from the resting
+  // value, so a hat that rests at 1.0 does not stick) into a token the binding maps and
+  // the remap wizard treat exactly like a button.
+  const AXIS_ON = 0.5;
 
   function emit(ev, data) { const s = listeners.get(ev); if (s) s.forEach((fn) => { try { fn(data); } catch (e) { console.error(e); } }); }
   function on(ev, fn) { let s = listeners.get(ev); if (!s) { s = new Set(); listeners.set(ev, s); } s.add(fn); return () => s.delete(fn); }
@@ -64,31 +80,72 @@ export function createInput(options = {}) {
   }
   function onKeyUp(e) { for (const dev of KEYBOARDS) { const l = laneFor(mapFor(dev), e.code); if (l >= 0) { up(dev, l); return; } } }
 
+  // gamepad source: injectable for tests, else the Web Gamepad API when present.
+  function currentPads() {
+    if (options.getGamepads) return options.getGamepads() || [];
+    if (typeof navigator !== 'undefined' && navigator.getGamepads) return navigator.getGamepads();
+    return [];
+  }
+
+  // the raw inputs held this frame: pressed button indices plus axis tokens for any
+  // axis deflected past AXIS_ON from its resting value
+  function rawInputs(gp) {
+    const active = [];
+    for (let b = 0; b < gp.buttons.length; b++) if (gp.buttons[b].pressed) active.push(b);
+    const axes = gp.axes || [];
+    const rest = axisRest[gp.index] || (axisRest[gp.index] = Array.from(axes, (v) => v || 0));
+    for (let i = 0; i < axes.length; i++) {
+      const d = axes[i] - (rest[i] || 0);
+      if (d <= -AXIS_ON) active.push('a' + i + '-');
+      else if (d >= AXIS_ON) active.push('a' + i + '+');
+    }
+    return active;
+  }
+
+  function resolveDown(device, map, standard, raw) {
+    if (listening && listening.device === device) { bindNow(device, listening.slot, raw, map); return; }
+    const l = laneFor(map, raw);
+    if (l >= 0) { down(device, l); return; }
+    if (inSlot(map, 'start', raw)) { emit('start', { device }); return; }
+    if (inSlot(map, 'back', raw)) { emit('back', { device }); return; }
+    // face-button convenience, standard mapping only (see the file header)
+    if (standard && raw === 0) emit('start', { device });
+    else if (standard && raw === 1) emit('back', { device });
+  }
+
   function poll() {
-    if (!padEnabled || typeof navigator === 'undefined' || !navigator.getGamepads) return;
-    for (const gp of navigator.getGamepads()) {
+    if (!padEnabled) return;
+    for (const gp of currentPads()) {
       if (!gp) continue;
       const key = padDeviceKey(gp), device = padDevice(key), map = ensurePad(binds, key);
-      for (let b = 0; b < gp.buttons.length; b++) {
-        const pk = gp.index + ':' + b, pressed = gp.buttons[b].pressed, was = prevPad[pk] || false;
-        if (pressed && !was) {
-          if (listening && listening.device === device) { bindNow(device, listening.slot, b, map); }
-          else {
-            if (inSlot(map, 'start', b)) emit('start', { device });
-            if (inSlot(map, 'back', b)) emit('back', { device });
-            const l = laneFor(map, b); if (l >= 0) down(device, l);
-          }
-        } else if (!pressed && was) { const l = laneFor(map, b); if (l >= 0) up(device, l); }
-        prevPad[pk] = pressed;
-      }
+      const standard = gp.mapping === 'standard';
+      const now = new Set(rawInputs(gp));
+      const prev = prevActive[gp.index] || new Set();
+      for (const raw of now) if (!prev.has(raw)) resolveDown(device, map, standard, raw);
+      for (const raw of prev) if (!now.has(raw)) { const l = laneFor(map, raw); if (l >= 0) up(device, l); }
+      prevActive[gp.index] = now;
     }
   }
 
   // connected gamepads with their stable device key (for the Pads screen and routing)
   function pads() {
-    if (typeof navigator === 'undefined' || !navigator.getGamepads) return [];
     const out = [];
-    for (const gp of navigator.getGamepads()) if (gp) { const key = padDeviceKey(gp); out.push({ key, device: padDevice(key), id: gp.id, index: gp.index }); }
+    for (const gp of currentPads()) if (gp) { const key = padDeviceKey(gp); out.push({ key, device: padDevice(key), id: gp.id, index: gp.index }); }
+    return out;
+  }
+
+  // live raw state for the Pads-screen diagnostic: what the browser actually reports,
+  // so a user can press each panel and see whether it reaches the browser at all (a
+  // driver/adapter problem) or reaches it under some button/axis they can then remap.
+  function rawPads() {
+    const out = [];
+    for (const gp of currentPads()) if (gp) {
+      out.push({
+        key: padDeviceKey(gp), id: gp.id, index: gp.index, mapping: gp.mapping || '',
+        buttons: Array.from(gp.buttons || [], (b) => !!b.pressed),
+        axes: Array.from(gp.axes || [], (v) => Math.round(v * 100) / 100)
+      });
+    }
     return out;
   }
 
@@ -108,7 +165,7 @@ export function createInput(options = {}) {
   function detach() { if (_target) { _target.removeEventListener('keydown', _kd); _target.removeEventListener('keyup', _ku); _target = null; } }
 
   return {
-    LANE_NAMES, on, poll, attach, detach, pads, devices,
+    LANE_NAMES, on, poll, attach, detach, pads, rawPads, devices,
     held: combinedHeld,
     heldFor: (device) => heldOf(device).slice(),
     isDown: (lane) => combinedHeld()[lane],

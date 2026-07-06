@@ -16,8 +16,8 @@ opens on the Title attract screen.
 The earlier vanilla single-file app (`apps/ddr`) was retired; the packages remain
 the proof the logic is framework-free.
 
-Current status: builds clean, 102 tests pass (86 package, 16 Vue), deployed live at
-https://dance.doot.games (current release v2.2.1) with full SEO (meta, Open Graph,
+Current status: builds clean, 109 tests pass (93 package, 16 Vue), deployed live at
+https://dance.doot.games (current release v2.3.0) with full SEO (meta, Open Graph,
 Twitter cards, JSON-LD, an OG share image, sitemap, and web manifest), signed and
 notarized desktop installers published to GitHub Releases, and a working in-app
 auto-updater. Verified end to end in the browser (controller-only play, difficulty
@@ -152,8 +152,8 @@ npm run dev            # web dev server (Vite, default http://localhost:5173)
 npm run build          # web build (apps/web/dist)
 npm run dev:desktop    # Vite inside an Electron window
 npm run build:desktop  # electron-builder installers (needs a desktop OS; dmg needs macOS)
-npm test               # 80 package unit tests (node --test)
-npm run test:web       # 12 Vue component/nav/settings/preview tests (Vitest)
+npm test               # 93 package unit tests (node --test)
+npm run test:web       # 16 Vue component/nav/settings/preview tests (Vitest)
 npm run test:all       # both
 ```
 
@@ -176,9 +176,11 @@ tools/       shared test helpers (testutil.mjs, fakecanvas.mjs)
   watchers. The design system is a real stylesheet (`styles/design.css`) plus
   `styles/tokens.js` for the values JS needs.
 - Composables are the seam to the imperative packages:
-  - `useInput` attaches input once, runs one global rAF, and bridges raw lane and
-    start/back events into `move`/`confirm`/`cancel` (nav) plus `lane:down`/`lane:up`
-    (gameplay), including gamepad face buttons for confirm/cancel.
+  - `useInput` attaches input once, runs one global rAF that calls `input.poll()`, and
+    bridges raw lane and start/back events into `move`/`confirm`/`cancel` (nav) plus
+    `lane:down`/`lane:up` (gameplay). Gamepad confirm/cancel now flow through the same
+    binding-driven `poll()` (start/back slots, plus a standard-mapping face-button
+    convenience), not a second raw button read. See the pad compatibility section.
   - `useNavigation` is a focus-scope stack; only the top scope receives nav events,
     which gives modal focus trapping. `useScope(handlers)` pushes/pops with a view.
   - `useRovingFocus(opts)` is the reusable focused-index helper (size, onConfirm,
@@ -209,6 +211,36 @@ click on whatever button the browser still had focused (a nav tab you clicked), 
 made a confirm exit a modal or navigate instead. The text-field guard runs first, so
 Enter to submit a URL still works. `screen.js` `go()` also blurs the active element on
 every navigation so a clicked tab does not keep a stray focus ring.
+
+## Gamepad input and pad compatibility
+
+`input.js` `poll()` is the single gamepad path. It resolves every button through the
+device's binding map (`bindings.js`, keyed by a stable vendor:product), and emits lane
+down/up plus start/back, which `useInput` turns into gameplay and confirm/cancel. There
+is no second raw button read: an earlier bug read `buttons[0]`/`[1]` directly for
+confirm/cancel, so on a non-standard pad (mapping is `''`), whose Down panel often
+enumerates as button 0 or 1, pressing Down fired back or start. The face-button
+convenience (bottom face = start, right face = back) now lives in `poll()` and is gated
+on `gp.mapping === 'standard'`, so a plain Xbox/PlayStation pad drives menus with no
+setup while a dance pad is never bitten.
+
+Many dance pads and PSX/DirectInput to USB adapters deliver the four arrows as an analog
+axis (a stick or a hat) rather than buttons, so the arrows never appear in `gp.buttons`.
+`poll()` reads `gp.axes` too: an axis deflected past 0.5 from its resting value (sampled
+once on first sight, so a hat that rests at 1.0 does not stick) becomes a token
+`a<index><sign>` that the binding maps and the remap wizard treat exactly like a button.
+Remaining limit: a d-pad delivered as a single POV-hat axis packs all four directions on
+one axis, so two directions can share a sign and collide; the common dual-axis adapters
+(arrows on axes 0 and 1) map cleanly. The Pads screen has a guided Remap wizard (walks
+LEFT, DOWN, UP, RIGHT, START, SELECT, advancing on each press) and a live raw readout per
+controller (id, mapping, per-button and per-axis state) so a user can tell a device that
+never reaches the browser (a driver or adapter problem) from one that reaches it under
+some button or axis they can bind.
+
+Platform note: on macOS there is no native Xbox 360 wired driver, so a 360 pad or dance
+mat may not enumerate through the Gamepad API at all; that is an OS driver gap, not the
+app. The live readout is the diagnostic: if pressing a panel moves nothing there, the
+browser is not seeing the device.
 
 ## Electron
 
@@ -420,8 +452,15 @@ fetch it. Copy is plain with no em dashes, per `RULES.md`.
 
 Branch `main`, remote `github.com/virgilvox/doot-doot-revolution`. Fully committed
 and pushed; the web app auto-deploys from `main` and desktop releases cut from
-`vX.Y.Z` tags. Releases run v2.0.0 through v2.2.1 (current), signed and notarized.
-Recent work, newest first: the optional VRM dancer over the gameplay shader (v2.2.0),
+`vX.Y.Z` tags. Releases run v2.0.0 through v2.3.0 (current), signed and notarized.
+Recent work, newest first: the gamepad input fix and controller setup overhaul (v2.3.0):
+fixed a non-standard pad's Down panel firing back/start by removing a raw face-button
+read and routing confirm/cancel through the binding-driven `poll()` (standard-mapping
+face-button convenience only); added analog-axis reading so a dance pad or PSX/DirectInput
+adapter that delivers the arrows as an axis works; a guided remap wizard that walks the
+four lanes plus Start and Select; and a live per-controller readout so a user can tell a
+driver/adapter problem from a mapping one. Before that: the optional VRM dancer over the
+gameplay shader (v2.2.0),
 which always plays a real dance clip (revealed hidden-until-a-clip-drives, so the static
 default/arms-up pose is never shown), cycles the pixiv VRMA and runtime-retargeted Mixamo
 FBX dances, and cuts an eased, calmer camera (v2.2.1 smoothed the cuts with a
