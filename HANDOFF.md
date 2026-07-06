@@ -153,7 +153,7 @@ npm run build          # web build (apps/web/dist)
 npm run dev:desktop    # Vite inside an Electron window
 npm run build:desktop  # electron-builder installers (needs a desktop OS; dmg needs macOS)
 npm test               # 93 package unit tests (node --test)
-npm run test:web       # 16 Vue component/nav/settings/preview tests (Vitest)
+npm run test:web       # 23 Vue component/nav/settings/preview/focus tests (Vitest)
 npm run test:all       # both
 ```
 
@@ -326,6 +326,32 @@ screen changes.
 Next feel ideas (not done): an osu-style hit-error bar with running deviation, a
 combo-to-score multiplier, escalating milestone tiers, and pitch-rising ticks per
 combo step.
+
+## Focus pause
+
+When the game window is not the player's focused, visible window, the sound stops
+and the run freezes, so a song does not keep playing to an empty room while the
+player is in another app or tab. A Settings toggle (`settings.pauseOnBlur`,
+"Pause when unfocused", on by default) controls it. `composables/useFocusPause.js`,
+wired once in `App.vue`, is the whole feature. It calls `engine.suspend()`, which
+suspends the shared `AudioContext`: every bus goes silent (music, previews, hit
+sounds) and `ctx.currentTime` stops advancing. Because the song clock is
+`ctx.currentTime - startAt`, freezing the context freezes the clock, so audio and
+visuals pause in place and resume in sync with no seek. `session.pause()` and
+`resume()` set a `paused` flag the render/judge loop checks, so it stops simulating
+against a frozen clock (the rAF stays armed and idles). The suspend is a no-op when
+no context exists yet, so it costs nothing on a silent menu.
+
+The events lie on macOS. Mission Control, the Spaces overview, and clicking a
+different window from that overview all fire a stray `focus` at the page while the
+window is not actually in front, so trusting a `focus` event to mean "we are back"
+resumed audio into the background. The watcher never trusts the event direction:
+on every `blur`, `focus`, `pageshow`, `pagehide`, and `visibilitychange`, it
+recomputes the real state from `document.visibilityState !== 'hidden' &&
+document.hasFocus()` and keeps the audio running only when the document genuinely
+holds focus. A spurious focus that arrives without real focus re-suspends. Gated on
+the setting, and it only resumes a suspend it caused, so toggling the setting off
+mid-pause still restores the audio.
 
 ## Dev note: linked packages are excluded from Vite pre-bundling
 
