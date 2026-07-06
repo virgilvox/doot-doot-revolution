@@ -24,14 +24,17 @@ export function useFocusPause() {
   if (wired || typeof window === 'undefined') return;
   wired = true;
 
-  let suspended = false;
+  let suspended = false; // tracks only the non-game (preview) suspend; a run tracks its own via session.state.paused
 
   const focused = () => document.visibilityState !== 'hidden' && document.hasFocus();
+  const gameActive = () => !!(session.state && session.state.playing);
 
   const suspend = () => {
-    if (suspended || !engine.ctx) return;
-    suspended = true;
-    session.pause();
+    if (!engine.ctx) return;
+    const active = gameActive();
+    if (active ? session.state.paused : suspended) return; // already down for this mode
+    if (!active) suspended = true;                          // the preview bool never tracks a run
+    session.pause();                                        // freezes an active run; a no-op otherwise
     engine.suspend();
   };
   const restore = () => {
@@ -41,10 +44,11 @@ export function useFocusPause() {
     session.resume();
   };
 
-  // Recompute from the real focus/visibility state on every event, rather than trusting
-  // the event's direction. This self-corrects through the focus churn macOS emits during
-  // Mission Control, Spaces, and cross-window clicks.
-  const sync = () => { if (settings.pauseOnBlur && !focused()) suspend(); else restore(); };
+  // Recompute from the real focus/visibility state on every event, rather than trusting the
+  // event's direction. This self-corrects through the focus churn macOS emits during Mission
+  // Control, Spaces, and cross-window clicks. A paused run does not auto-resume on return:
+  // the pause menu counts the player back in, so we only ever auto-restore preview audio.
+  const sync = () => { if (settings.pauseOnBlur && !focused()) suspend(); else if (!gameActive()) restore(); };
 
   window.addEventListener('blur', sync);
   window.addEventListener('focus', sync);

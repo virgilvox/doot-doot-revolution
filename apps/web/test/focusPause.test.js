@@ -4,7 +4,7 @@ import { test, expect, vi, beforeEach } from 'vitest';
 // against spies. ctx is truthy so suspend() is not skipped by the "no audio yet" guard;
 // setVolumes exists because importing settings.js runs its immediate volume watcher.
 const engine = vi.hoisted(() => ({ ctx: {}, suspend: vi.fn(), resume: vi.fn(), setVolumes: vi.fn() }));
-const session = vi.hoisted(() => ({ pause: vi.fn(), resume: vi.fn() }));
+const session = vi.hoisted(() => ({ pause: vi.fn(), resume: vi.fn(), state: { playing: false, paused: false } }));
 vi.mock('../src/game/singletons.js', () => ({ engine }));
 vi.mock('../src/composables/useSession.js', () => ({ session }));
 
@@ -25,6 +25,7 @@ useFocusPause();
 
 beforeEach(() => {
   settings.pauseOnBlur = true;
+  session.state.playing = false; session.state.paused = false; // no run unless a test opts in
   setState('visible', true);
   fire('focus'); // return to a clean, un-suspended baseline
   engine.suspend.mockClear(); engine.resume.mockClear();
@@ -81,6 +82,18 @@ test('turning the setting off while suspended restores the audio', () => {
   fire('focus'); // any re-evaluation now restores the suspend it caused
   expect(engine.resume).toHaveBeenCalledTimes(1);
   expect(session.resume).toHaveBeenCalledTimes(1);
+});
+
+test('a paused run does not auto-resume on focus return (the pause menu counts back in)', () => {
+  session.state.playing = true;
+  setState('visible', false); fire('blur'); // the run pauses and the audio suspends
+  expect(session.pause).toHaveBeenCalledTimes(1);
+  expect(engine.suspend).toHaveBeenCalledTimes(1);
+  engine.resume.mockClear(); session.resume.mockClear();
+
+  setState('visible', true); fire('focus'); // genuine focus, but a run stays paused for the menu
+  expect(engine.resume).not.toHaveBeenCalled();
+  expect(session.resume).not.toHaveBeenCalled();
 });
 
 test('does not suspend before any audio context exists', () => {
