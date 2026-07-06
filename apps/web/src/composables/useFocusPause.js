@@ -1,10 +1,18 @@
-// useFocusPause: when the window loses focus, stop the sound and freeze the run, so a
-// song does not keep playing to an empty room while the player is in another app or tab.
+// useFocusPause: when the window is not the player's focused, visible window, stop the
+// sound and freeze the run, so a song does not keep playing to an empty room while the
+// player is in another app, tab, or the macOS Mission Control / Spaces overview.
 // Suspending the shared AudioContext silences everything (music, previews, hits) and
 // freezes the song clock; session.pause halts the render/judge loop so it does not
-// simulate against a frozen clock. Regaining focus resumes both in sync. The whole
-// behavior is gated on the pauseOnBlur setting, and we only ever resume a suspend we
-// caused, so toggling the setting off mid-pause still lets focus restore the audio.
+// simulate against a frozen clock. Being truly focused again resumes both in sync.
+//
+// The events lie. macOS fires a stray focus while Mission Control is open and when you
+// click a different window from the overview, so trusting a focus event to mean "we are
+// back" would resume audio into the background. So every event just re-reads the real
+// state: keep playing only when the document is both visible and actually holds focus
+// (document.hasFocus()). Any spurious focus that arrives without real focus re-suspends.
+//
+// Gated on the pauseOnBlur setting. We only ever suspend a context we can see, and only
+// resume a suspend we caused, so toggling the setting off still restores the audio.
 
 import { engine } from '../game/singletons.js';
 import { settings } from '../game/settings.js';
@@ -18,8 +26,10 @@ export function useFocusPause() {
 
   let suspended = false;
 
+  const focused = () => document.visibilityState !== 'hidden' && document.hasFocus();
+
   const suspend = () => {
-    if (suspended || !settings.pauseOnBlur || !engine.ctx) return;
+    if (suspended || !engine.ctx) return;
     suspended = true;
     session.pause();
     engine.suspend();
@@ -31,10 +41,14 @@ export function useFocusPause() {
     session.resume();
   };
 
-  // window blur/focus catches switching to another application while the tab is still
-  // visible; visibilitychange catches tab switches and minimizing. The suspended guard
-  // dedupes the overlap between the two.
-  window.addEventListener('blur', suspend);
-  window.addEventListener('focus', restore);
-  document.addEventListener('visibilitychange', () => (document.hidden ? suspend() : restore()));
+  // Recompute from the real focus/visibility state on every event, rather than trusting
+  // the event's direction. This self-corrects through the focus churn macOS emits during
+  // Mission Control, Spaces, and cross-window clicks.
+  const sync = () => { if (settings.pauseOnBlur && !focused()) suspend(); else restore(); };
+
+  window.addEventListener('blur', sync);
+  window.addEventListener('focus', sync);
+  window.addEventListener('pageshow', sync);
+  window.addEventListener('pagehide', sync);
+  document.addEventListener('visibilitychange', sync);
 }
